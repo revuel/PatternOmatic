@@ -1,0 +1,3 @@
+# PatternOmatic non sources to ignore
+.idea/
+/venv
