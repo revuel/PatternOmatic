@@ -1,7 +1,7 @@
 """ Individual class """
 import re
 import json
-from random import randint
+from random import random
 from itertools import cycle
 
 
@@ -10,19 +10,23 @@ class Individual(object):
 
     def __init__(self, grammar: dict):
         self._grammar = grammar
-        self._bin_genotype = None
-        self._int_genotype = [randint(0, 255) for i in range(1,10)]
-        self._fenotype = self.decode()
+        self._bin_genotype = self._initialize()
+        self._int_genotype = self._transcription()
+        self._fenotype = self._decode()
         self._fitness_value = None
 
     ''' Decoding methods '''
-    def transcription(self):
+    @staticmethod
+    def _initialize():
+        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, 80)]).strip()
+
+    def _transcription(self):
+        return [int(self._bin_genotype[i:i+7], 2) for i in range(0, len(self._bin_genotype), 7)]
+
+    def _translation(self):
         pass
 
-    def translation(self):
-        pass
-
-    def decode(self):
+    def _decode(self):
         """
             Decodes a given genotype to produce its related fenotype
             :param grammar: Grammar dict
