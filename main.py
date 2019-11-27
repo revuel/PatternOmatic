@@ -1,5 +1,8 @@
-""" Entru"""
+""" Entry Point """
 import spacy
+
+
+''' NLP Engine '''
 
 
 def features_seen(samples: list) -> int and dict:
@@ -60,16 +63,16 @@ def features_seen(samples: list) -> int and dict:
         if sample_length > max_doc_length:
             max_doc_length = sample_length
 
-    features = {'<ORTH>': list(set(orth_list)),
-                '<TEXT>': list(set(text_list)),
-                '<LOWER>': list(set(lower_list)),
-                '<LENGTH>': list(set(length_list)),
-                '<POS>': list(set(pos_list)),
-                '<TAG>': list(set(tag_list)),
-                '<DEP>': list(set(dep_list)),
-                '<LEMMA>': list(set(lemma_list)),
-                '<SHAPE>': list(set(shape_list)),
-                '<ENT>': list(set(ent_type_list))}
+    features = {'<ORTH>': sorted(list(set(orth_list))),
+                '<TEXT>': sorted(list(set(text_list))),
+                '<LOWER>': sorted(list(set(lower_list))),
+                '<LENGTH>': sorted(list(set(length_list))),
+                '<POS>': sorted(list(set(pos_list))),
+                '<TAG>': sorted(list(set(tag_list))),
+                '<DEP>': sorted(list(set(dep_list))),
+                '<LEMMA>': sorted(list(set(lemma_list))),
+                '<SHAPE>': sorted(list(set(shape_list))),
+                '<ENT>': sorted(list(set(ent_type_list)))}
 
     to_del_list = list()
     for k in features.keys():
@@ -87,7 +90,7 @@ def dynamic_grammar_generator(samples: list) -> dict:
     Builds a specific Spacy grammar given a sample doc list
     :return: dict
     """
-    pattern_grammar = {"S": "<P>"}
+    pattern_grammar = {"<S>": "<P>"}
 
     # Watch out features of seen samples and max number of tokens per sample
     max_length_token, features_dict = features_seen(samples)
@@ -124,6 +127,54 @@ def dynamic_grammar_generator(samples: list) -> dict:
 
     return pattern_grammar
 
+
+''' Grammatical Evolution '''
+
+
+def genotype_to_fenotype(grammar: dict, int_list) -> str:
+    """
+    Decodes a given genotype to produce its related fenotype
+    :param grammar: Grammar dict
+    :param int_list: List of codons integer representation
+    :return: String fenotype
+    """
+    import re, json
+    from itertools import cycle
+
+    done = False
+    symbolic_string = grammar["<S>"]
+    circular = cycle(int_list)
+
+    # What we need here is to map each integer to its corresponding production rule of the grammar
+    # From left to right, expand production rules until terminal expressions are reached
+    # Consider codons as circular
+
+    while done is not True:
+        old_symbolic_string = symbolic_string  # Check if anything changed from last iteration
+
+        for key in grammar.keys():
+            if type(grammar[key]) is list:
+                ci = next(circular)
+                fire = divmod(ci, len(grammar[key]))[1]
+                if key == '<T>':
+                    symbolic_string = re.sub(key, "{" + str(grammar[key][fire]) + "}", symbolic_string, 1)
+                elif key not in ['S', '<P>', '<T>','<F>']:
+                    dkey = key.replace('<', '').replace('>', '')
+                    feature = "\"" + dkey + "\"" + ":" + "\"" + str(grammar[key][fire]) +"\""
+                    # feature = dkey + ":" + str(grammar[key][fire])
+                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                else:
+                    symbolic_string = re.sub(key, str(grammar[key][fire]), symbolic_string, 1)
+            else:
+                symbolic_string = re.sub(key, str(grammar[key]), symbolic_string, 1)
+
+        if old_symbolic_string == symbolic_string:
+            done = True
+
+    return json.loads("[" + symbolic_string + "]")
+
+
+''' Run '''
 nlp = spacy.load("en_core_web_sm")
 
 # Receive samples
@@ -134,5 +185,15 @@ sample_list = [nlp.tokenizer(u'Fuck it!'),
 
 grammar = dynamic_grammar_generator(sample_list)
 
+
 for k in grammar.keys():
     print(k, ":", str(grammar[k]))
+
+
+individual_string = "111101100101001000010010101010010"
+individual_integers = [2, 3, 4, 5]
+
+print(str(genotype_to_fenotype(grammar, individual_integers)))
+print(str(genotype_to_fenotype(grammar, [8, 1, 2, 5, 0, 7])))
+print(str(genotype_to_fenotype(grammar, [7, 4, 1])))
+print(str(genotype_to_fenotype(grammar, [0, 1, 6])))
