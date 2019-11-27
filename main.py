@@ -63,6 +63,8 @@ def features_seen(samples: list) -> int and dict:
         if sample_length > max_doc_length:
             max_doc_length = sample_length
 
+    # TODO: Some features have a total positive correlation, one way of removing unneeded features would be comparing some list of features and if they're equal, remove one feature list
+
     features = {'<ORTH>': sorted(list(set(orth_list))),
                 '<TEXT>': sorted(list(set(text_list))),
                 '<LOWER>': sorted(list(set(lower_list))),
@@ -197,3 +199,10 @@ print(str(genotype_to_fenotype(grammar, individual_integers)))
 print(str(genotype_to_fenotype(grammar, [8, 1, 2, 5, 0, 7])))
 print(str(genotype_to_fenotype(grammar, [7, 4, 1])))
 print(str(genotype_to_fenotype(grammar, [0, 1, 6])))
+
+from ge.individual import Individual
+
+dude = Individual()
+dude._int_genotype = [8, 1, 2, 5, 0, 7]
+deco_dude = dude.decode(grammar)
+print('decodude: ', str(deco_dude))
