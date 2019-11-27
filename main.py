@@ -26,7 +26,9 @@ dude_2 = indi.Individual(grammar)
 dude_3 = indi.Individual(grammar)
 dude_4 = indi.Individual(grammar)
 
-print(str(dude_1.decode()))
-print(str(dude_2.decode()))
-print(str(dude_3.decode()))
-print(str(dude_4.decode()))
+print(str(dude_1._decode()))
+print(str(dude_2._decode()))
+print(str(dude_3._decode()))
+print(str(dude_4._decode()))
+
+
