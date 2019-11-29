@@ -1,6 +1,8 @@
 """ Individual class """
 import re
 import json
+from spacy.tokens import Doc
+from spacy.matcher import Matcher
 from random import random
 from itertools import cycle
 
@@ -8,12 +10,13 @@ from itertools import cycle
 class Individual(object):
     """ TODO: Docstring """
 
-    def __init__(self, grammar: dict):
+    def __init__(self, samples: [Doc], grammar: dict):
+        self._samples = samples
         self._grammar = grammar
         self._bin_genotype = self._initialize()
         self._int_genotype = self._transcription()
         self._fenotype = self._decode()
-        self._fitness_value = None
+        self._fitness_value = self.fitness()
 
     ''' Decoding methods '''
     @staticmethod
@@ -66,4 +69,11 @@ class Individual(object):
         pass
 
     def fitness(self):
-        pass
+        matchy = Matcher(self._samples[0].vocab)
+        matchy.add("new", None, self._fenotype)
+        contact = 0
+        for sample in self._samples:
+            if len(matchy(sample)) > 0:
+                contact += 1
+
+        return contact/len(self._samples) if contact != 0 else 0.0
