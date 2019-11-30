@@ -1,14 +1,22 @@
 """ Population class """
 import random
 from spacy.tokens import Doc
-from spacy.matcher import Matcher
 from ge.individual import Individual
 
 
 class Population(object):
-    """ TODO: Docstring """
+    """
+    Population implementation of a AI Grammatical Evolution algorithm in OOP fashion
+    """
 
     def __init__(self, samples: [Doc], grammar: dict, size: int):
+        """
+        Population constructor, initializes a list of Individual objects
+        Args:
+            samples: list of Spacy doc objets
+            grammar: Backus Naur Form grammar notation encoded in a dictionary
+            size: Maximum number of individuals per generation
+        """
         self._samples = samples
         self._grammar = grammar
         self._size = size
@@ -16,17 +24,32 @@ class Population(object):
         self._offspring = list()
         self._max_generations = 200
 
+    def _info(self):
+        """
+        Prints current generation individuals' fenotype and fitness value
+        Returns:
+
+        """
+        for individual in self._generation:
+            print("Fenotype: ", str(individual._fenotype), "Fitness value: ", individual._fitness_value)
+
     def _initialize(self) -> [Individual]:
-        """ Initializes the first generation  """
+        """
+        Initializes the first generation
+        Returns: A list of individual objects
+
+        """
         return [Individual(self._samples, self._grammar) for _ in range(0, self._size)]
 
-    def sort(self, individuals: [Individual]):
-        """ Sorts individual lists by fitness """
-        pass
+    ''' Evolutionary specific methods '''
+    def _selection(self) -> [Individual]:
+        """
+        Selects members of the current generation into the mating pool in order to produce offspring
+        Returns: a list of individuals
 
-    def _selection(self):
-        """ Selects members of the current generation into the mating pool in order to produce offspring """
-        ''' Currently fashion: Binary Tournament '''
+        """
+        # TODO(me): k tournament
+        ''' Current implementation: Binary Tournament '''
         mating_pool = []
 
         while len(mating_pool) <= len(self._generation):
@@ -47,10 +70,17 @@ class Population(object):
         return mating_pool
 
     def _recombination(self, mating_pool: [Individual]):
-        """ Creates the offspring recombining the mating pool """
+        """
+        Creates the offspring recombining the mating pool
+        Args:
+            mating_pool: A list of individuals selected from the current generation
+
+        Returns: A list of new individuals, offspring of the current generation
+
+        """
         offspring = []
-        offspring_max_size = round(len(self._generation) * 3.5) # TODO configuration externalization
-        mutation_chance = 0.9  # TODO configuration externalization
+        offspring_max_size = round(len(self._generation) * 3.5) # TODO(me): configuration externalization
+        mutation_chance = 0.9  # TODO(me): configuration externalization
 
         while len(offspring) <= offspring_max_size:
             parent_1 = random.choice(mating_pool)
@@ -58,7 +88,7 @@ class Population(object):
 
             if random.random() < mutation_chance:
 
-                cut = random.randint(1, 7) * 10  # At least one codon far away from start or from end TODO: dehardcode
+                cut = random.randint(1, 7) * 10  # One codon far away from start or from end TODO()me: dehardcode
 
                 child_1 = Individual(self._samples, self._grammar,
                                      dna=parent_1._bin_genotype[:cut] + parent_2._bin_genotype[-(80-cut):])
@@ -70,28 +100,28 @@ class Population(object):
 
         return offspring
 
-    # TODO: Clean if no need
-    def _mutate(self, offspring: [Individual]):
-        pass
+    def _replacement(self) -> None:
+        """
+        Produces the new generation and cleans up the offspring pool
+        Returns: None
 
-    def _replacement(self):
-        """ Produces the new generation """
-        ''' Actually mu plus lambda 
+        """
+        ''' Replacement type:  mu plus lambda
         replacement_pool = self._generation + self._offspring
         replacement_pool.sort(key=lambda i: i._fitness_value, reverse=True)
         self._generation = replacement_pool[:len(self._generation)]
         self._offspring = [] '''
 
-        ''' mu lambda with elitism '''
+        ''' Replacement type: mu lambda with elitism
         self._generation.sort(key=lambda i: i._fitness_value, reverse=True)
         self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
         self._generation[1:len(self._generation)] = self._offspring[0:len(self._generation)]
-        self._offspring = []
+        self._offspring = []'''
 
-        ''' mu lambda without elitism
+        ''' Replacement type: mu lambda without elitism '''
         self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
         self._generation = self._offspring[0:len(self._generation)]
-        self._offspring = [] '''
+        self._offspring = []
 
     def evolve(self):
         """ Search Engine """
@@ -99,8 +129,3 @@ class Population(object):
             mating_pool = self._selection()
             self._offspring = self._recombination(mating_pool)
             self._replacement()
-        # self._info()
-
-    def _info(self):
-        for individual in self._generation:
-            print("Fenotype: ", str(individual._fenotype), "Fitness: ", individual._fitness_value)
