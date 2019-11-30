@@ -95,7 +95,6 @@ class Individual(object):
         Returns: Binary string
 
         """
-
         p_mutation = 0.5
         mutated_dna = ''
 
