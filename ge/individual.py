@@ -24,10 +24,10 @@ class Individual(object):
         self._grammar = grammar
         self._bin_genotype = self._initialize() if dna is None else self.mutate(dna)
         self._int_genotype = self._transcription()
-        self._fenotype = self._decode()
+        self._fenotype = self._translation()
         self._fitness_value = self.fitness()
 
-    ''' Decoding methods '''
+    ''' Specific GE methods '''
     @staticmethod
     def _initialize() -> str:
         """
@@ -46,9 +46,6 @@ class Individual(object):
         return [int(self._bin_genotype[i:i+7], 2) for i in range(0, len(self._bin_genotype), 7)]
 
     def _translation(self):
-        pass
-
-    def _decode(self) -> [dict]:
         """
         Translates the transcription of the genotype to set an individual fenotype given a grammar.
         Returns: List of dictionaries
@@ -84,7 +81,7 @@ class Individual(object):
 
         return json.loads("[" + symbolic_string + "]")
 
-    ''' Evolution methods '''
+    ''' Generic GA methods '''
     @classmethod
     def mutate(cls, dna) -> str:
         """

@@ -28,6 +28,6 @@ for k in grammar.keys():
 ''' GE '''
 
 population = Population(sample_list, grammar, 20)
-population._info()
 population.evolve()
 
+print(str(population._generation[0]._fenotype))
