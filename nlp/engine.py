@@ -16,7 +16,7 @@ def features_seen(samples: list) -> int and dict:
     length_list = []
 
     # Boolean ones (no need list)
-    bool_list = [True, False]
+    # · bool_list = [True, False]
     '''is_alpha_list = []
     is_ascii_list = []
     is_digit_list = []
@@ -58,8 +58,6 @@ def features_seen(samples: list) -> int and dict:
 
         if sample_length > max_doc_length:
             max_doc_length = sample_length
-
-    # TODO: Some features have a total positive correlation, one way of removing unneeded features would be comparing some list of features and if they're equal, remove one feature list
 
     features = {'<ORTH>': sorted(list(set(orth_list))),
                 '<TEXT>': sorted(list(set(text_list))),
