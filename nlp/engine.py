@@ -123,4 +123,5 @@ def dynagg(samples: list) -> dict:
     for k, v in features_dict.items():
         pattern_grammar.update({k: v})
 
+    pattern_grammar['<P>'] = ['<T>,<T>','<T>,<T>,<T>']
     return pattern_grammar
