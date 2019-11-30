@@ -1,11 +1,13 @@
 """ Entry Point """
 import spacy
 import nlp.engine as engine
-import ge.individual as indi
-import ge.population as pop
+import ge.individual
+from ge.population import Population
 
 ''' Engine '''
 nlp = spacy.load("en_core_web_sm")
+
+from spacy.matcher import Matcher
 
 # Receive samples
 sample_list = [nlp.tokenizer(u'Fuck it!'),
@@ -15,18 +17,17 @@ sample_list = [nlp.tokenizer(u'Fuck it!'),
 
 grammar = engine.dynagg(sample_list)
 
+sample_list = [nlp(u'Fuck it!'),
+               nlp(u'Fuck off!'),
+               nlp(u'Fuck all!'),
+               nlp(u'Fuck you!')]
 
 for k in grammar.keys():
     print(k, ":", str(grammar[k]))
 
 ''' GE '''
 
-dude_1 = indi.Individual(grammar)
-dude_2 = indi.Individual(grammar)
-dude_3 = indi.Individual(grammar)
-dude_4 = indi.Individual(grammar)
+population = Population(sample_list, grammar, 20)
+population.evolve()
 
-print(str(dude_1.decode()))
-print(str(dude_2.decode()))
-print(str(dude_3.decode()))
-print(str(dude_4.decode()))
+print(str(population._generation[0]._fenotype))
