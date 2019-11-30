@@ -1,19 +1,22 @@
 """ NLP Engines """
+from spacy.tokens import Doc
 
 
-def features_seen(samples: list) -> int and dict:
+def features_seen(samples: [Doc]) -> int and dict:
     """
-    Returns a dict of features and its seen unique values
-    :param samples: A list of docs
-    :return: A dict where each key is a spacy feature and its val is the list of the detected values of that feature
-    given a sample list of docs
-    """
+    Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the sample
+    Args:
+        samples: List of Spacy Doc objects
 
+    Returns: Integer, the max length of a doc within the sample and a dict
+
+    """
     # Just tokenizer features
     orth_list = []
     text_list = []
     lower_list = []
     length_list = []
+    shape_list = []
 
     # Boolean ones (no need list)
     # · bool_list = [True, False]
@@ -35,7 +38,6 @@ def features_seen(samples: list) -> int and dict:
     tag_list = []
     dep_list = []
     lemma_list = []
-    shape_list = []  # move up ?
     ent_type_list = []
 
     # Capture the len of the largest doc
@@ -81,10 +83,15 @@ def features_seen(samples: list) -> int and dict:
     return max_doc_length, features
 
 
-def dynagg(samples: list) -> dict:
+def dynagg(samples: [Doc]) -> dict:
     """
-    Dynamic Grammar Generator (spacy) Builds a specific Spacy grammar given a sample doc list
-    :return: dict
+    Dynamically generates a grammar in Backus Nuar Form notation representing the
+    available Spacy NLP Linguistic Features
+    Args:
+        samples: List of Spacy Doc objects
+
+    Returns: Backus Naur Form grammar notation encoded in a dictionary
+
     """
     pattern_grammar = {"<S>": "<P>"}
 
@@ -114,12 +121,11 @@ def dynagg(samples: list) -> dict:
 
     pattern_grammar["<T>"] = feature_times
 
-    # Update available features
-    pattern_grammar["<F>"] = list(features_dict.keys())  # Just the features list
+    # Update available features (just the features list)
+    pattern_grammar["<F>"] = list(features_dict.keys())
 
     # Update each feature possible values
     for k, v in features_dict.items():
         pattern_grammar.update({k: v})
 
-    pattern_grammar['<P>'] = ['<T>,<T>','<T>,<T>,<T>']
     return pattern_grammar
