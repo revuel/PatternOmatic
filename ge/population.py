@@ -22,7 +22,8 @@ class Population(object):
         self._size = size
         self._generation = self._initialize()
         self._offspring = list()
-        self._max_generations = 200
+        self._max_generations = 300
+        self._best_individual = None
 
     def _info(self):
         """
@@ -40,6 +41,13 @@ class Population(object):
 
         """
         return [Individual(self._samples, self._grammar) for _ in range(0, self._size)]
+
+    def _best_challenge(self):
+        if self._best_individual is not None and \
+                self._generation[0]._fitness_value >= self._best_individual._fitness_value:
+            self._best_individual = self._generation[0]
+        else:
+            self._best_individual = self._generation[0]
 
     ''' Evolutionary specific methods '''
     def _selection(self) -> [Individual]:
@@ -106,11 +114,11 @@ class Population(object):
         Returns: None
 
         """
-        ''' Replacement type:  mu plus lambda
+        ''' Replacement type:  mu plus lambda '''
         replacement_pool = self._generation + self._offspring
         replacement_pool.sort(key=lambda i: i._fitness_value, reverse=True)
         self._generation = replacement_pool[:len(self._generation)]
-        self._offspring = [] '''
+        self._offspring = []
 
         ''' Replacement type: mu lambda with elitism
         self._generation.sort(key=lambda i: i._fitness_value, reverse=True)
@@ -118,10 +126,10 @@ class Population(object):
         self._generation[1:len(self._generation)] = self._offspring[0:len(self._generation)]
         self._offspring = []'''
 
-        ''' Replacement type: mu lambda without elitism '''
+        ''' Replacement type: mu lambda without elitism 
         self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
         self._generation = self._offspring[0:len(self._generation)]
-        self._offspring = []
+        self._offspring = [] '''
 
     def evolve(self):
         """ Search Engine """
@@ -129,3 +137,5 @@ class Population(object):
             mating_pool = self._selection()
             self._offspring = self._recombination(mating_pool)
             self._replacement()
+            self._best_challenge()
+            # self._info()
