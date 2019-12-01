@@ -112,7 +112,7 @@ class Individual(object):
 
         """
         matchy = Matcher(self._samples[0].vocab)
-        matchy.add("new", None, self._fenotype)
+        matchy.add("basic", None, self._fenotype)
         contact = 0.0
         for sample in self._samples:
             matches = matchy(sample)
