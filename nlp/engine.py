@@ -42,6 +42,7 @@ def features_seen(samples: [Doc]) -> int and dict:
 
     # Capture the len of the largest doc
     max_doc_length = 0
+    min_doc_length = 999999999
 
     for sample in samples:
         sample_length = len(sample)
@@ -60,6 +61,9 @@ def features_seen(samples: [Doc]) -> int and dict:
 
         if sample_length > max_doc_length:
             max_doc_length = sample_length
+
+        if sample_length < min_doc_length:
+            min_doc_length = sample_length
 
     features = {'<ORTH>': sorted(list(set(orth_list))),
                 '<TEXT>': sorted(list(set(text_list))),
@@ -80,7 +84,7 @@ def features_seen(samples: [Doc]) -> int and dict:
     for k_item in to_del_list:
         del features[k_item]
 
-    return max_doc_length, features
+    return max_doc_length, min_doc_length, features
 
 
 def dynagg(samples: [Doc]) -> dict:
@@ -96,16 +100,28 @@ def dynagg(samples: [Doc]) -> dict:
     pattern_grammar = {"<S>": "<P>"}
 
     # Watch out features of seen samples and max number of tokens per sample
-    max_length_token, features_dict = features_seen(samples)
+    max_length_token, min_length_token, features_dict = features_seen(samples)
 
-    # Update times token per pattern (Max length of tokens)
+    # Update times token per pattern [Min length of tokens, Max length of tokens] interval
     token_symbol = "<T>"
     token_times = list()
-    token_times.append(token_symbol)
-    for _ in range(max_length_token - 1):
-        last = token_times[-1]
-        last = last + "," + token_symbol
-        token_times.append(last)
+
+    last = ''
+    for _ in range(min_length_token):
+        if last == '':
+            last = token_symbol
+        else:
+            last = last + "," + token_symbol
+    token_times.append(last)
+
+    if min_length_token != max_length_token:
+
+        inner_length_token = max_length_token - min_length_token
+
+        for _ in range(inner_length_token):
+            last = token_times[-1]
+            last = last + "," + token_symbol
+            token_times.append(last)
 
     pattern_grammar["<P>"] = token_times
 
