@@ -121,3 +121,13 @@ class Individual(object):
                     contact += (match[2] - match[1]) / len(sample)
 
         return contact/len(self._samples) if contact != 0.0 else contact
+
+    ''' Problem specific methods '''
+    def duped_disabling(self):
+        """
+        Checks at fenotype level if there are duplicated
+        Returns:
+
+        """
+        # TODO(me): is this method really needed?
+        raise NotImplementedError
