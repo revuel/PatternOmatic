@@ -144,4 +144,9 @@ def dynagg(samples: [Doc]) -> dict:
     for k, v in features_dict.items():
         pattern_grammar.update({k: v})
 
+    '''
+    pattern_grammar['<P>'] = ['<T>,<T>,<T>']
+    pattern_grammar['<T>'] = ['<F>']
+    '''
+
     return pattern_grammar
