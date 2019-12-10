@@ -35,7 +35,7 @@ class Individual(object):
         Returns: String, binary fashion
 
         """
-        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, 80)]).strip()
+        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, 32)]).strip()
 
     def _transcription(self) -> [int]:
         """
