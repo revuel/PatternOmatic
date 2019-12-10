@@ -43,9 +43,13 @@ class Population(object):
         return [Individual(self._samples, self._grammar) for _ in range(0, self._size)]
 
     def _best_challenge(self):
-        if self._best_individual is not None and \
-                self._generation[0]._fitness_value >= self._best_individual._fitness_value:
-            self._best_individual = self._generation[0]
+        """
+        Compares current generation best fitness individual against previous generation best fitness individual.
+        Updates the best individual attribute accordingly
+        """
+        if self._best_individual is not None:
+            if self._generation[0]._fitness_value >= self._best_individual._fitness_value:
+                self._best_individual = self._generation[0]
         else:
             self._best_individual = self._generation[0]
 
