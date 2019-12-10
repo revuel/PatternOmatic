@@ -1,1 +1,2 @@
-spacy==2.2.2
+spacy==2.2.3
+en-core-web-sm==2.2.5
