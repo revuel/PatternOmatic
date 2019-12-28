@@ -21,7 +21,7 @@ for k in grammar.keys():
 
 ''' GE '''
 
-population = Population(sample_list, grammar, 30)
+population = Population(sample_list, grammar)
 population.evolve()
 
 print("Fenotype:", str(population._best_individual._fenotype), "Fitness:", population._best_individual._fitness_value)
