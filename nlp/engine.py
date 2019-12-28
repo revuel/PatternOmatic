@@ -1,5 +1,6 @@
 """ NLP Engines """
 from spacy.tokens import Doc
+from settings.config import Config
 from settings.literals import *
 
 def features_seen(samples: [Doc]) -> int and dict:
@@ -97,6 +98,8 @@ def dynagg(samples: [Doc]) -> dict:
     Returns: Backus Naur Form grammar notation encoded in a dictionary
 
     """
+    config = Config()
+
     pattern_grammar = {S: P}
 
     # Watch out features of seen samples and max number of tokens per sample
@@ -125,7 +128,14 @@ def dynagg(samples: [Doc]) -> dict:
     pattern_grammar[P] = token_times
 
     #  Update times features per token (Max length of features)
-    max_length_features = len(features_dict.keys())
+    if config._features_per_token == 0:
+        max_length_features = len(features_dict.keys())
+    else:
+        if len(features_dict.keys()) < config._features_per_token + 1:
+            max_length_features = len(features_dict.keys())
+        else:
+            max_length_features = config._features_per_token
+
     feature_times = list()
     feature_times.append(F)
     for _ in range(max_length_features - 1):
@@ -141,10 +151,5 @@ def dynagg(samples: [Doc]) -> dict:
     # Update each feature possible values
     for k, v in features_dict.items():
         pattern_grammar.update({k: v})
-
-    '''
-    pattern_grammar['<P>'] = ['<T>,<T>,<T>']
-    pattern_grammar['<T>'] = ['<F>']
-    '''
 
     return pattern_grammar

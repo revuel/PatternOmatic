@@ -23,7 +23,7 @@ class Config(metaclass=SingletonMetaNaive):
 
         ''' GE configuration parameters '''
         self._population_size = 10
-        self._max_generations = 300
+        self._max_generations = 3
         self._codon_length = 8
         self._num_codons_per_individual = 4
         self._dna_length = self._codon_length * self._num_codons_per_individual
