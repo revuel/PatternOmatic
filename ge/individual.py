@@ -14,9 +14,9 @@ class Individual(object):
 
     def __init__(self, samples: [Doc], grammar: dict, dna: str = None):
         """
-        Individual constructor, if dna is not suplied, sets up randomly its binary genotype
+        Individual constructor, if dna is not supplied, sets up randomly its binary genotype
         Args:
-            samples: list of Spacy doc objets
+            samples: list of Spacy doc objects
             grammar: Backus Naur Form grammar notation encoded in a dictionary
             dna: Optional, binary string representation
         """
