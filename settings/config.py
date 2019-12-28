@@ -1,6 +1,7 @@
 """ Configuration Management class """
 from __future__ import annotations
 from typing import Optional
+from settings.literals import *
 import configparser
 
 
@@ -29,11 +30,12 @@ class Config(metaclass=SingletonMetaNaive):
         self._mutation_probability = 0.5
         self._offspring_max_size_factor = 3.5
         self._mating_probability = 0.9
+        self._k_value = None
 
         ''' GE configuration methods '''
-        self._selection_type = ''
-        self._recombination_type = ''
-        self._replacement_type = ''
+        self._selection_type = BINARY_TOURNAMENT
+        self._recombination_type = RANDOM_ONE_POINT_CROSSOVER
+        self._replacement_type = MU_PLUS_LAMBDA
 
         ''' Dynamic Grammar Generation configuration options '''
 
