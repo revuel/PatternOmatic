@@ -3,20 +3,18 @@ import random
 from spacy.tokens import Doc
 from ge.individual import Individual
 from settings.config import Config
+from settings.literals import *
 
 
 class Population(object):
-    """
-    Population implementation of a AI Grammatical Evolution algorithm in OOP fashion
-    """
+    """ Population implementation of a AI Grammatical Evolution algorithm in OOP fashion """
 
-    def __init__(self, samples: [Doc], grammar: dict, size: int):
+    def __init__(self, samples: [Doc], grammar: dict):
         """
         Population constructor, initializes a list of Individual objects
         Args:
             samples: list of Spacy doc objets
             grammar: Backus Naur Form grammar notation encoded in a dictionary
-            size: Maximum number of individuals per generation
         """
         self._samples = samples
         self._grammar = grammar
@@ -58,26 +56,30 @@ class Population(object):
         Returns: a list of individuals
 
         """
-        # TODO(me): k tournament
-        ''' Current implementation: Binary Tournament '''
-        mating_pool = []
+        if self._config._selection_type == BINARY_TOURNAMENT:
+            mating_pool = []
 
-        while len(mating_pool) <= len(self._generation):
-            i = random.randint(0, len(self._generation) - 1)
-            j = i
+            while len(mating_pool) <= len(self._generation):
+                i = random.randint(0, len(self._generation) - 1)
+                j = i
 
-            while j == i:
-                j = random.randint(0, len(self._generation) - 1)
+                while j == i:
+                    j = random.randint(0, len(self._generation) - 1)
 
-            i = self._generation[i]
-            j = self._generation[j]
+                i = self._generation[i]
+                j = self._generation[j]
 
-            if i._fitness_value >= j._fitness_value:
-                mating_pool.append(i)
-            else:
-                mating_pool.append(j)
+                if i._fitness_value >= j._fitness_value:
+                    mating_pool.append(i)
+                else:
+                    mating_pool.append(j)
 
-        return mating_pool
+            return mating_pool
+        elif self._config._selection_type == K_TOURNAMENT:
+            # TODO(me): k tournament
+            raise NotImplementedError
+        else:
+            raise ValueError('Invalid selection type: ', self._config._selection_type)
 
     def _recombination(self, mating_pool: [Individual]):
         """
@@ -89,54 +91,52 @@ class Population(object):
 
         """
 
-        ''' Random one point crossover '''
-        offspring = []
-        offspring_max_size = round(len(self._generation) * self._config._offspring_max_size_factor)
+        if self._config._recombination_type == RANDOM_ONE_POINT_CROSSOVER:
+            offspring = []
+            offspring_max_size = round(len(self._generation) * self._config._offspring_max_size_factor)
 
-        while len(offspring) <= offspring_max_size:
-            parent_1 = random.choice(mating_pool)
-            parent_2 = random.choice(mating_pool)
+            while len(offspring) <= offspring_max_size:
+                parent_1 = random.choice(mating_pool)
+                parent_2 = random.choice(mating_pool)
 
-            if random.random() < self._config._mating_probability:
+                if random.random() < self._config._mating_probability:
+                    cut = random.randint(1, self._config._codon_length - 1) * self._config._num_codons_per_individual
 
-                cut = random.randint(1, self._config._codon_length - 1) * self._config._num_codons_per_individual
+                    # Create children
+                    child_1 = Individual(self._samples, self._grammar,
+                                         dna=parent_1._bin_genotype[:cut] +
+                                             parent_2._bin_genotype[-(self._config._dna_length - cut):])
 
-                # Create children
-                child_1 = Individual(self._samples, self._grammar,
-                                     dna=parent_1._bin_genotype[:cut] +
-                                         parent_2._bin_genotype[-(self._config._dna_length - cut):])
+                    child_2 = Individual(self._samples, self._grammar,
+                                         dna=parent_2._bin_genotype[:cut] +
+                                             parent_1._bin_genotype[-(self._config._dna_length - cut):])
 
-                child_2 = Individual(self._samples, self._grammar,
-                                     dna=parent_2._bin_genotype[:cut] +
-                                         parent_1._bin_genotype[-(self._config._dna_length - cut):])
+                    offspring.append(child_1)
+                    offspring.append(child_2)
 
-                offspring.append(child_1)
-                offspring.append(child_2)
-
-        return offspring
+            return offspring
+        else:
+            raise ValueError('Invalid recombination type: ', self._config._recombination_type)
 
     def _replacement(self) -> None:
-        """
-        Produces the new generation and cleans up the offspring pool
-        Returns: None
+        """ Produces the new generation and cleans up the offspring pool  """
 
-        """
-        ''' Replacement type:  mu plus lambda '''
-        replacement_pool = self._generation + self._offspring
-        replacement_pool.sort(key=lambda i: i._fitness_value, reverse=True)
-        self._generation = replacement_pool[:len(self._generation)]
-        self._offspring = []
-
-        ''' Replacement type: mu lambda with elitism
-        self._generation.sort(key=lambda i: i._fitness_value, reverse=True)
-        self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
-        self._generation[1:len(self._generation)] = self._offspring[0:len(self._generation)]
-        self._offspring = []'''
-
-        ''' Replacement type: mu lambda without elitism 
-        self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
-        self._generation = self._offspring[0:len(self._generation)]
-        self._offspring = [] '''
+        if self._config._replacement_type == MU_PLUS_LAMBDA:
+            replacement_pool = self._generation + self._offspring
+            replacement_pool.sort(key=lambda i: i._fitness_value, reverse=True)
+            self._generation = replacement_pool[:len(self._generation)]
+            self._offspring = []
+        elif self._config._replacement_type == MU_LAMBDA_WITH_ELITISM:
+            self._generation.sort(key=lambda i: i._fitness_value, reverse=True)
+            self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
+            self._generation[1:len(self._generation)] = self._offspring[0:len(self._generation)]
+            self._offspring = []
+        elif self._config._replacement_type == MU_LAMBDA_WITHOUT_ELITISM:
+            self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
+            self._generation = self._offspring[0:len(self._generation)]
+            self._offspring = []
+        else:
+            raise ValueError('Invalid replacement type: ', self._config._replacement_type)
 
     def evolve(self):
         """ Search Engine """
