@@ -25,6 +25,7 @@ class Config(metaclass=SingletonMetaNaive):
         self._max_generations = 300
         self._codon_length = 8
         self._num_codons_per_individual = 4
+        self._dna_length = self._codon_length * self._num_codons_per_individual
         self._mutation_probability = 0.5
         self._offspring_max_size_factor = 3.5
         self._mating_probability = 0.9
