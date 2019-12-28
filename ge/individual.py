@@ -5,6 +5,7 @@ from random import random
 from itertools import cycle
 from spacy.tokens import Doc
 from spacy.matcher import Matcher
+from settings.config import Config
 
 
 class Individual(object):
@@ -35,7 +36,8 @@ class Individual(object):
         Returns: String, binary fashion
 
         """
-        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, 32)]).strip()
+        config = Config()
+        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, config._dna_length)]).strip()
 
     def _transcription(self) -> [int]:
         """
@@ -43,7 +45,9 @@ class Individual(object):
         Returns: List of integers
 
         """
-        return [int(self._bin_genotype[i:i+7], 2) for i in range(0, len(self._bin_genotype), 7)]
+        config = Config()
+        return [int(self._bin_genotype[i:(i+config._codon_length-1)], 2)
+                for i in range(0, len(self._bin_genotype), config._codon_length-1)]
 
     def _translation(self):
         """
@@ -92,11 +96,11 @@ class Individual(object):
         Returns: Binary string
 
         """
-        p_mutation = 0.5
+        config = Config()
         mutated_dna = ''
 
         for gen in dna:
-            if random() < p_mutation:
+            if random() < config._mutation_probability:
                 if gen == '1':
                     mutated_dna += '0'
                 else:
