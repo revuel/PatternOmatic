@@ -103,9 +103,9 @@ class Population(object):
                 cut = random.randint(1, 7) * 10  # One codon far away from start or from end TODO()me: dehardcode
 
                 child_1 = Individual(self._samples, self._grammar,
-                                     dna=parent_1._bin_genotype[:cut] + parent_2._bin_genotype[-(80-cut):])
+                                     dna=parent_1._bin_genotype[:cut] + parent_2._bin_genotype[-(32-cut):])
                 child_2 = Individual(self._samples, self._grammar,
-                                     dna=parent_2._bin_genotype[:cut] + parent_1._bin_genotype[-(80-cut):])
+                                     dna=parent_2._bin_genotype[:cut] + parent_1._bin_genotype[-(32-cut):])
 
                 offspring.append(child_1)
                 offspring.append(child_2)
