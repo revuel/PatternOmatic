@@ -6,6 +6,7 @@ from itertools import cycle
 from spacy.tokens import Doc
 from spacy.matcher import Matcher
 from settings.config import Config
+from settings.literals import *
 
 
 class Individual(object):
@@ -56,7 +57,7 @@ class Individual(object):
 
         """
         done = False
-        symbolic_string = self._grammar["<S>"]
+        symbolic_string = self._grammar[S]
         circular = cycle(self._int_genotype)
 
         while done is not True:
@@ -66,12 +67,12 @@ class Individual(object):
             for key in self._grammar.keys():
                 if type(self._grammar[key]) is list:
                     fire = divmod(ci, len(self._grammar[key]))[1]
-                    if key == '<T>':
+                    if key == T:
                         ci = next(circular)
                         fire = divmod(ci, len(self._grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self._grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key not in ['S', '<P>', '<T>', '<F>']:
-                        dkey = key.replace('<', '').replace('>', '')
+                    elif key not in [S, P, T, F]:
+                        dkey = key.replace(SLD, '').replace(SRD, '')
                         feature = "\"" + dkey + "\"" + ":" + "\"" + str(self._grammar[key][fire]) + "\""
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     else:
@@ -115,16 +116,19 @@ class Individual(object):
         Returns: Float
 
         """
-        matchy = Matcher(self._samples[0].vocab)
-        matchy.add("basic", None, self._fenotype)
-        contact = 0.0
-        for sample in self._samples:
-            matches = matchy(sample)
-            if len(matches) > 0:
-                for match in matches:
-                    contact += (match[2] - match[1]) / len(sample)
-
-        return contact/len(self._samples) if contact != 0.0 else contact
+        config = Config()
+        if config._fitness_function_type == FITNESS_BASIC:
+            matchy = Matcher(self._samples[0].vocab)
+            matchy.add("basic", None, self._fenotype)
+            contact = 0.0
+            for sample in self._samples:
+                matches = matchy(sample)
+                if len(matches) > 0:
+                    for match in matches:
+                        contact += (match[2] - match[1]) / len(sample)
+            return contact/len(self._samples) if contact != 0.0 else contact
+        else:
+            raise ValueError('Invalid fitness function type: ', config._fitness_function_type)
 
     ''' Problem specific methods '''
     def duped_disabling(self):

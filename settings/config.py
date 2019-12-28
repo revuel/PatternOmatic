@@ -38,6 +38,12 @@ class Config(metaclass=SingletonMetaNaive):
         self._replacement_type = MU_PLUS_LAMBDA
 
         ''' Dynamic Grammar Generation configuration options '''
+        self._features_per_token = 1
+        self._extended_features = True
+        self._use_uniques = True
+
+        ''' Problem specific configuration options '''
+        self._fitness_function_type = FITNESS_BASIC
 
     def __iter__(self):
         pass
