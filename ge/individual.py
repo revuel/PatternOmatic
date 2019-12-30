@@ -8,6 +8,8 @@ from spacy.matcher import Matcher
 from settings.config import Config
 from settings.literals import *
 
+config = Config()
+
 
 class Individual(object):
     """
@@ -37,7 +39,6 @@ class Individual(object):
         Returns: String, binary fashion
 
         """
-        config = Config()
         return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, config._dna_length)]).strip()
 
     def _transcription(self) -> [int]:
@@ -46,7 +47,6 @@ class Individual(object):
         Returns: List of integers
 
         """
-        config = Config()
         return [int(self._bin_genotype[i:(i+config._codon_length-1)], 2)
                 for i in range(0, len(self._bin_genotype), config._codon_length-1)]
 
@@ -97,7 +97,6 @@ class Individual(object):
         Returns: Binary string
 
         """
-        config = Config()
         mutated_dna = ''
 
         for gen in dna:
@@ -116,7 +115,6 @@ class Individual(object):
         Returns: Float
 
         """
-        config = Config()
         if config._fitness_function_type == FITNESS_BASIC:
             matchy = Matcher(self._samples[0].vocab)
             matchy.add("basic", None, self._fenotype)
