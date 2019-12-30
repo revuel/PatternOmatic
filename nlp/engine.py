@@ -3,6 +3,8 @@ from spacy.tokens import Doc
 from settings.config import Config
 from settings.literals import *
 
+config = Config()
+
 def features_seen(samples: [Doc]) -> int and dict:
     """
     Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the sample
@@ -98,8 +100,6 @@ def dynagg(samples: [Doc]) -> dict:
     Returns: Backus Naur Form grammar notation encoded in a dictionary
 
     """
-    config = Config()
-
     pattern_grammar = {S: P}
 
     # Watch out features of seen samples and max number of tokens per sample
