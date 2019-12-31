@@ -14,11 +14,11 @@ def str2bool(vargin: str) -> bool:
     Returns: True if v in string set, False otherwise
 
     """
-    return vargin.lower() in ("yes", "True", "true", "1")
+    return vargin.lower() in ('Yes', 'yes', 'True', 'true', '1')
 
 
 class SingletonMetaNaive(type):
-    """ The Naive Singleton Design Pattern of type metaclass """
+    """ The Naive Singleton Design Pattern of type Metaclass builder """
 
     _instance: Optional[Config] = None
 
@@ -57,7 +57,7 @@ class Config(metaclass=SingletonMetaNaive):
 
             ''' Dynamic Grammar Generation configuration options '''
             self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
-            self._extended_features = str2bool(config_parser[DGG][FEATURE_EXTENSION])
+            self._use_custom_features = str2bool(config_parser[DGG][CUSTOM_FEATURES])
             self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
             self._use_grammar_operators = str2bool(config_parser[DGG][GRAMMAR_OPERATORS])
             self._token_wildcard = str2bool(config_parser[DGG][TOKEN_WILDCARD])
@@ -86,7 +86,7 @@ class Config(metaclass=SingletonMetaNaive):
 
             ''' Dynamic Grammar Generation configuration options '''
             self._features_per_token = 1
-            self._extended_features = True
+            self._use_custom_features = True
             self._use_uniques = True
             self._use_grammar_operators = False
             self._use_grammar_wildcards = False
@@ -97,17 +97,70 @@ class Config(metaclass=SingletonMetaNaive):
     def __iter__(self):
         pass
 
+    @property
+    def population_size(self):
+        return self._population_size
 
-if __name__ == "__main__":
-    # The client code.
+    @property
+    def max_generations(self):
+        return self._max_generations
 
-    s1 = Config()
-    s2 = Config()
+    @property
+    def codon_length(self):
+        return self._codon_length
 
-    if id(s1) == id(s2):
-        print("Singleton works, both variables contain the same instance.")
-        s1._population_size = 12
-        print("Population Size S1:", s1._population_size)
-        print("Population Size S2:", s2._population_size)
-    else:
-        print("Singleton failed, variables contain different instances.")
+    @property
+    def num_codons_per_individual(self):
+        return self._num_codons_per_individual
+
+    @property
+    def dna_length(self):
+        return self._dna_length
+
+    @property
+    def mutation_probability(self):
+        return self._mutation_probability
+
+    @property
+    def offspring_max_size_factor(self):
+        return self._offspring_max_size_factor
+
+    @property
+    def mating_probability(self):
+        return self._mating_probability
+
+    @property
+    def k_value(self):
+        return self._k_value
+
+    @property
+    def selection_type(self):
+        return self._selection_type
+
+    @property
+    def recombination_type(self):
+        return self._recombination_type
+
+    @property
+    def replacement_type(self):
+        return self._replacement_type
+
+    @property
+    def features_per_token(self):
+        return self._features_per_token
+
+    @property
+    def use_custom_features(self):
+        return self._use_custom_features
+
+    @property
+    def use_uniques(self):
+        return self._use_uniques
+
+    @property
+    def use_grammar_wildcards(self):
+        return self._use_grammar_wildcards
+
+    @property
+    def fitness_function_type(self):
+        return self._fitness_function_type
