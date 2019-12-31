@@ -5,6 +5,7 @@ from settings.literals import *
 
 config = Config()
 
+
 def features_seen(samples: [Doc]) -> int and dict:
     """
     Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the sample
