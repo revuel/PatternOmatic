@@ -5,6 +5,10 @@ from random import random
 from itertools import cycle
 from spacy.tokens import Doc
 from spacy.matcher import Matcher
+from settings.config import Config
+from settings.literals import *
+
+config = Config()
 
 
 class Individual(object):
@@ -14,9 +18,9 @@ class Individual(object):
 
     def __init__(self, samples: [Doc], grammar: dict, dna: str = None):
         """
-        Individual constructor, if dna is not suplied, sets up randomly its binary genotype
+        Individual constructor, if dna is not supplied, sets up randomly its binary genotype
         Args:
-            samples: list of Spacy doc objets
+            samples: list of Spacy doc objects
             grammar: Backus Naur Form grammar notation encoded in a dictionary
             dna: Optional, binary string representation
         """
@@ -35,7 +39,7 @@ class Individual(object):
         Returns: String, binary fashion
 
         """
-        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, 32)]).strip()
+        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, config.dna_length)]).strip()
 
     def _transcription(self) -> [int]:
         """
@@ -43,7 +47,8 @@ class Individual(object):
         Returns: List of integers
 
         """
-        return [int(self._bin_genotype[i:i+7], 2) for i in range(0, len(self._bin_genotype), 7)]
+        return [int(self._bin_genotype[i:(i+config.codon_length-1)], 2)
+                for i in range(0, len(self._bin_genotype), config.codon_length-1)]
 
     def _translation(self):
         """
@@ -52,7 +57,7 @@ class Individual(object):
 
         """
         done = False
-        symbolic_string = self._grammar["<S>"]
+        symbolic_string = self._grammar[S]
         circular = cycle(self._int_genotype)
 
         while done is not True:
@@ -62,12 +67,12 @@ class Individual(object):
             for key in self._grammar.keys():
                 if type(self._grammar[key]) is list:
                     fire = divmod(ci, len(self._grammar[key]))[1]
-                    if key == '<T>':
+                    if key == T:
                         ci = next(circular)
                         fire = divmod(ci, len(self._grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self._grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key not in ['S', '<P>', '<T>', '<F>']:
-                        dkey = key.replace('<', '').replace('>', '')
+                    elif key not in [S, P, T, F]:
+                        dkey = key.replace(SLD, '').replace(SRD, '')
                         feature = "\"" + dkey + "\"" + ":" + "\"" + str(self._grammar[key][fire]) + "\""
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     else:
@@ -92,11 +97,10 @@ class Individual(object):
         Returns: Binary string
 
         """
-        p_mutation = 0.5
         mutated_dna = ''
 
         for gen in dna:
-            if random() < p_mutation:
+            if random() < config.mutation_probability:
                 if gen == '1':
                     mutated_dna += '0'
                 else:
@@ -111,16 +115,18 @@ class Individual(object):
         Returns: Float
 
         """
-        matchy = Matcher(self._samples[0].vocab)
-        matchy.add("basic", None, self._fenotype)
-        contact = 0.0
-        for sample in self._samples:
-            matches = matchy(sample)
-            if len(matches) > 0:
-                for match in matches:
-                    contact += (match[2] - match[1]) / len(sample)
-
-        return contact/len(self._samples) if contact != 0.0 else contact
+        if config.fitness_function_type == FITNESS_BASIC:
+            matchy = Matcher(self._samples[0].vocab)
+            matchy.add("basic", None, self._fenotype)
+            contact = 0.0
+            for sample in self._samples:
+                matches = matchy(sample)
+                if len(matches) > 0:
+                    for match in matches:
+                        contact += (match[2] - match[1]) / len(sample)
+            return contact/len(self._samples) if contact != 0.0 else contact
+        else:
+            raise ValueError('Invalid fitness function type: ', config.fitness_function_type)
 
     ''' Problem specific methods '''
     def duped_disabling(self):
