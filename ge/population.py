@@ -24,11 +24,44 @@ class Population(object):
         self._offspring = list()
         self._best_individual = None
 
+    ''' Properties & setters '''
+    @property
+    def samples(self):
+        return self._samples
+
+    @property
+    def grammar(self):
+        return self._grammar
+
+    @property
+    def generation(self):
+        return self._generation
+
+    @generation.setter
+    def generation(self, generation: [Individual]):
+        self._generation = generation
+
+    @property
+    def offspring(self):
+        return self._offspring
+
+    @offspring.setter
+    def offspring(self, offspring: [Individual]):
+        self._offspring = offspring
+
+    @property
+    def best_individual(self):
+        return self._best_individual
+
+    @best_individual.setter
+    def best_individual(self, best_individual: Individual):
+        self._best_individual = best_individual
+
     def _info(self):
         """
         Prints current generation individuals' fenotype and fitness value
         """
-        for individual in self._generation:
+        for individual in self.generation:
             print("Fenotype: ", str(individual._fenotype), "Fitness value: ", individual._fitness_value)
 
     def _initialize(self) -> [Individual]:
@@ -37,18 +70,18 @@ class Population(object):
         Returns: A list of individual objects
 
         """
-        return [Individual(self._samples, self._grammar) for _ in range(0, config.dna_length)]
+        return [Individual(self.samples, self.grammar) for _ in range(0, config.dna_length)]
 
     def _best_challenge(self):
         """
         Compares current generation best fitness individual against previous generation best fitness individual.
         Updates the best individual attribute accordingly
         """
-        if self._best_individual is not None:
-            if self._generation[0]._fitness_value > self._best_individual._fitness_value:
-                self._best_individual = self._generation[0]
+        if self.best_individual is not None:
+            if self.generation[0]._fitness_value > self.best_individual._fitness_value:
+                self.best_individual = self.generation[0]
         else:
-            self._best_individual = self._generation[0]
+            self.best_individual = self.generation[0]
 
     ''' Evolutionary specific methods '''
     def _selection(self) -> [Individual]:
@@ -60,15 +93,15 @@ class Population(object):
         if config.selection_type == BINARY_TOURNAMENT:
             mating_pool = []
 
-            while len(mating_pool) <= len(self._generation):
-                i = random.randint(0, len(self._generation) - 1)
+            while len(mating_pool) <= len(self.generation):
+                i = random.randint(0, len(self.generation) - 1)
                 j = i
 
                 while j == i:
-                    j = random.randint(0, len(self._generation) - 1)
+                    j = random.randint(0, len(self.generation) - 1)
 
-                i = self._generation[i]
-                j = self._generation[j]
+                i = self.generation[i]
+                j = self.generation[j]
 
                 if i._fitness_value >= j._fitness_value:
                     mating_pool.append(i)
@@ -94,7 +127,7 @@ class Population(object):
 
         if config.recombination_type == RANDOM_ONE_POINT_CROSSOVER:
             offspring = []
-            offspring_max_size = round(len(self._generation) * config.offspring_max_size_factor)
+            offspring_max_size = round(len(self.generation) * config.offspring_max_size_factor)
 
             while len(offspring) <= offspring_max_size:
                 parent_1 = random.choice(mating_pool)
@@ -104,11 +137,11 @@ class Population(object):
                     cut = random.randint(1, config.codon_length - 1) * config.num_codons_per_individual
 
                     # Create children
-                    child_1 = Individual(self._samples, self._grammar,
+                    child_1 = Individual(self.samples, self.grammar,
                                          dna=parent_1._bin_genotype[:cut] +
                                              parent_2._bin_genotype[-(config.dna_length - cut):])
 
-                    child_2 = Individual(self._samples, self._grammar,
+                    child_2 = Individual(self.samples, self.grammar,
                                          dna=parent_2._bin_genotype[:cut] +
                                              parent_1._bin_genotype[-(config.dna_length - cut):])
 
@@ -123,27 +156,32 @@ class Population(object):
         """ Produces the new generation and cleans up the offspring pool  """
 
         if config.replacement_type == MU_PLUS_LAMBDA:
-            replacement_pool = self._generation + self._offspring
+            replacement_pool = self.generation + self.offspring
             replacement_pool.sort(key=lambda i: i._fitness_value, reverse=True)
-            self._generation = replacement_pool[:len(self._generation)]
-            self._offspring = []
+            self.generation = replacement_pool[:len(self.generation)]
+            self.offspring = []
         elif config.replacement_type == MU_LAMBDA_WITH_ELITISM:
-            self._generation.sort(key=lambda i: i._fitness_value, reverse=True)
-            self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
-            self._generation[1:len(self._generation)] = self._offspring[0:len(self._generation)]
-            self._offspring = []
+            self.generation.sort(key=lambda i: i._fitness_value, reverse=True)
+            self.offspring.sort(key=lambda i: i._fitness_value, reverse=True)
+            self.generation[1:len(self.generation)] = self.offspring[0:len(self.generation)]
+            self.offspring = []
         elif config.replacement_type == MU_LAMBDA_WITHOUT_ELITISM:
-            self._offspring.sort(key=lambda i: i._fitness_value, reverse=True)
-            self._generation = self._offspring[0:len(self._generation)]
-            self._offspring = []
+            self.offspring.sort(key=lambda i: i._fitness_value, reverse=True)
+            self.generation = self.offspring[0:len(self.generation)]
+            self.offspring = []
         else:
             raise ValueError('Invalid replacement type: ', config.replacement_type)
 
     def evolve(self):
-        """ Search Engine """
+        """ Search Engine
+        1) Selects individuals of the current generation to constitute who will mate
+        2) Crossover or recombination of the previously selected individuals
+        3) Replace the this generation with the offspring
+        4) Save the best individual by fitness """
+
         for _ in range(config.max_generations):
             mating_pool = self._selection()
-            self._offspring = self._recombination(mating_pool)
+            self.offspring = self._recombination(mating_pool)
             self._replacement()
             self._best_challenge()
             # self._info()
