@@ -26,15 +26,15 @@ class Population(object):
 
     ''' Properties & setters '''
     @property
-    def samples(self):
+    def samples(self) -> [Doc]:
         return self._samples
 
     @property
-    def grammar(self):
+    def grammar(self) -> dict:
         return self._grammar
 
     @property
-    def generation(self):
+    def generation(self) -> [Individual]:
         return self._generation
 
     @generation.setter
@@ -42,7 +42,7 @@ class Population(object):
         self._generation = generation
 
     @property
-    def offspring(self):
+    def offspring(self) -> [Individual]:
         return self._offspring
 
     @offspring.setter
@@ -50,7 +50,7 @@ class Population(object):
         self._offspring = offspring
 
     @property
-    def best_individual(self):
+    def best_individual(self) -> Individual:
         return self._best_individual
 
     @best_individual.setter
@@ -62,7 +62,7 @@ class Population(object):
         Prints current generation individuals' fenotype and fitness value
         """
         for individual in self.generation:
-            print("Fenotype: ", str(individual._fenotype), "Fitness value: ", individual._fitness_value)
+            print("Fenotype: ", str(individual.fenotype), "Fitness value: ", individual.fitness_value)
 
     def _initialize(self) -> [Individual]:
         """
@@ -78,7 +78,7 @@ class Population(object):
         Updates the best individual attribute accordingly
         """
         if self.best_individual is not None:
-            if self.generation[0]._fitness_value > self.best_individual._fitness_value:
+            if self.generation[0].fitness_value > self.best_individual.fitness_value:
                 self.best_individual = self.generation[0]
         else:
             self.best_individual = self.generation[0]
@@ -103,7 +103,7 @@ class Population(object):
                 i = self.generation[i]
                 j = self.generation[j]
 
-                if i._fitness_value >= j._fitness_value:
+                if i.fitness_value >= j.fitness_value:
                     mating_pool.append(i)
                 else:
                     mating_pool.append(j)
@@ -138,12 +138,12 @@ class Population(object):
 
                     # Create children
                     child_1 = Individual(self.samples, self.grammar,
-                                         dna=parent_1._bin_genotype[:cut] +
-                                             parent_2._bin_genotype[-(config.dna_length - cut):])
+                                         dna=parent_1.bin_genotype[:cut] +
+                                             parent_2.bin_genotype[-(config.dna_length - cut):])
 
                     child_2 = Individual(self.samples, self.grammar,
-                                         dna=parent_2._bin_genotype[:cut] +
-                                             parent_1._bin_genotype[-(config.dna_length - cut):])
+                                         dna=parent_2.bin_genotype[:cut] +
+                                             parent_1.bin_genotype[-(config.dna_length - cut):])
 
                     offspring.append(child_1)
                     offspring.append(child_2)
@@ -157,16 +157,16 @@ class Population(object):
 
         if config.replacement_type == MU_PLUS_LAMBDA:
             replacement_pool = self.generation + self.offspring
-            replacement_pool.sort(key=lambda i: i._fitness_value, reverse=True)
+            replacement_pool.sort(key=lambda i: i.fitness_value, reverse=True)
             self.generation = replacement_pool[:len(self.generation)]
             self.offspring = []
         elif config.replacement_type == MU_LAMBDA_WITH_ELITISM:
-            self.generation.sort(key=lambda i: i._fitness_value, reverse=True)
-            self.offspring.sort(key=lambda i: i._fitness_value, reverse=True)
+            self.generation.sort(key=lambda i: i.fitness_value, reverse=True)
+            self.offspring.sort(key=lambda i: i.fitness_value, reverse=True)
             self.generation[1:len(self.generation)] = self.offspring[0:len(self.generation)]
             self.offspring = []
         elif config.replacement_type == MU_LAMBDA_WITHOUT_ELITISM:
-            self.offspring.sort(key=lambda i: i._fitness_value, reverse=True)
+            self.offspring.sort(key=lambda i: i.fitness_value, reverse=True)
             self.generation = self.offspring[0:len(self.generation)]
             self.offspring = []
         else:
