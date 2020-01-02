@@ -1,5 +1,9 @@
 """ NLP Engines """
 from spacy.tokens import Doc
+from settings.config import Config
+from settings.literals import *
+
+config = Config()
 
 
 def features_seen(samples: [Doc]) -> int and dict:
@@ -65,16 +69,16 @@ def features_seen(samples: [Doc]) -> int and dict:
         if sample_length < min_doc_length:
             min_doc_length = sample_length
 
-    features = {'<ORTH>': sorted(list(set(orth_list))),
-                '<TEXT>': sorted(list(set(text_list))),
-                '<LOWER>': sorted(list(set(lower_list))),
-                '<LENGTH>': sorted(list(set(length_list))),
-                '<POS>': sorted(list(set(pos_list))),
-                '<TAG>': sorted(list(set(tag_list))),
-                '<DEP>': sorted(list(set(dep_list))),
-                '<LEMMA>': sorted(list(set(lemma_list))),
-                '<SHAPE>': sorted(list(set(shape_list))),
-                '<ENT>': sorted(list(set(ent_type_list)))}
+    features = {ORTH: sorted(list(set(orth_list))),
+                TEXT: sorted(list(set(text_list))),
+                LOWER: sorted(list(set(lower_list))),
+                LENGTH: sorted(list(set(length_list))),
+                POS: sorted(list(set(pos_list))),
+                TAG: sorted(list(set(tag_list))),
+                DEP: sorted(list(set(dep_list))),
+                LEMMA: sorted(list(set(lemma_list))),
+                SHAPE: sorted(list(set(shape_list))),
+                ENT: sorted(list(set(ent_type_list)))}
 
     to_del_list = list()
     for k in features.keys():
@@ -97,21 +101,20 @@ def dynagg(samples: [Doc]) -> dict:
     Returns: Backus Naur Form grammar notation encoded in a dictionary
 
     """
-    pattern_grammar = {"<S>": "<P>"}
+    pattern_grammar = {S: P}
 
     # Watch out features of seen samples and max number of tokens per sample
     max_length_token, min_length_token, features_dict = features_seen(samples)
 
     # Update times token per pattern [Min length of tokens, Max length of tokens] interval
-    token_symbol = "<T>"
     token_times = list()
 
     last = ''
     for _ in range(min_length_token):
         if last == '':
-            last = token_symbol
+            last = T
         else:
-            last = last + "," + token_symbol
+            last = last + "," + T
     token_times.append(last)
 
     if min_length_token != max_length_token:
@@ -120,33 +123,34 @@ def dynagg(samples: [Doc]) -> dict:
 
         for _ in range(inner_length_token):
             last = token_times[-1]
-            last = last + "," + token_symbol
+            last = last + "," + T
             token_times.append(last)
 
-    pattern_grammar["<P>"] = token_times
+    pattern_grammar[P] = token_times
 
     #  Update times features per token (Max length of features)
-    max_length_features = len(features_dict.keys())
-    feature_symbol = "<F>"
+    if config._features_per_token == 0:
+        max_length_features = len(features_dict.keys())
+    else:
+        if len(features_dict.keys()) < config._features_per_token + 1:
+            max_length_features = len(features_dict.keys())
+        else:
+            max_length_features = config._features_per_token
+
     feature_times = list()
-    feature_times.append(feature_symbol)
+    feature_times.append(F)
     for _ in range(max_length_features - 1):
         last = feature_times[-1]
-        last = last + "," + feature_symbol
+        last = last + "," + F
         feature_times.append(last)
 
-    pattern_grammar["<T>"] = feature_times
+    pattern_grammar[T] = feature_times
 
     # Update available features (just the features list)
-    pattern_grammar["<F>"] = list(features_dict.keys())
+    pattern_grammar[F] = list(features_dict.keys())
 
     # Update each feature possible values
     for k, v in features_dict.items():
         pattern_grammar.update({k: v})
-
-    '''
-    pattern_grammar['<P>'] = ['<T>,<T>,<T>']
-    pattern_grammar['<T>'] = ['<F>']
-    '''
 
     return pattern_grammar
