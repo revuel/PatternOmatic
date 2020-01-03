@@ -98,67 +98,67 @@ class Config(metaclass=SingletonMetaNaive):
         pass
 
     @property
-    def population_size(self):
+    def population_size(self) -> int:
         return self._population_size
 
     @property
-    def max_generations(self):
+    def max_generations(self) -> int:
         return self._max_generations
 
     @property
-    def codon_length(self):
+    def codon_length(self) -> int:
         return self._codon_length
 
     @property
-    def num_codons_per_individual(self):
+    def num_codons_per_individual(self) -> int:
         return self._num_codons_per_individual
 
     @property
-    def dna_length(self):
+    def dna_length(self) -> int:
         return self._dna_length
 
     @property
-    def mutation_probability(self):
+    def mutation_probability(self) -> float:
         return self._mutation_probability
 
     @property
-    def offspring_max_size_factor(self):
+    def offspring_max_size_factor(self) -> float:
         return self._offspring_max_size_factor
 
     @property
-    def mating_probability(self):
+    def mating_probability(self) -> float:
         return self._mating_probability
 
     @property
-    def k_value(self):
+    def k_value(self) -> int:
         return self._k_value
 
     @property
-    def selection_type(self):
+    def selection_type(self) -> str:
         return self._selection_type
 
     @property
-    def recombination_type(self):
+    def recombination_type(self) -> str:
         return self._recombination_type
 
     @property
-    def replacement_type(self):
+    def replacement_type(self) -> str:
         return self._replacement_type
 
     @property
-    def features_per_token(self):
+    def features_per_token(self) -> int:
         return self._features_per_token
 
     @property
-    def use_custom_features(self):
+    def use_custom_features(self) -> bool:
         return self._use_custom_features
 
     @property
-    def use_uniques(self):
+    def use_uniques(self) -> bool:
         return self._use_uniques
 
     @property
-    def use_grammar_wildcards(self):
+    def use_grammar_wildcards(self) -> bool:
         return self._use_grammar_wildcards
 
     @property

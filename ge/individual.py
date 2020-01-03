@@ -31,6 +31,31 @@ class Individual(object):
         self._fenotype = self._translation()
         self._fitness_value = self.fitness()
 
+    ''' Properties & setters '''
+    @property
+    def samples(self) -> [Doc]:
+        return self._samples
+
+    @property
+    def grammar(self) -> dict:
+        return self._grammar
+
+    @property
+    def bin_genotype(self) -> str:
+        return self._bin_genotype
+
+    @property
+    def int_genotype(self) -> [int]:
+        return self._int_genotype
+
+    @property
+    def fenotype(self) -> dict:
+        return self._fenotype
+
+    @property
+    def fitness_value(self) -> float:
+        return self._fitness_value
+
     ''' Specific GE methods '''
     @staticmethod
     def _initialize() -> str:
@@ -47,8 +72,8 @@ class Individual(object):
         Returns: List of integers
 
         """
-        return [int(self._bin_genotype[i:(i+config.codon_length-1)], 2)
-                for i in range(0, len(self._bin_genotype), config.codon_length-1)]
+        return [int(self.bin_genotype[i:(i+config.codon_length-1)], 2)
+                for i in range(0, len(self.bin_genotype), config.codon_length-1)]
 
     def _translation(self):
         """
@@ -57,28 +82,28 @@ class Individual(object):
 
         """
         done = False
-        symbolic_string = self._grammar[S]
-        circular = cycle(self._int_genotype)
+        symbolic_string = self.grammar[S]
+        circular = cycle(self.int_genotype)
 
         while done is not True:
             # First save previous iteration copy
             old_symbolic_string = symbolic_string
             ci = next(circular)
-            for key in self._grammar.keys():
-                if type(self._grammar[key]) is list:
-                    fire = divmod(ci, len(self._grammar[key]))[1]
+            for key in self.grammar.keys():
+                if type(self.grammar[key]) is list:
+                    fire = divmod(ci, len(self.grammar[key]))[1]
                     if key == T:
                         ci = next(circular)
-                        fire = divmod(ci, len(self._grammar[key]))[1]
-                        symbolic_string = re.sub(key, "{" + str(self._grammar[key][fire]) + "}", symbolic_string, 1)
+                        fire = divmod(ci, len(self.grammar[key]))[1]
+                        symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
                     elif key not in [S, P, T, F]:
                         dkey = key.replace(SLD, '').replace(SRD, '')
-                        feature = "\"" + dkey + "\"" + ":" + "\"" + str(self._grammar[key][fire]) + "\""
+                        feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     else:
-                        symbolic_string = re.sub(key, str(self._grammar[key][fire]), symbolic_string, 1)
+                        symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
                 else:
-                    symbolic_string = re.sub(key, str(self._grammar[key]), symbolic_string, 1)
+                    symbolic_string = re.sub(key, str(self.grammar[key]), symbolic_string, 1)
 
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:
@@ -111,22 +136,30 @@ class Individual(object):
 
     def fitness(self) -> float:
         """
-        Sets the fitness value for an individual
+        A pseudo-factory to different fitness functions
         Returns: Float
 
         """
         if config.fitness_function_type == FITNESS_BASIC:
-            matchy = Matcher(self._samples[0].vocab)
-            matchy.add("basic", None, self._fenotype)
-            contact = 0.0
-            for sample in self._samples:
-                matches = matchy(sample)
-                if len(matches) > 0:
-                    for match in matches:
-                        contact += (match[2] - match[1]) / len(sample)
-            return contact/len(self._samples) if contact != 0.0 else contact
+            return self._fitness_basic()
         else:
             raise ValueError('Invalid fitness function type: ', config.fitness_function_type)
+
+    def _fitness_basic(self) -> float:
+        """
+        Sets the fitness value for an individual.
+        Returns: Float (fitness value)
+
+        """
+        matchy = Matcher(self.samples[0].vocab)
+        matchy.add("basic", None, self.fenotype)
+        contact = 0.0
+        for sample in self.samples:
+            matches = matchy(sample)
+            if len(matches) > 0:
+                for match in matches:
+                    contact += (match[2] - match[1]) / len(sample)
+        return contact / len(self.samples) if contact != 0.0 else contact
 
     ''' Problem specific methods '''
     def duped_disabling(self):
