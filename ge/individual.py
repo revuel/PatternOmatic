@@ -136,22 +136,30 @@ class Individual(object):
 
     def fitness(self) -> float:
         """
-        Sets the fitness value for an individual
+        A pseudo-factory to different fitness functions
         Returns: Float
 
         """
         if config.fitness_function_type == FITNESS_BASIC:
-            matchy = Matcher(self.samples[0].vocab)
-            matchy.add("basic", None, self.fenotype)
-            contact = 0.0
-            for sample in self.samples:
-                matches = matchy(sample)
-                if len(matches) > 0:
-                    for match in matches:
-                        contact += (match[2] - match[1]) / len(sample)
-            return contact/len(self.samples) if contact != 0.0 else contact
+            return self._fitness_basic()
         else:
             raise ValueError('Invalid fitness function type: ', config.fitness_function_type)
+
+    def _fitness_basic(self) -> float:
+        """
+        Sets the fitness value for an individual.
+        Returns: Float (fitness value)
+
+        """
+        matchy = Matcher(self.samples[0].vocab)
+        matchy.add("basic", None, self.fenotype)
+        contact = 0.0
+        for sample in self.samples:
+            matches = matchy(sample)
+            if len(matches) > 0:
+                for match in matches:
+                    contact += (match[2] - match[1]) / len(sample)
+        return contact / len(self.samples) if contact != 0.0 else contact
 
     ''' Problem specific methods '''
     def duped_disabling(self):
