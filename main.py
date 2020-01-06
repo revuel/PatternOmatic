@@ -19,8 +19,8 @@ grammar = engine.dynagg(sample_list)
 for k in grammar.keys():
     print(k, ":", str(grammar[k]))
 
-''' GE '''
 
+''' GE '''
 population = Population(sample_list, grammar)
 population.evolve()
 
