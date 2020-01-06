@@ -93,8 +93,8 @@ def features_seen(samples: [Doc]) -> int and dict:
 
 def dynagg(samples: [Doc]) -> dict:
     """
-    Dynamically generates a grammar in Backus Nuar Form notation representing the
-    available Spacy NLP Linguistic Features
+    Dynamically generates a grammar in Backus Naur Form (BNF) notation representing the available Spacy NLP
+    Linguistic Features
     Args:
         samples: List of Spacy Doc objects
 
@@ -144,10 +144,22 @@ def dynagg(samples: [Doc]) -> dict:
         last = last + "," + F
         feature_times.append(last)
 
+    if config.use_token_wildcard is True:
+        feature_times.append(TOKEN_WILDCARD)
+
     pattern_grammar[T] = feature_times
 
     # Update available features (just the features list)
-    pattern_grammar[F] = list(features_dict.keys())
+    list_of_features = list(features_dict.keys())
+    if config.use_grammar_operators is True:
+        list_of_features_op = list()
+        for feature in list_of_features:
+            list_of_features_op.append(feature)
+            list_of_features_op.append(feature + ',' + OP)
+        pattern_grammar[F] = list_of_features_op
+        pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
+    else:
+        pattern_grammar[F] = list_of_features
 
     # Update each feature possible values
     for k, v in features_dict.items():

@@ -109,6 +109,7 @@ class Individual(object):
             if old_symbolic_string == symbolic_string:
                 done = True
 
+        symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
         return json.loads("[" + symbolic_string + "]")
 
     ''' Generic GA methods '''
