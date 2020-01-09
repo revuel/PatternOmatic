@@ -107,57 +107,38 @@ def dynagg(samples: [Doc]) -> dict:
     max_length_token, min_length_token, features_dict = features_seen(samples)
 
     # Update times token per pattern [Min length of tokens, Max length of tokens] interval
-    token_times = list()
-
-    last = ''
-    for _ in range(min_length_token):
-        if last == '':
-            last = T
-        else:
-            last = last + "," + T
-    token_times.append(last)
-
-    if min_length_token != max_length_token:
-
-        inner_length_token = max_length_token - min_length_token
-
-        for _ in range(inner_length_token):
-            last = token_times[-1]
-            last = last + "," + T
-            token_times.append(last)
-
-    pattern_grammar[P] = token_times
+    pattern_grammar[P] = _symbol_stacker(T, max_length_token)
 
     #  Update times features per token (Max length of features)
-    if config._features_per_token == 0:
-        max_length_features = len(features_dict.keys())
-    else:
-        if len(features_dict.keys()) < config._features_per_token + 1:
-            max_length_features = len(features_dict.keys())
-        else:
-            max_length_features = config._features_per_token
-
-    feature_times = list()
-    feature_times.append(F)
-    for _ in range(max_length_features - 1):
-        last = feature_times[-1]
-        last = last + "," + F
-        feature_times.append(last)
+    pattern_grammar[T] = _symbol_stacker(F, _get_features_per_token(features_dict))
 
     if config.use_token_wildcard is True:
-        feature_times.append(TOKEN_WILDCARD)
-
-    pattern_grammar[T] = feature_times
+        pattern_grammar[T].append(TOKEN_WILDCARD)
 
     # Update available features (just the features list)
     list_of_features = list(features_dict.keys())
-    if config.use_grammar_operators is True:
+    if config.use_grammar_operators is True and config.use_extended_pattern_syntax is False:
         list_of_features_op = list()
         for feature in list_of_features:
             list_of_features_op.append(feature)
             list_of_features_op.append(feature + ',' + OP)
         pattern_grammar[F] = list_of_features_op
         pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
+    elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
+        list_of_features_op = list()
+        for feature in list_of_features:
+            list_of_features_op.append(feature)
+            list_of_features_op.append(feature + ',' + XPS)
+        full_terminal_stack = _all_feature_terminal_list(features_dict)
+        pattern_grammar[F] = list_of_features_op
+        pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
+        pattern_grammar[IN] = full_terminal_stack
+        pattern_grammar[NOT_IN] = full_terminal_stack
+        pattern_grammar[EQQ] = LENGTH
+        pattern_grammar[GEQ] = LENGTH
+        pattern_grammar[LEQ] = LENGTH
+        pattern_grammar[GTH] = LENGTH
+        pattern_grammar[LTH] = LENGTH
     else:
         pattern_grammar[F] = list_of_features
 
@@ -166,3 +147,73 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar.update({k: v})
 
     return pattern_grammar
+
+
+def _symbol_stacker(symbol: str, max_length: int) -> list:
+    """
+    Given a symbol creates a list of length max_length where each item is symbol concat previous list item
+    Args:
+        symbol: string
+        max_length: list max length
+
+    Returns: list of symbol
+
+    """
+    symbol_times_list = list()
+
+    last = ''
+    for _ in range(max_length):
+        if last == '':
+            last = symbol
+        else:
+            last = last + "," + symbol
+        symbol_times_list.append(last)
+
+    return symbol_times_list
+
+
+def _all_feature_terminal_list(features_dict: dict) -> list:
+    """
+    Stacks all feature terminal options in a list of lists to be used for the extended pattern syntax
+    Args:
+        features_dict: dictionary of features keys with all possible feature value options
+
+    Returns:
+
+    """
+    all_terminal_list = list()
+
+    for item in list(features_dict.items()):
+        current_terminal_holder = list()
+
+        for terminal_list_item in item[1]:
+            if len(current_terminal_holder) > 0:
+                temp_list = list(current_terminal_holder[-1])
+                temp_list.append(terminal_list_item)
+                current_terminal_holder.append(temp_list)
+            else:
+                current_terminal_holder.append([terminal_list_item])
+
+        all_terminal_list.append(current_terminal_holder)
+
+    return all_terminal_list
+
+
+def _get_features_per_token(features_dict: dict) -> int:
+    """
+    Given the configuration set up, determine the maximum number of features per token at grammar
+    Args:
+        features_dict: dictionary of features keys with all possible feature value options
+
+    Returns: integer
+
+    """
+    if config.features_per_token == 0:
+        max_length_features = len(features_dict.keys())
+    else:
+        if len(features_dict.keys()) < config.features_per_token + 1:
+            max_length_features = len(features_dict.keys())
+        else:
+            max_length_features = config.features_per_token
+
+    return max_length_features

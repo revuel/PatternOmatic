@@ -96,7 +96,7 @@ class Individual(object):
                         ci = next(circular)
                         fire = divmod(ci, len(self.grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key not in [S, P, T, F]:
+                    elif key not in [S, P, T, F, XPS]:
                         dkey = key.replace(SLD, '').replace(SRD, '')
                         feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)

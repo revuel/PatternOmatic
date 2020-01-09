@@ -33,7 +33,7 @@ DEP = SLD + 'DEP' + SRD
 LEMMA = SLD + 'LEMMA' + SRD
 SHAPE = SLD + 'SHAPE' + SRD
 ENT = SLD + 'ENT' + SRD
-# Grammar token operator symbols
+# Grammar operator and quantifier symbols
 OP = SLD + 'OP' + SRD
 NEGATION = '!'
 ZERO_OR_ONE = '?'
@@ -41,6 +41,15 @@ ONE_OR_MORE = '+'
 ZERO_OR_MORE = '*'
 # Token wildcard
 TOKEN_WILDCARD = '{}'
+# Grammar extended pattern syntax
+XPS = SLD + 'XPS' + SRD
+IN = SLD + 'IN' + SRD
+NOT_IN = SLD + 'NOT_IN' + SRD
+EQQ = SLD + 'EQQ' + SRD
+GEQ = SLD + 'GEQ' + SRD
+LEQ = SLD + 'LEQ' + SRD
+GTH = SLD + 'GTH' + SRD
+LTH = SLD + 'LTH' + SRD
 
 ''' Config ini literals '''
 GE = 'GE'
@@ -61,4 +70,5 @@ USE_CUSTOM_FEATURES = 'USE_CUSTOM_FEATURES'
 USE_UNIQUES = 'USE_UNIQUES'
 USE_GRAMMAR_OPERATORS = 'USE_GRAMMAR_OPERATORS'
 USE_TOKEN_WILDCARD = 'USE_TOKEN_WILDCARD'
+USE_EXTENDED_PATTERN_SYNTAX = 'USE_EXTENDED_PATTERN_SYNTAX'
 FITNESS_FUNCTION_TYPE = 'FITNESS_FUNCTION_TYPE'

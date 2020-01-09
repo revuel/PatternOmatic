@@ -61,6 +61,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
             self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
             self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
+            self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
 
             ''' Problem specific configuration options '''
             self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
@@ -90,6 +91,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._use_uniques = True
             self._use_grammar_operators = True
             self._use_token_wildcard = False
+            self._use_extended_pattern_syntax = False
 
             ''' Problem specific configuration options '''
             self._fitness_function_type = FITNESS_BASIC
@@ -164,6 +166,10 @@ class Config(metaclass=SingletonMetaNaive):
     @property
     def use_token_wildcard(self) -> bool:
         return self._use_token_wildcard
+
+    @property
+    def use_extended_pattern_syntax(self) -> bool:
+        return self._use_extended_pattern_syntax
 
     @property
     def fitness_function_type(self):
