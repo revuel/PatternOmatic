@@ -241,4 +241,4 @@ class Population(object):
             self.offspring = self._recombination(mating_pool)
             self._replacement()
             self._best_challenge()
-            self._info()
+            # self._info()
