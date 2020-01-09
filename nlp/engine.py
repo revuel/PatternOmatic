@@ -101,6 +101,7 @@ def dynagg(samples: [Doc]) -> dict:
     Returns: Backus Naur Form grammar notation encoded in a dictionary
 
     """
+    # BNF root
     pattern_grammar = {S: P}
 
     # Watch out features of seen samples and max number of tokens per sample
@@ -194,7 +195,7 @@ def _all_feature_terminal_list(features_dict: dict) -> list:
             else:
                 current_terminal_holder.append([terminal_list_item])
 
-        all_terminal_list.append(current_terminal_holder)
+        all_terminal_list += current_terminal_holder
 
     return all_terminal_list
 
