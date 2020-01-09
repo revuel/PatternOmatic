@@ -126,25 +126,24 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar[F] = list_of_features_op
         pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
     elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
-        list_of_features_op = list()
-        for feature in list_of_features:
-            list_of_features_op.append(feature)
-            list_of_features_op.append(feature + ',' + XPS)
+        tmp_lengths = features_dict[LENGTH].copy()
         full_terminal_stack = _all_feature_terminal_list(features_dict)
-        pattern_grammar[F] = list_of_features_op
+        pattern_grammar[F] = list_of_features
         pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
         pattern_grammar[IN] = full_terminal_stack
         pattern_grammar[NOT_IN] = full_terminal_stack
-        pattern_grammar[EQQ] = LENGTH
-        pattern_grammar[GEQ] = LENGTH
-        pattern_grammar[LEQ] = LENGTH
-        pattern_grammar[GTH] = LENGTH
-        pattern_grammar[LTH] = LENGTH
+        pattern_grammar[EQQ] = tmp_lengths
+        pattern_grammar[GEQ] = tmp_lengths
+        pattern_grammar[LEQ] = tmp_lengths
+        pattern_grammar[GTH] = tmp_lengths
+        pattern_grammar[LTH] = tmp_lengths
     else:
         pattern_grammar[F] = list_of_features
 
     # Update each feature possible values
     for k, v in features_dict.items():
+        if config.use_extended_pattern_syntax is True:
+            v.append(XPS)
         pattern_grammar.update({k: v})
 
     return pattern_grammar

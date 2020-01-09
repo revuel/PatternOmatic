@@ -92,14 +92,22 @@ class Individual(object):
             for key in self.grammar.keys():
                 if type(self.grammar[key]) is list:
                     fire = divmod(ci, len(self.grammar[key]))[1]
-                    if key == T:
+                    if key == T or key == XPS:
                         ci = next(circular)
                         fire = divmod(ci, len(self.grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
                     elif key not in [S, P, T, F, XPS]:
-                        dkey = key.replace(SLD, '').replace(SRD, '')
-                        feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
-                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                        if key in [IN, NOT_IN]:
+                            dkey = key.replace(SLD, '').replace(SRD, '')
+                            feature = "{\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
+                            symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                        elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
+                            feature = "{\"" + key + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
+                            symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                        else:
+                            dkey = key.replace(SLD, '').replace(SRD, '')
+                            feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
+                            symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     else:
                         symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
                 else:
@@ -110,6 +118,8 @@ class Individual(object):
                 done = True
 
         symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
+        symbolic_string = re.sub('{{', '{', symbolic_string)
+        symbolic_string = re.sub('}}', '}', symbolic_string)
         return json.loads("[" + symbolic_string + "]")
 
     ''' Generic GA methods '''
