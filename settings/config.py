@@ -66,6 +66,9 @@ class Config(metaclass=SingletonMetaNaive):
             ''' Problem specific configuration options '''
             self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
 
+            ''' CONFIGURATION CHECKS (FILE ONLY)'''
+            self._check_xps_op_restriction()
+
         except FileNotFoundError:
             print('Unable to locate config.ini file, using default configuration parameters')
 
@@ -174,3 +177,9 @@ class Config(metaclass=SingletonMetaNaive):
     @property
     def fitness_function_type(self):
         return self._fitness_function_type
+
+    def _check_xps_op_restriction(self):
+        if self._use_extended_pattern_syntax == self._use_grammar_operators:
+            print('Extended Pattern Syntax is not compatible with the usage of grammar operators.')
+            print('Disabling Extended Pattern Syntax!')
+            self._use_extended_pattern_syntax = False
