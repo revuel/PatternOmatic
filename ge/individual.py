@@ -100,20 +100,15 @@ class Individual(object):
                         symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
                     elif key in [IN, NOT_IN]:
                         dkey = key.replace(SLD, '').replace(SRD, '')
-                        # feature = "{\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
                         feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
-                        # feature = "{\"" + key + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
-                        # feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
-                        # dkey = key.replace(SLD, '').replace(SRD, '')
                         feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     else:
                         dkey = key.replace(SLD, '').replace(SRD, '')
                         fired_rule = str(self.grammar[key][fire])
                         if fired_rule != XPS:
-                            # feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
                             feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
                         else:
                             feature = "\"" + dkey + "\"" + ":" + fired_rule
@@ -121,19 +116,13 @@ class Individual(object):
                 else:
                     symbolic_string = re.sub(key, str(self.grammar[key]), symbolic_string, 1)
 
-                print(symbolic_string)
-
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:
                 done = True
 
         symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
 
-        try:
-            return json.loads("[" + symbolic_string + "]")
-        except BaseException:
-            print(self._bin_genotype, symbolic_string, 'MAL')
-            return json.loads("[{}]")
+        return json.loads("[" + symbolic_string + "]")
 
     ''' Generic GA methods '''
     @classmethod
