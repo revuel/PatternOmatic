@@ -57,13 +57,17 @@ class Config(metaclass=SingletonMetaNaive):
 
             ''' Dynamic Grammar Generation configuration options '''
             self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
-            self._use_custom_features = str2bool(config_parser[DGG][CUSTOM_FEATURES])
+            self._use_custom_features = str2bool(config_parser[DGG][USE_CUSTOM_FEATURES])
             self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
-            self._use_grammar_operators = str2bool(config_parser[DGG][GRAMMAR_OPERATORS])
-            self._token_wildcard = str2bool(config_parser[DGG][TOKEN_WILDCARD])
+            self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
+            self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
+            self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
 
             ''' Problem specific configuration options '''
             self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
+
+            ''' CONFIGURATION CHECKS (FILE ONLY)'''
+            self._check_xps_op_restriction()
 
         except FileNotFoundError:
             print('Unable to locate config.ini file, using default configuration parameters')
@@ -88,8 +92,9 @@ class Config(metaclass=SingletonMetaNaive):
             self._features_per_token = 1
             self._use_custom_features = True
             self._use_uniques = True
-            self._use_grammar_operators = False
-            self._use_grammar_wildcards = False
+            self._use_grammar_operators = True
+            self._use_token_wildcard = False
+            self._use_extended_pattern_syntax = False
 
             ''' Problem specific configuration options '''
             self._fitness_function_type = FITNESS_BASIC
@@ -158,9 +163,23 @@ class Config(metaclass=SingletonMetaNaive):
         return self._use_uniques
 
     @property
-    def use_grammar_wildcards(self) -> bool:
-        return self._use_grammar_wildcards
+    def use_grammar_operators(self) -> bool:
+        return self._use_grammar_operators
+
+    @property
+    def use_token_wildcard(self) -> bool:
+        return self._use_token_wildcard
+
+    @property
+    def use_extended_pattern_syntax(self) -> bool:
+        return self._use_extended_pattern_syntax
 
     @property
     def fitness_function_type(self):
         return self._fitness_function_type
+
+    def _check_xps_op_restriction(self):
+        if self._use_extended_pattern_syntax == self._use_grammar_operators:
+            print('Extended Pattern Syntax is not compatible with the usage of grammar operators.')
+            print('Disabling Extended Pattern Syntax!')
+            self._use_extended_pattern_syntax = False

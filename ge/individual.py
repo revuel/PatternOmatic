@@ -92,22 +92,35 @@ class Individual(object):
             for key in self.grammar.keys():
                 if type(self.grammar[key]) is list:
                     fire = divmod(ci, len(self.grammar[key]))[1]
-                    if key == T:
+                    if key in [T, XPS]:
                         ci = next(circular)
                         fire = divmod(ci, len(self.grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key not in [S, P, T, F]:
+                    elif key in [S, P, T, F]:
+                        symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
+                    elif key in [IN, NOT_IN]:
                         dkey = key.replace(SLD, '').replace(SRD, '')
-                        feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
+                        feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                    elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
+                        feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
                         symbolic_string = re.sub(key, feature, symbolic_string, 1)
                     else:
-                        symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
+                        dkey = key.replace(SLD, '').replace(SRD, '')
+                        fired_rule = str(self.grammar[key][fire])
+                        if fired_rule != XPS:
+                            feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
+                        else:
+                            feature = "\"" + dkey + "\"" + ":" + fired_rule
+                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
                 else:
                     symbolic_string = re.sub(key, str(self.grammar[key]), symbolic_string, 1)
 
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:
                 done = True
+
+        symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
 
         return json.loads("[" + symbolic_string + "]")
 
