@@ -126,7 +126,7 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar[F] = list_of_features_op
         pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
     elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
-        tmp_lengths = features_dict[LENGTH].copy()
+        tmp_lengths = features_dict[LENGTH].copy() # TODO (me): Does this worth it?
         full_terminal_stack = _all_feature_terminal_list(features_dict)
         pattern_grammar[F] = list_of_features
         pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
