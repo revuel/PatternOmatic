@@ -92,35 +92,48 @@ class Individual(object):
             for key in self.grammar.keys():
                 if type(self.grammar[key]) is list:
                     fire = divmod(ci, len(self.grammar[key]))[1]
-                    if key == T or key == XPS:
+                    if key in [T, XPS]:
                         ci = next(circular)
                         fire = divmod(ci, len(self.grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key not in [S, P, T, F, XPS]:
-                        if key in [IN, NOT_IN]:
-                            dkey = key.replace(SLD, '').replace(SRD, '')
-                            feature = "{\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
-                            symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                        elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
-                            feature = "{\"" + key + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
-                            symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                        else:
-                            dkey = key.replace(SLD, '').replace(SRD, '')
-                            feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
-                            symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                    else:
+                    elif key in [S, P, T, F]:
                         symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
+                    elif key in [IN, NOT_IN]:
+                        dkey = key.replace(SLD, '').replace(SRD, '')
+                        # feature = "{\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
+                        feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                    elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
+                        # feature = "{\"" + key + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "") + "}"
+                        # feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+                        # dkey = key.replace(SLD, '').replace(SRD, '')
+                        feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
+                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                    else:
+                        dkey = key.replace(SLD, '').replace(SRD, '')
+                        fired_rule = str(self.grammar[key][fire])
+                        if fired_rule != XPS:
+                            # feature = "\"" + dkey + "\"" + ":" + "\"" + str(self.grammar[key][fire]) + "\""
+                            feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
+                        else:
+                            feature = "\"" + dkey + "\"" + ":" + fired_rule
+                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
                 else:
                     symbolic_string = re.sub(key, str(self.grammar[key]), symbolic_string, 1)
+
+                print(symbolic_string)
 
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:
                 done = True
 
         symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
-        symbolic_string = re.sub('{{', '{', symbolic_string)
-        symbolic_string = re.sub('}}', '}', symbolic_string)
-        return json.loads("[" + symbolic_string + "]")
+
+        try:
+            return json.loads("[" + symbolic_string + "]")
+        except BaseException:
+            print(self._bin_genotype, symbolic_string, 'MAL')
+            return json.loads("[{}]")
 
     ''' Generic GA methods '''
     @classmethod
