@@ -3,3 +3,6 @@
 /venv
 *pycache*
 .scannerwork/
+build/
+dist/
+PatternOmatic.egg-info
