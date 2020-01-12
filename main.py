@@ -20,7 +20,6 @@ for k in grammar.keys():
     print(k, ":", str(grammar[k]))
 
 ''' GE '''
-
 population = Population(sample_list, grammar)
 population.evolve()
 
