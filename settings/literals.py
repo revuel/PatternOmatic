@@ -50,6 +50,7 @@ GEQ = SLD + 'GEQ' + SRD
 LEQ = SLD + 'LEQ' + SRD
 GTH = SLD + 'GTH' + SRD
 LTH = SLD + 'LTH' + SRD
+XPS_AS = {EQQ: "==", GEQ: ">=", LEQ: "<=", GTH: ">", LTH: "<"}
 
 ''' Config ini literals '''
 GE = 'GE'
