@@ -12,6 +12,7 @@ MU_LAMBDA_WITH_ELITISM = 'Mu lambda with elitism'
 MU_LAMBDA_WITHOUT_ELITISM = 'Mu lambda without elitism'
 # Fitness types
 FITNESS_BASIC = 'Basic fitness function'
+FITNESS_FULLMATCH = 'Fullmatch fitness function'
 
 ''' Dynamic grammar generation related literals '''
 # Symbol delimiters

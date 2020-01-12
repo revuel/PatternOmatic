@@ -155,6 +155,8 @@ class Individual(object):
         """
         if config.fitness_function_type == FITNESS_BASIC:
             return self._fitness_basic()
+        elif config.fitness_function_type == FITNESS_FULLMATCH:
+            return self._fitness_fullmatch()
         else:
             raise ValueError('Invalid fitness function type: ', config.fitness_function_type)
 
@@ -173,6 +175,28 @@ class Individual(object):
                 for match in matches:
                     contact += (match[2] - match[1]) / len(sample)
         return contact / len(self.samples) if contact != 0.0 else contact
+
+    def _fitness_fullmatch(self) -> float:
+        """
+        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals full length
+        of the sample
+        Returns: Float
+
+        """
+        max_score_per_sample = 1 / len(self.samples)
+
+        matchy = Matcher(self.samples[0].vocab)
+        matchy.add("basic", None, self.fenotype)
+        contact = 0.0
+
+        for sample in self.samples:
+            matches = matchy(sample)
+            if len(matches) > 0:
+                for match in matches:
+                    if match[2] == len(sample) and match[1] == 0:
+                        contact += max_score_per_sample
+
+        return contact
 
     ''' Problem specific methods '''
     def duped_disabling(self):
