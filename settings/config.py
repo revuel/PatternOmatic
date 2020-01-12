@@ -179,7 +179,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._fitness_function_type
 
     def _check_xps_op_restriction(self):
-        if self._use_extended_pattern_syntax == self._use_grammar_operators:
+        if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
             print('Extended Pattern Syntax is not compatible with the usage of grammar operators.')
             print('Disabling Extended Pattern Syntax!')
             self._use_extended_pattern_syntax = False
