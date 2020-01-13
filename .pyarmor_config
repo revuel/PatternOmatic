@@ -1,0 +1,23 @@
+{
+  "version": "0.1.0",
+  "name": "PatternOmatic",
+  "title": "PatternOmatic",
+  "src": ".",
+  "is_package": 1,
+  "manifest": "global-include *.py, prune venv, prune .scannerwork",
+  "entry": "main.py",
+  "output": "dist",
+  "capsule": "/Users/rev/.pyarmor_capsule.zip",
+  "runtime_path": null,
+  "restrict_mode": 1,
+  "obf_code": 1,
+  "obf_mod": 1,
+  "wrap_mode": 1,
+  "advanced_mode": 0,
+  "cross_protection": 1,
+  "plugins": null,
+  "platform": null,
+  "package_runtime": 1,
+  "enable_suffix": 0,
+  "build_time": 1578949862.450103
+}
