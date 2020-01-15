@@ -5,6 +5,7 @@ from ge.population import Population
 
 ''' Engine '''
 nlp = spacy.load("en_core_web_sm")
+nlp.add_pipe(nlp.create_pipe("sentencizer"), first=True)
 
 # Receive samples
 sample_list = [nlp(u'Fuck it!'),

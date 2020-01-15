@@ -57,7 +57,8 @@ class Config(metaclass=SingletonMetaNaive):
 
             ''' Dynamic Grammar Generation configuration options '''
             self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
-            self._use_custom_features = str2bool(config_parser[DGG][USE_CUSTOM_FEATURES])
+            self._use_boolean_features = str2bool(config_parser[DGG][USE_BOOLEAN_FEATURES])
+            self._use_custom_attributes = str2bool(config_parser[DGG][USE_CUSTOM_ATTRIBUTES])
             self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
             self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
             self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
@@ -90,7 +91,8 @@ class Config(metaclass=SingletonMetaNaive):
 
             ''' Dynamic Grammar Generation configuration options '''
             self._features_per_token = 1
-            self._use_custom_features = True
+            self._use_boolean_features = False
+            self._use_custom_attributes = True
             self._use_uniques = True
             self._use_grammar_operators = True
             self._use_token_wildcard = False
@@ -155,8 +157,12 @@ class Config(metaclass=SingletonMetaNaive):
         return self._features_per_token
 
     @property
-    def use_custom_features(self) -> bool:
-        return self._use_custom_features
+    def use_boolean_features(self) -> bool:
+        return self._use_boolean_features
+
+    @property
+    def use_custom_attributes(self) -> bool:
+        return self._use_custom_attributes
 
     @property
     def use_uniques(self) -> bool:
