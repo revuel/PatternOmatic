@@ -22,20 +22,8 @@ def features_seen(samples: [Doc]) -> int and dict:
     length_list = []
     shape_list = []
 
-    # Boolean ones (no need list)
-    # · bool_list = [True, False]
-    '''is_alpha_list = []
-    is_ascii_list = []
-    is_digit_list = []
-    is_lower_list = []
-    is_upper_list = []
-    is_title_list = []
-    is_punct_list = []
-    is_space_list = []
-    is_stop_list = []
-    like_num = []
-    like_url = []
-    like_email = []'''
+    # For boolean features
+    bool_list = [True, False]
 
     # Require more than a tokenizer
     pos_list = []
@@ -80,6 +68,24 @@ def features_seen(samples: [Doc]) -> int and dict:
                 SHAPE: sorted(list(set(shape_list))),
                 ENT: sorted(list(set(ent_type_list)))}
 
+    # Add boolean features
+    if config.use_boolean_features is True:
+        features.update({
+            IS_ALPHA: bool_list,
+            IS_ASCII: bool_list,
+            IS_DIGIT: bool_list,
+            IS_LOWER: bool_list,
+            IS_UPPER: bool_list,
+            IS_TITLE: bool_list,
+            IS_PUNCT: bool_list,
+            IS_SPACE: bool_list,
+            IS_STOP: bool_list,
+            LIKE_NUM: bool_list,
+            LIKE_URL: bool_list,
+            LIKE_EMAIL: bool_list
+        })
+
+    # Drop all observations equal to empty string
     to_del_list = list()
     for k in features.keys():
         if len(features[k]) == 1 and features[k][0] == '':
