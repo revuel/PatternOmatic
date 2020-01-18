@@ -67,7 +67,9 @@ LTH = SLD + 'LTH' + SRD
 XPS_AS = {EQQ: "==", GEQ: ">=", LEQ: "<=", GTH: ">", LTH: "<"}
 # Grammar custom attributes extension symbol
 UNDERSCORE = SLD + 'UNDERSCORE' + SRD
-
+MATCHER_SUPPORTED_ATTRIBUTES =  ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'is_alpha',
+                                 'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct', 'is_space',
+                                 'is_stop', 'like_num', 'like_url', 'like_email')
 ''' Config ini literals '''
 GE = 'GE'
 POPULATION_SIZE = 'POPULATION_SIZE'

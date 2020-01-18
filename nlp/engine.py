@@ -1,5 +1,6 @@
 """ NLP Engines """
-from spacy.tokens import Doc
+from inspect import getmembers
+from spacy.tokens import Doc, Token
 from settings.config import Config
 from settings.literals import *
 
@@ -36,6 +37,10 @@ def features_seen(samples: [Doc]) -> int and dict:
     max_doc_length = 0
     min_doc_length = 999999999
 
+    # Set token extensions
+    if config.use_custom_attributes is True:
+        _set_token_extension_attributes(samples[0][0])
+
     for sample in samples:
         sample_length = len(sample)
 
@@ -51,6 +56,7 @@ def features_seen(samples: [Doc]) -> int and dict:
             shape_list.append(token.shape_)
             ent_type_list.append(token.ent_type_)
 
+        # Checks for max/min length of tokens per sample
         if sample_length > max_doc_length:
             max_doc_length = sample_length
 
@@ -100,7 +106,7 @@ def features_seen(samples: [Doc]) -> int and dict:
 def dynagg(samples: [Doc]) -> dict:
     """
     Dynamically generates a grammar in Backus Naur Form (BNF) notation representing the available Spacy NLP
-    Linguistic Features
+    Linguistic Feature values of the given sample list of Doc instances
     Args:
         samples: List of Spacy Doc objects
 
@@ -180,9 +186,9 @@ def _symbol_stacker(symbol: str, max_length: int) -> list:
 
 def _all_feature_terminal_list(features_dict: dict) -> list:
     """
-    Stacks all feature terminal options in a list of lists to be used for the extended pattern syntax
+    Stacks all feature terminal options in a list of lists to be used for the extended pattern syntax set operators
     Args:
-        features_dict: dictionary of features keys with all possible feature value options
+        features_dict: dictionary of feature keys with all possible feature value options
 
     Returns:
 
@@ -223,3 +229,39 @@ def _get_features_per_token(features_dict: dict) -> int:
             max_length_features = config.features_per_token
 
     return max_length_features
+
+
+def _set_token_extension_attributes(token: Token) -> None:
+    """
+    Given a Spacy Token instance, register all the Spacy token attributes not accepted by the Spacy Matcher
+    as custom attributes inside the Token Extensions (token._. space)
+    Returns: None
+
+    """
+    # Retrieve cleaned up Token Attributes
+    token_attributes = _clean_token_attributes(
+        {k: v for k, v in getmembers(token) if type(v) in (str, bool, float)})
+
+    # Set token custom attributes
+    lambda_list = []
+    i = 0
+    for k, v in token_attributes.items():
+        lambda_list.append(lambda token_=token, k_=k: getattr(token_, k_))
+        token.set_extension('custom_'+k, getter=lambda_list[i])
+        i += 1
+
+
+def _clean_token_attributes(token_attributes: dict) -> dict:
+    """
+    Removes from input dict keys contained in a set that represents the Spacy Matcher supported token attributes
+    Args:
+        token_attributes: dict of token features
+
+    Returns: None
+
+    """
+    token_attributes.pop('__doc__')
+    for item in MATCHER_SUPPORTED_ATTRIBUTES:
+        token_attributes.pop(item)
+
+    return token_attributes
