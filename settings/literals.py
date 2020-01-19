@@ -67,9 +67,33 @@ LTH = SLD + 'LTH' + SRD
 XPS_AS = {EQQ: "==", GEQ: ">=", LEQ: "<=", GTH: ">", LTH: "<"}
 # Grammar custom attributes extension symbol
 UNDERSCORE = SLD + 'UNDERSCORE' + SRD
-MATCHER_SUPPORTED_ATTRIBUTES =  ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'is_alpha',
-                                 'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct', 'is_space',
-                                 'is_stop', 'like_num', 'like_url', 'like_email')
+MATCHER_SUPPORTED_ATTRIBUTES = ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'is_alpha',
+                                'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct', 'is_space',
+                                'is_stop', 'like_num', 'like_url', 'like_email')
+EF = SLD + 'EF' + SRD
+ENT_ID = SLD + 'ENT_ID_' + SRD
+ENT_IOB = SLD + 'ENT_IOB_' + SRD
+ENT_KB_ID = SLD + 'ENT_KB_ID_' + SRD
+ENT_TYPE = SLD + 'ENT_TYPE_' + SRD
+HAS_VECTOR = SLD + 'HAS_VECTOR' + SRD
+IS_BRACKET = SLD + 'IS_BRACKET' + SRD
+IS_CURRENCY = SLD + 'IS_CURRENCY' + SRD
+IS_LEFT_PUNCT = SLD + 'IS_LEFT_PUNCT' + SRD
+IS_OOV = SLD + 'IS_OOV' + SRD
+IS_QUOTE = SLD + 'IS_QUOTE' + SRD
+IS_RIGHT_PUNCT = SLD + 'IS_RIGHT_PUNCT' + SRD
+IS_SENT_START = SLD + 'IS_SENT_START' + SRD
+LANG = SLD + 'LANG_' + SRD
+NORM = SLD + 'NORM_' + SRD
+PREFIX = SLD + 'PREFIX_' + SRD
+PROB = SLD + 'PROB' + SRD
+SENT_START = SLD + 'SENT_START' + SRD
+SENTIMENT = SLD + 'SENTIMENT' + SRD
+STRING = SLD + 'STRING' + SRD
+SUFFIX = SLD + 'SUFFIX_' + SRD
+TEXT_WITH_WS = SLD + 'TEXT_WITH_WS' + SRD
+WHITESPACE = SLD + 'WHITESPACE_' + SRD
+
 ''' Config ini literals '''
 GE = 'GE'
 POPULATION_SIZE = 'POPULATION_SIZE'
