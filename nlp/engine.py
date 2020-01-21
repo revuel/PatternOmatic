@@ -42,7 +42,7 @@ def features_seen(samples: [Doc]) -> int and dict:
         _set_token_extension_attributes(samples[0][0])
         extended_features = _extended_features_seen([token for sample in samples for token in sample])
     else:
-        extended_features = {UNDERSCORE: ['']}
+        extended_features = {UNDERSCORE: {}}
 
     for sample in samples:
         sample_length = len(sample)
@@ -160,6 +160,8 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar[UNDERSCORE] = _symbol_stacker(EF, _get_features_per_token(extended_features[UNDERSCORE]))
         pattern_grammar[EF] = list(extended_features[UNDERSCORE].keys())
         pattern_grammar.update(extended_features[UNDERSCORE].items())
+        pattern_grammar[T].append(UNDERSCORE)
+        pattern_grammar[T].append(F + "," + UNDERSCORE)
 
     return pattern_grammar
 
@@ -250,7 +252,7 @@ def _set_token_extension_attributes(token: Token) -> None:
     i = 0
     for k, v in token_attributes.items():
         lambda_list.append(lambda token_=token, k_=k: getattr(token_, k_))
-        token.set_extension('custom_'+k, getter=lambda_list[i])
+        token.set_extension(str('custom_'+k).upper(), getter=lambda_list[i])
         i += 1
 
 
@@ -285,10 +287,10 @@ def _extended_features_seen(tokens: [Token]) -> dict:
     extended_features = \
         {
             UNDERSCORE: {
-                ENT_ID: sorted(list(set([token._.custom_ent_id_ for token in tokens]))),
-                ENT_IOB: sorted(list(set([token._.custom_ent_iob_ for token in tokens]))),
-                ENT_KB_ID: sorted(list(set([token._.custom_ent_kb_id_ for token in tokens]))),
-                ENT_TYPE: sorted(list(set([token._.custom_ent_type_ for token in tokens]))),
+                ENT_ID: sorted(list(set([token._.CUSTOM_ENT_ID_ for token in tokens]))),
+                ENT_IOB: sorted(list(set([token._.CUSTOM_ENT_IOB_ for token in tokens]))),
+                ENT_KB_ID: sorted(list(set([token._.CUSTOM_ENT_KB_ID_ for token in tokens]))),
+                ENT_TYPE: sorted(list(set([token._.CUSTOM_ENT_TYPE_ for token in tokens]))),
                 HAS_VECTOR: bool_list,
                 IS_BRACKET: bool_list,
                 IS_CURRENCY: bool_list,
@@ -297,16 +299,16 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 IS_QUOTE: bool_list,
                 IS_RIGHT_PUNCT: bool_list,
                 IS_SENT_START: bool_list,
-                LANG: sorted(list(set([token._.custom_lang_ for token in tokens]))),
-                NORM: sorted(list(set([token._.custom_norm_ for token in tokens]))),
-                PREFIX: sorted(list(set([token._.custom_prefix_ for token in tokens]))),
-                PROB: sorted(list(set([token._.custom_prob for token in tokens]))),
-                SENT_START: bool_list,
-                SENTIMENT: sorted(list(set([token._.custom_sentiment for token in tokens]))),
-                STRING: sorted(list(set([token._.custom_string for token in tokens]))),
-                SUFFIX: sorted(list(set([token._.custom_suffix_ for token in tokens]))),
-                TEXT_WITH_WS: sorted(list(set([token._.custom_text_with_ws for token in tokens]))),
-                WHITESPACE: sorted(list(set([token._.custom_whitespace_ for token in tokens])))
+                LANG: sorted(list(set([token._.CUSTOM_LANG_ for token in tokens]))),
+                NORM: sorted(list(set([token._.CUSTOM_NORM_ for token in tokens]))),
+                PREFIX: sorted(list(set([token._.CUSTOM_PREFIX_ for token in tokens]))),
+                PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
+                # SENT_START: bool_list,  # TODO: This feature breaks the matcher
+                SENTIMENT: sorted(list(set([token._.CUSTOM_SENTIMENT for token in tokens]))),
+                STRING: sorted(list(set([token._.CUSTOM_STRING for token in tokens]))),
+                SUFFIX: sorted(list(set([token._.CUSTOM_SUFFIX_ for token in tokens]))),
+                TEXT_WITH_WS: sorted(list(set([token._.CUSTOM_TEXT_WITH_WS for token in tokens]))),
+                WHITESPACE: sorted(list(set([token._.CUSTOM_WHITESPACE_ for token in tokens])))
             }
         }
 
@@ -325,6 +327,7 @@ def _feature_pruner(features: dict) -> dict:
     # Drop all observations equal to empty string
     to_del_list = list()
     for k in features.keys():
+        # if len(features[k]) == 1: # TODO: Review this twice
         if len(features[k]) == 1 and features[k][0] == '':
             to_del_list.append(k)
 

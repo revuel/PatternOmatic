@@ -24,8 +24,6 @@ sample_list = [nlp(u'Fuck it!'),
                nlp(u'Fuck you all!'),
                nlp(u'Fuck!')]
 
-
-
 grammar = engine.dynagg(sample_list)
 
 for k in grammar.keys():

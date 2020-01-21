@@ -96,7 +96,9 @@ class Individual(object):
                         ci = next(circular)
                         fire = divmod(ci, len(self.grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key in [S, P, T, F]:
+                    elif key is UNDERSCORE:
+                        symbolic_string = re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+                    elif key in [S, P, T, F, EF]:
                         symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
                     elif key in [IN, NOT_IN]:
                         dkey = key.replace(SLD, '').replace(SRD, '')
@@ -121,7 +123,6 @@ class Individual(object):
                 done = True
 
         symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
-
         return json.loads("[" + symbolic_string + "]")
 
     ''' Generic GA methods '''
