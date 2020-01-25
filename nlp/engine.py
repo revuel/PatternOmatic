@@ -66,16 +66,28 @@ def features_seen(samples: [Doc]) -> int and dict:
         if sample_length < min_doc_length:
             min_doc_length = sample_length
 
-    features = {ORTH: sorted(list(set(orth_list))),
-                TEXT: sorted(list(set(text_list))),
-                LOWER: sorted(list(set(lower_list))),
-                LENGTH: sorted(list(set(length_list))),
-                POS: sorted(list(set(pos_list))),
-                TAG: sorted(list(set(tag_list))),
-                DEP: sorted(list(set(dep_list))),
-                LEMMA: sorted(list(set(lemma_list))),
-                SHAPE: sorted(list(set(shape_list))),
-                ENT: sorted(list(set(ent_type_list)))}
+    if config.use_uniques is True:
+        features = {ORTH: sorted(list(set(orth_list))),
+                    TEXT: sorted(list(set(text_list))),
+                    LOWER: sorted(list(set(lower_list))),
+                    LENGTH: sorted(list(set(length_list))),
+                    POS: sorted(list(set(pos_list))),
+                    TAG: sorted(list(set(tag_list))),
+                    DEP: sorted(list(set(dep_list))),
+                    LEMMA: sorted(list(set(lemma_list))),
+                    SHAPE: sorted(list(set(shape_list))),
+                    ENT_TYPE: sorted(list(set(ent_type_list)))}
+    else:
+        features = {ORTH: orth_list,
+                    TEXT: text_list,
+                    LOWER: lower_list,
+                    LENGTH: length_list,
+                    POS: pos_list,
+                    TAG: tag_list,
+                    DEP: dep_list,
+                    LEMMA: lemma_list,
+                    SHAPE: shape_list,
+                    ENT_TYPE: ent_type_list}
 
     # Add boolean features
     if config.use_boolean_features is True:
@@ -136,7 +148,7 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar[F] = list_of_features_op
         pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
     elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
-        tmp_lengths = features_dict[LENGTH].copy()  # TODO (me): Does this worth it?
+        tmp_lengths = features_dict[LENGTH].copy()
         full_terminal_stack = _all_feature_terminal_list(features_dict)
         pattern_grammar[F] = list_of_features
         pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
@@ -290,7 +302,6 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 ENT_ID: sorted(list(set([token._.CUSTOM_ENT_ID_ for token in tokens]))),
                 ENT_IOB: sorted(list(set([token._.CUSTOM_ENT_IOB_ for token in tokens]))),
                 ENT_KB_ID: sorted(list(set([token._.CUSTOM_ENT_KB_ID_ for token in tokens]))),
-                ENT_TYPE: sorted(list(set([token._.CUSTOM_ENT_TYPE_ for token in tokens]))),
                 HAS_VECTOR: bool_list,
                 IS_BRACKET: bool_list,
                 IS_CURRENCY: bool_list,
@@ -303,7 +314,6 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 NORM: sorted(list(set([token._.CUSTOM_NORM_ for token in tokens]))),
                 PREFIX: sorted(list(set([token._.CUSTOM_PREFIX_ for token in tokens]))),
                 PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
-                # SENT_START: bool_list,  # TODO: This feature breaks the matcher
                 SENTIMENT: sorted(list(set([token._.CUSTOM_SENTIMENT for token in tokens]))),
                 STRING: sorted(list(set([token._.CUSTOM_STRING for token in tokens]))),
                 SUFFIX: sorted(list(set([token._.CUSTOM_SUFFIX_ for token in tokens]))),
@@ -327,7 +337,6 @@ def _feature_pruner(features: dict) -> dict:
     # Drop all observations equal to empty string
     to_del_list = list()
     for k in features.keys():
-        # if len(features[k]) == 1: # TODO: Review this twice
         if len(features[k]) == 1 and features[k][0] == '':
             to_del_list.append(k)
 

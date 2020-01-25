@@ -33,7 +33,7 @@ TAG = SLD + 'TAG' + SRD
 DEP = SLD + 'DEP' + SRD
 LEMMA = SLD + 'LEMMA' + SRD
 SHAPE = SLD + 'SHAPE' + SRD
-ENT = SLD + 'ENT' + SRD
+ENT_TYPE = SLD + 'ENT_TYPE' + SRD
 # Feature symbols (base boolean)
 IS_ALPHA = SLD + 'IS_ALPHA' + SRD
 IS_ASCII = SLD + 'IS_ASCII' + SRD
@@ -67,15 +67,13 @@ LTH = SLD + 'LTH' + SRD
 XPS_AS = {EQQ: "==", GEQ: ">=", LEQ: "<=", GTH: ">", LTH: "<"}
 # Grammar custom attributes extension symbol
 UNDERSCORE = SLD + 'UNDERSCORE' + SRD
-
-MATCHER_SUPPORTED_ATTRIBUTES = ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'is_alpha',
-                                'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct', 'is_space',
-                                'is_stop', 'like_num', 'like_url', 'like_email')
+MATCHER_SUPPORTED_ATTRIBUTES = ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'ent_type_',
+                                'is_alpha', 'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct',
+                                'is_space', 'is_stop', 'like_num', 'like_url', 'like_email')
 EF = SLD + 'EF' + SRD
 ENT_ID = SLD + 'CUSTOM_ENT_ID_' + SRD
 ENT_IOB = SLD + 'CUSTOM_ENT_IOB_' + SRD
 ENT_KB_ID = SLD + 'CUSTOM_ENT_KB_ID_' + SRD
-ENT_TYPE = SLD + 'CUSTOM_ENT_TYPE_' + SRD
 HAS_VECTOR = SLD + 'CUSTOM_HAS_VECTOR' + SRD
 IS_BRACKET = SLD + 'CUSTOM_IS_BRACKET' + SRD
 IS_CURRENCY = SLD + 'CUSTOM_IS_CURRENCY' + SRD
