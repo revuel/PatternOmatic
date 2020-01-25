@@ -11,7 +11,7 @@ cvage:
 	`pwd`/venv/bin/coverage report --ignore-errors --omit=tests/**,*__init__* && \
 	`pwd`/venv/bin/coverage xml
 sscas:
-	sonar-scanner -Dsonar.projectKey=PatternOmatic
+	sonar-scanner -Dsonar.projectKey=pOm
 build:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/python3 setup.py sdist bdist_wheel
