@@ -198,13 +198,3 @@ class Individual(object):
                         contact += max_score_per_sample
 
         return contact
-
-    ''' Problem specific methods '''
-    def duped_disabling(self):
-        """
-        Checks at fenotype level if there are duplicated
-        Returns:
-
-        """
-        # TODO(me): is this method really needed?
-        raise NotImplementedError

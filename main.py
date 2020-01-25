@@ -33,4 +33,4 @@ for k in grammar.keys():
 population = Population(sample_list, grammar)
 population.evolve()
 
-print("Fenotype:", str(population._best_individual._fenotype), "Fitness:", population._best_individual._fitness_value)
+print("Fenotype:", str(population.best_individual.fenotype), "Fitness:", population.best_individual.fitness_value)
