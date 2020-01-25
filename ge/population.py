@@ -228,7 +228,6 @@ class Population(object):
         self.offspring = []
 
     ''' Evolution '''
-
     def evolve(self):
         """ Search Engine
         1) Selects individuals of the current generation to constitute who will mate
