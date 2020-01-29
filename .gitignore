@@ -3,6 +3,8 @@
 /venv
 *pycache*
 .scannerwork/
+.coverage
+coverage.xml
 build/
 dist/
 PatternOmatic.egg-info

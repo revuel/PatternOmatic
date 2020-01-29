@@ -8,7 +8,7 @@ test:
 cvage:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/coverage run --branch --source=. -m unittest && \
-	`pwd`/venv/bin/coverage report --ignore-errors --omit=tests/**,*__init__* && \
+	`pwd`/venv/bin/coverage report --ignore-errors --omit=venv/**,tests/**,*__init__* && \
 	`pwd`/venv/bin/coverage xml
 sscas:
 	sonar-scanner -Dsonar.projectKey=pOm
