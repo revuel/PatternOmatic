@@ -1,5 +1,6 @@
 setuptools==40.8.0
 pip==19.0.3
+coverage==5.0.3
 wheel==0.33.6
 PyInstaller==3.6
 pyarmor==5.8.9
