@@ -88,13 +88,11 @@ class Individual(object):
         while done is not True:
             # First save previous iteration copy
             old_symbolic_string = symbolic_string
-            ci = next(circular)
             for key in self.grammar.keys():
+                ci = next(circular)
+                fire = divmod(ci, len(self.grammar[key]))[1]
                 if type(self.grammar[key]) is list:
-                    fire = divmod(ci, len(self.grammar[key]))[1]
                     if key in [T, XPS]:
-                        ci = next(circular)
-                        fire = divmod(ci, len(self.grammar[key]))[1]
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
                     elif key is UNDERSCORE:
                         symbolic_string = re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
