@@ -107,11 +107,5 @@ class TestDG(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    test = TestDG()
-    test.test_basic_grammar_dg()
-    test.test_basic_grammar_without_uniques_dg()
-    test.test_basic_grammar_with_booleans_dg()
-    test.test_basic_grammar_with_booleans_and_operators_dg()
-    test.test_basic_grammar_with_booleans_and_extended_pattern_syntax_dg()
-    test.test_basic_grammar_with_booleans_and_custom_attributes_dg()
+    unittest.main()
 
