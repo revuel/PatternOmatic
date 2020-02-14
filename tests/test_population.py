@@ -26,11 +26,14 @@ class TestPopulation(unittest.TestCase):
         assert isinstance(p.generation[0], Individual)
 
     def test_best_challenge(self):
-        config.max_generations = 150
+        config.max_generations = 3
         config.fitness_function_type = FITNESS_BASIC
         p = Population(self.samples, self.grammar)
+        config.mutation_probability = 0.0
+        p.generation[0] = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
+        config.mutation_probability = 0.5
         p.evolve()
-        assert p.best_individual.fitness_value > 0
+        assert p.best_individual.fitness_value >= 0.4
 
     def test_binary_tournament(self):
         config.max_generations = 3
@@ -82,12 +85,14 @@ class TestPopulation(unittest.TestCase):
         assert p.offspring == []
 
     def test_evolve(self):
-        config.max_generations = 100
+        config.max_generations = 3
         config.fitness_function_type = FITNESS_BASIC
         p = Population(self.samples, self.grammar)
+        config.mutation_probability = 0.0
+        p.generation[0] = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
+        config.mutation_probability = 0.5
         p.evolve()
-        config.show()
-        assert p.best_individual.fitness_value > 0
+        assert p.generation[0].fitness_value >= 0.4
 
 
 if __name__ == "__main__":

@@ -55,7 +55,6 @@ class TestIndividual(unittest.TestCase):
         config.mutation_probability = 0.0
         config.fitness_function_type = FITNESS_BASIC
         i = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
-        print(str(i.fenotype))
         assert i.fitness_value == 0.4
 
     def test_fitness_fullmatch(self):
@@ -64,10 +63,6 @@ class TestIndividual(unittest.TestCase):
         config.fitness_function_type = FITNESS_FULLMATCH
         i = Individual(self.samples, self.grammar, '11100010101000111001010100111011')
         assert i.fitness_value == 0.25
-
-    def tearDown(self):
-        # Unregister extensions
-        pass
 
 
 if __name__ == "__main__":
