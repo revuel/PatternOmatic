@@ -1,9 +1,9 @@
 """ Unit testing file for DG Engine """
 import unittest
 import spacy
-from nlp.engine import dynagg
-from settings.literals import *
-from settings.config import Config
+from src.nlp.engine import dynagg
+from src.settings.literals import *
+from src.settings.config import Config
 
 config = Config()
 

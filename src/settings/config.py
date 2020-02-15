@@ -1,7 +1,7 @@
 """ Configuration Management class """
 from __future__ import annotations
 from typing import Optional
-from settings.literals import *
+from src.settings.literals import *
 import configparser
 
 

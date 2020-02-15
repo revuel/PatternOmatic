@@ -4,10 +4,10 @@
 if __name__ == "__main__":
 
     import spacy
-    import nlp.engine as engine
-    from ge.population import Population
-    from settings.config import Config
-    from settings.literals import *
+    from src import nlp as engine
+    from src.ge.population import Population
+    from src.settings.config import Config
+    from src.settings.literals import *
 
     ''' Engine '''
     nlp = spacy.load("en_core_web_sm")

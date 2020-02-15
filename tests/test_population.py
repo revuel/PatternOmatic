@@ -1,11 +1,11 @@
 """ Unit testing file for GE module """
 import unittest
 import spacy
-from nlp.engine import dynagg as dgg
-from ge.population import Population
-from ge.individual import Individual
-from settings.config import Config
-from settings.literals import *
+from src.nlp.engine import dynagg as dgg
+from src.ge.population import Population
+from src.ge.individual import Individual
+from src.settings.config import Config
+from src.settings.literals import *
 
 config = Config()
 
