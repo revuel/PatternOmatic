@@ -1,5 +1,4 @@
-all:
-	reqs, cvage, build
+all: reqs cvage build sscas
 
 reqs:
 	pip install -r requirements.txt

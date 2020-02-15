@@ -8,11 +8,12 @@ setuptools.setup(
     version="0.1.0",
     author="Miguel Revuelta Espinosa",
     author_email="revuel22@hotmail.com",
-    description="AI/NLP pattern finder",
+    description="AI/NLP (Spacy) Rule Based Matcher pattern inder",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/revuel/PatternOmatic",
     packages=setuptools.find_packages(),
+    scripts=['scripts/patternomatic.py'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

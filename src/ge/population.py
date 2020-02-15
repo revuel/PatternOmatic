@@ -1,9 +1,9 @@
 """ Population class """
 import random
 from spacy.tokens import Doc
-from ge.individual import Individual
-from settings.config import Config
-from settings.literals import *
+from src.ge.individual import Individual
+from src.settings.config import Config
+from src.settings.literals import *
 
 config = Config()
 

@@ -1,8 +1,8 @@
 """ NLP Engines """
 from inspect import getmembers
 from spacy.tokens import Doc, Token
-from settings.config import Config
-from settings.literals import *
+from src.settings.config import Config
+from src.settings.literals import *
 
 config = Config()
 
