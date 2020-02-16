@@ -23,5 +23,7 @@ build:
 armor:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/pyarmor build -B
-	# cd dist/PatternOmatic
-	# python main.py
+
+run:
+	export PYTHONPATH=`pwd`/venv/bin/python3
+	python3 scripts/patternomatic.py hola
