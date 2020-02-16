@@ -1,4 +1,4 @@
-all: reqs cvage build sscas
+all: reqs cvrg build sscas
 
 reqs:
 	pip install -r requirements.txt
@@ -7,7 +7,7 @@ test:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/python3 -m unittest
 
-cvage:
+cvrg:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/coverage run --branch --source=. -m unittest && \
 	`pwd`/venv/bin/coverage report --ignore-errors --omit=venv/**,tests/**,*__init__* && \
@@ -19,6 +19,7 @@ sscas:
 build:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/python3 setup.py sdist bdist_wheel
+	# `pwd`/venv/bin/python3 setup.py sdist bdist_wheel
 
 armor:
 	export PYTHONPATH=`pwd`/venv/bin/python3

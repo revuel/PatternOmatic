@@ -1,10 +1,10 @@
 """ Unit testing file for GE module """
 import unittest
 import spacy
-from src.nlp.engine import dynagg as dgg
-from src.ge.individual import Individual
-from src.settings.config import Config
-from src.settings.literals import *
+from PatternOmatic.nlp.engine import dynagg as dgg
+from PatternOmatic.ge.individual import Individual
+from PatternOmatic.settings.config import Config
+from PatternOmatic.settings.literals import *
 
 config = Config()
 

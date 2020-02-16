@@ -5,8 +5,8 @@ from random import random
 from itertools import cycle
 from spacy.tokens import Doc
 from spacy.matcher import Matcher
-from src.settings.config import Config
-from src.settings.literals import *
+from PatternOmatic.settings.config import Config
+from PatternOmatic.settings.literals import *
 
 config = Config()
 

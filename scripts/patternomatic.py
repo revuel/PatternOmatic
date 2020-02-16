@@ -5,8 +5,8 @@ import argparse
 import logging
 import spacy
 from spacy.tokens.doc import Doc
-from src.nlp.engine import dynagg as dgg
-from src.ge.population import Population
+from PatternOmatic.nlp.engine import dynagg as dgg
+from PatternOmatic.ge.population import Population
 
 
 def find_pattern(text_samples: [Doc], language_model_path: str = None, configuration_path: str = None):
@@ -17,14 +17,12 @@ def find_pattern(text_samples: [Doc], language_model_path: str = None, configura
         language_model_path: Optional Spacy model language path
         configuration_path: Optional path for configuration file
 
-    Returns:
+    Returns: None
 
     """
     bnf_g = dgg(text_samples)
     p = Population(text_samples, bnf_g)
     p.evolve()
-    # logging.info(f'BNF G: {bnf_g}')
-    # print('BFNG: ', str(bnf_g))
     print('Best pattern found: ', str(p.best_individual.fenotype))
     print('Score over sample: ', str(p.best_individual.fitness_value))
 
@@ -78,6 +76,7 @@ if __name__ == "__main__":
 
         # Find pattern
         find_pattern(parsed_args.sample)
+
     except Exception as ex:
         logging.critical(str(ex))
         raise Exception(ex)
