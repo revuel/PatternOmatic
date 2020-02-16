@@ -1,7 +1,7 @@
 """ Configuration Management class """
 from __future__ import annotations
 from typing import Optional
-from settings.literals import *
+from PatternOmatic.settings.literals import *
 import configparser
 
 
@@ -82,7 +82,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._mutation_probability = 0.5
             self._offspring_max_size_factor = 3.5
             self._mating_probability = 0.9
-            self._k_value = None
+            self._k_value = 3
 
             ''' GE configuration methods '''
             self._selection_type = BINARY_TOURNAMENT
@@ -92,33 +92,72 @@ class Config(metaclass=SingletonMetaNaive):
             ''' Dynamic Grammar Generation configuration options '''
             self._features_per_token = 1
             self._use_boolean_features = False
-            self._use_custom_attributes = True
+            self._use_custom_attributes = False
             self._use_uniques = True
-            self._use_grammar_operators = True
+            self._use_grammar_operators = False
             self._use_token_wildcard = False
             self._use_extended_pattern_syntax = False
 
             ''' Problem specific configuration options '''
-            self._fitness_function_type = FITNESS_BASIC
+            self._fitness_function_type = FITNESS_FULLMATCH
 
     def __iter__(self):
-        pass
+        yield 'Population size', self.population_size
+        yield 'Maximum number of generations', self.max_generations
+        yield 'Codon length', self.codon_length
+        yield 'Number of codons per Individual', self.num_codons_per_individual
+        yield 'DNA length', self.dna_length
+        yield 'Mutation probability', self.mutation_probability
+        yield 'Offspring maximum size factor', self.offspring_max_size_factor
+        yield 'Mating probability', self.mating_probability
+        yield 'K tournament size value', self.k_value
+        yield 'Selection algorithm', self.selection_type
+        yield 'Recombination algorithm', self.recombination_type
+        yield 'Replacement algorithm', self.replacement_type
+        yield 'Maximum number of features per token', self.features_per_token
+        yield 'Using boolean features?', self.use_boolean_features
+        yield 'Using custom attributes?', self.use_custom_attributes
+        yield 'Using unique feature terminal?', self.use_uniques
+        yield 'Using grammar operators?', self.use_grammar_operators
+        yield 'Using token wildcards?', self.use_token_wildcard
+        yield 'Using extended pattern syntax?', self.use_extended_pattern_syntax
+        yield 'Finess function type', self.fitness_function_type
 
     @property
     def population_size(self) -> int:
         return self._population_size
 
+    @population_size.setter
+    def population_size(self, value: int) -> None:
+        self.population_size = value
+
     @property
     def max_generations(self) -> int:
         return self._max_generations
+
+    @max_generations.setter
+    def max_generations(self, value: int):
+        self.max_generations = value
+
+    @max_generations.setter
+    def max_generations(self, value):
+        self._max_generations = value
 
     @property
     def codon_length(self) -> int:
         return self._codon_length
 
+    @codon_length.setter
+    def codon_length(self, value) -> None:
+        self.codon_length = value
+
     @property
     def num_codons_per_individual(self) -> int:
         return self._num_codons_per_individual
+
+    @num_codons_per_individual.setter
+    def num_codons_per_individual(self, value: int) -> None:
+        self.num_codons_per_individual = value
 
     @property
     def dna_length(self) -> int:
@@ -127,6 +166,10 @@ class Config(metaclass=SingletonMetaNaive):
     @property
     def mutation_probability(self) -> float:
         return self._mutation_probability
+
+    @mutation_probability.setter
+    def mutation_probability(self, value: float):
+        self._mutation_probability = value
 
     @property
     def offspring_max_size_factor(self) -> float:
@@ -144,48 +187,98 @@ class Config(metaclass=SingletonMetaNaive):
     def selection_type(self) -> str:
         return self._selection_type
 
+    @selection_type.setter
+    def selection_type(self, value):
+        self._selection_type = value
+
     @property
     def recombination_type(self) -> str:
         return self._recombination_type
+
+    @recombination_type.setter
+    def recombination_type(self, value):
+        self._recombination_type = value
 
     @property
     def replacement_type(self) -> str:
         return self._replacement_type
 
+    @replacement_type.setter
+    def replacement_type(self, value):
+        self._replacement_type = value
+
     @property
     def features_per_token(self) -> int:
         return self._features_per_token
+
+    @features_per_token.setter
+    def features_per_token(self, value: int) -> None:
+        self._features_per_token = value
 
     @property
     def use_boolean_features(self) -> bool:
         return self._use_boolean_features
 
+    @use_boolean_features.setter
+    def use_boolean_features(self, value: int) -> None:
+        self._use_boolean_features = value
+
     @property
     def use_custom_attributes(self) -> bool:
         return self._use_custom_attributes
+
+    @use_custom_attributes.setter
+    def use_custom_attributes(self, value: int) -> None:
+        self._use_custom_attributes = value
 
     @property
     def use_uniques(self) -> bool:
         return self._use_uniques
 
+    @use_uniques.setter
+    def use_uniques(self, value: int) -> None:
+        self._use_uniques = value
+
     @property
     def use_grammar_operators(self) -> bool:
         return self._use_grammar_operators
+
+    @use_grammar_operators.setter
+    def use_grammar_operators(self, value: int) -> None:
+        self._use_grammar_operators = value
 
     @property
     def use_token_wildcard(self) -> bool:
         return self._use_token_wildcard
 
+    @use_token_wildcard.setter
+    def use_token_wildcard(self, value) -> None:
+        self._use_token_wildcard = value
+
     @property
     def use_extended_pattern_syntax(self) -> bool:
         return self._use_extended_pattern_syntax
+
+    @use_extended_pattern_syntax.setter
+    def use_extended_pattern_syntax(self, value) -> None:
+        self._use_extended_pattern_syntax = value
 
     @property
     def fitness_function_type(self):
         return self._fitness_function_type
 
+    @fitness_function_type.setter
+    def fitness_function_type(self, value: int) -> None:
+        self._fitness_function_type = value
+
+    ''' Configuration restrictions '''
     def _check_xps_op_restriction(self):
         if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
             print('Extended Pattern Syntax is not compatible with the usage of grammar operators.')
             print('Disabling Extended Pattern Syntax!')
             self._use_extended_pattern_syntax = False
+
+    ''' Auxiliary methods '''
+    def show(self):
+        """ Prints current configuration in JSON format """
+        return print(dict(self))
