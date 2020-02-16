@@ -1,9 +1,9 @@
 """ Population class """
 import random
 from spacy.tokens import Doc
-from src.ge.individual import Individual
-from src.settings.config import Config
-from src.settings.literals import *
+from PatternOmatic.ge.individual import Individual
+from PatternOmatic.settings.config import Config
+from PatternOmatic.settings.literals import *
 
 config = Config()
 

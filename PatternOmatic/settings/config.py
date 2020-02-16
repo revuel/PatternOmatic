@@ -1,7 +1,7 @@
 """ Configuration Management class """
 from __future__ import annotations
 from typing import Optional
-from src.settings.literals import *
+from PatternOmatic.settings.literals import *
 import configparser
 
 
