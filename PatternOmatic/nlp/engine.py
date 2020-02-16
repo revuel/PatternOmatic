@@ -1,8 +1,8 @@
 """ NLP Engines """
 from inspect import getmembers
 from spacy.tokens import Doc, Token
-from settings.config import Config
-from settings.literals import *
+from PatternOmatic.settings.config import Config
+from PatternOmatic.settings.literals import *
 
 config = Config()
 
@@ -130,7 +130,7 @@ def dynagg(samples: [Doc]) -> dict:
     max_length_token, min_length_token, features_dict, extended_features = features_seen(samples)
 
     # Update times token per pattern [Min length of tokens, Max length of tokens] interval
-    pattern_grammar[P] = _symbol_stacker(T, max_length_token)
+    pattern_grammar[P] = _symbol_stacker(T, max_length_token, min_length_token)
 
     #  Update times features per token (Max length of features)
     pattern_grammar[T] = _symbol_stacker(F, _get_features_per_token(features_dict))
@@ -178,7 +178,7 @@ def dynagg(samples: [Doc]) -> dict:
     return pattern_grammar
 
 
-def _symbol_stacker(symbol: str, max_length: int) -> list:
+def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
     """
     Given a symbol creates a list of length max_length where each item is symbol concat previous list item
     Args:
@@ -191,7 +191,15 @@ def _symbol_stacker(symbol: str, max_length: int) -> list:
     symbol_times_list = list()
 
     last = ''
-    for _ in range(max_length):
+    for _ in range(min_length):
+        if last == '':
+            last = symbol
+        else:
+            last = last + "," + symbol
+
+    symbol_times_list.append(last)
+
+    for _ in range(min_length, max_length):
         if last == '':
             last = symbol
         else:
