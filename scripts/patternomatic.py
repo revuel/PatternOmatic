@@ -1,32 +1,83 @@
-""" PatternOmatic wrapper """
+#!/usr/bin/python
+""" PatternOmatic command line """
 import sys
+import argparse
 import logging
 import spacy
-import src.nlp.engine as engine
+from spacy.tokens.doc import Doc
+from src.nlp.engine import dynagg as dgg
 from src.ge.population import Population
-from src.settings.config import Config
-
-config = Config()
 
 
-def find_pattern(text_samples: str, spacy_language=None, config_path=None):
+def find_pattern(text_samples: [Doc], language_model_path: str = None, configuration_path: str = None):
     """
-
+    Given some samples, this function finds an optimized pattern to be used by the Spacy's Rule Based Matcher
     Args:
         text_samples: Text phrases
-        spacy_language: Optional Spacy model language path
-        config_path: Optional path for configuration file
+        language_model_path: Optional Spacy model language path
+        configuration_path: Optional path for configuration file
 
     Returns:
 
     """
-    pass
+    bnf_g = dgg(text_samples)
+    p = Population(text_samples, bnf_g)
+    p.evolve()
+    # logging.info(f'BNF G: {bnf_g}')
+    # print('BFNG: ', str(bnf_g))
+    print('Best pattern found: ', str(p.best_individual.fenotype))
+    print('Score over sample: ', str(p.best_individual.fitness_value))
 
 
 if __name__ == "__main__":
     # execute only if run as a script
+    logging.info("Parsing command line arguments...")
     try:
-        find_pattern(sys.argv[0], sys.argv[1], sys.argv[2])
+        cli = argparse.ArgumentParser(description='Finds the Spacy\'s Matcher pattern for the given samples')
+
+        # Samples
+        cli.add_argument(
+            "-s",
+            "--sample",
+            action='append',
+            required=True,
+            nargs="+",
+            type=str,
+            help='A sample phrase'
+        )
+
+        # Spacy Language Model
+        cli.add_argument(
+            "-l",
+            "--language",
+            nargs="?",
+            type=str,
+            default="en_core_web_sm",
+            help='Spacy language model to be used'
+        )
+
+        # Configuration file to be used
+        cli.add_argument(
+            "-c",
+            "--config",
+            nargs="?",
+            type=str,
+            help='Configuration file to be used',
+            default=None,
+        )
+
+        # Parse command line input arguments/options
+        parsed_args = cli.parse_args(sys.argv[1:])
+
+        # Set up language model
+        nlp = spacy.load(parsed_args.language)
+
+        # Convert to Doc sample arguments
+        for index, item in enumerate(parsed_args.sample):
+            parsed_args.sample[index] = nlp(u" ".join(item))
+
+        # Find pattern
+        find_pattern(parsed_args.sample)
     except Exception as ex:
-        logging.critical("Invalid argument list!")
+        logging.critical(str(ex))
         raise Exception(ex)
