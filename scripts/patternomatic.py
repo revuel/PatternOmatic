@@ -23,8 +23,8 @@ def find_pattern(text_samples: [Doc], language_model_path: str = None, configura
     bnf_g = dgg(text_samples)
     p = Population(text_samples, bnf_g)
     p.evolve()
-    print('Best pattern found: ', str(p.best_individual.fenotype))
-    print('Score over sample: ', str(p.best_individual.fitness_value))
+    logging.info('Best pattern found: ', str(p.best_individual.fenotype))
+    logging.info('Score over sample: ', str(p.best_individual.fitness_value))
 
 
 if __name__ == "__main__":
@@ -68,7 +68,13 @@ if __name__ == "__main__":
         parsed_args = cli.parse_args(sys.argv[1:])
 
         # Set up language model
-        nlp = spacy.load(parsed_args.language)
+        try:
+            nlp = spacy.load(parsed_args.language)
+        except Exception:
+            logging.warning('Model {} not found, falling back to patternOmatic\'s default langugage model: '
+                            'en_core_web_sm'.format(parsed_args.language))
+
+            nlp = spacy.load('en_core_web_sm')
 
         # Convert to Doc sample arguments
         for index, item in enumerate(parsed_args.sample):

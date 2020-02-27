@@ -43,7 +43,7 @@ class TestPopulation(unittest.TestCase):
         p = Population(self.samples, self.grammar)
         mating_pool = p._selection()
 
-        super().assertNotEquals(p.generation, mating_pool)
+        super().assertNotEqual(p.generation, mating_pool)
 
     def test_k_tournament(self):
         config.selection_type = K_TOURNAMENT
@@ -60,7 +60,7 @@ class TestPopulation(unittest.TestCase):
         p = Population(self.samples, self.grammar)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
-        super().assertNotEquals(p.generation, p.offspring)
+        super().assertNotEqual(p.generation, p.offspring)
 
     def test_mu_plus_lambda(self):
         config.replacement_type = MU_PLUS_LAMBDA

@@ -40,7 +40,7 @@ class Config(metaclass=SingletonMetaNaive):
             if len(file_list) == 0:
                 raise FileNotFoundError
 
-            ''' GE configuration parameters '''
+            # GE configuration parameters
             self._population_size = int(config_parser[GE][POPULATION_SIZE])
             self._max_generations = int(config_parser[GE][MAX_GENERATIONS])
             self._codon_length = int(config_parser[GE][CODON_LENGTH])
@@ -51,12 +51,12 @@ class Config(metaclass=SingletonMetaNaive):
             self._mating_probability = float(config_parser[GE][MATING_PROBABILITY])
             self._k_value = int(config_parser[GE][K_VALUE])
 
-            ''' GE configuration methods '''
+            # GE configuration methods
             self._selection_type = globals()[config_parser[GE][SELECTION_TYPE]]
             self._recombination_type = globals()[config_parser[GE][RECOMBINATION_TYPE]]
             self._replacement_type = globals()[config_parser[GE][REPLACEMENT_TYPE]]
 
-            ''' Dynamic Grammar Generation configuration options '''
+            # Dynamic Grammar Generation configuration options
             self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
             self._use_boolean_features = str2bool(config_parser[DGG][USE_BOOLEAN_FEATURES])
             self._use_custom_attributes = str2bool(config_parser[DGG][USE_CUSTOM_ATTRIBUTES])
@@ -65,16 +65,16 @@ class Config(metaclass=SingletonMetaNaive):
             self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
             self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
 
-            ''' Problem specific configuration options '''
+            # Problem specific configuration options
             self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
 
-            ''' CONFIGURATION CHECKS (FILE ONLY)'''
+            # CONFIGURATION CHECKS (FILE ONLY)
             self._check_xps_op_restriction()
 
         except FileNotFoundError:
             logging.warning('Unable to locate config.ini file, using default configuration parameters')
 
-            ''' GE configuration parameters '''
+            # GE configuration parameters '''
             self._population_size = 10
             self._max_generations = 3
             self._codon_length = 8
@@ -85,12 +85,12 @@ class Config(metaclass=SingletonMetaNaive):
             self._mating_probability = 0.9
             self._k_value = 3
 
-            ''' GE configuration methods '''
+            # GE configuration methods '''
             self._selection_type = BINARY_TOURNAMENT
             self._recombination_type = RANDOM_ONE_POINT_CROSSOVER
             self._replacement_type = MU_PLUS_LAMBDA
 
-            ''' Dynamic Grammar Generation configuration options '''
+            # Dynamic Grammar Generation configuration options
             self._features_per_token = 1
             self._use_boolean_features = False
             self._use_custom_attributes = False
@@ -99,7 +99,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._use_token_wildcard = False
             self._use_extended_pattern_syntax = False
 
-            ''' Problem specific configuration options '''
+            # Problem specific configuration options
             self._fitness_function_type = FITNESS_FULLMATCH
 
     def __iter__(self):
@@ -137,11 +137,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._max_generations
 
     @max_generations.setter
-    def max_generations(self, value: int):
-        self.max_generations = value
-
-    @max_generations.setter
-    def max_generations(self, value):
+    def max_generations(self, value: int) -> None:
         self._max_generations = value
 
     @property
@@ -169,7 +165,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._mutation_probability
 
     @mutation_probability.setter
-    def mutation_probability(self, value: float):
+    def mutation_probability(self, value: float) -> None:
         self._mutation_probability = value
 
     @property
@@ -189,7 +185,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._selection_type
 
     @selection_type.setter
-    def selection_type(self, value):
+    def selection_type(self, value) -> None:
         self._selection_type = value
 
     @property
@@ -197,7 +193,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._recombination_type
 
     @recombination_type.setter
-    def recombination_type(self, value):
+    def recombination_type(self, value) -> None:
         self._recombination_type = value
 
     @property
@@ -205,7 +201,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._replacement_type
 
     @replacement_type.setter
-    def replacement_type(self, value):
+    def replacement_type(self, value) -> None:
         self._replacement_type = value
 
     @property
@@ -272,14 +268,14 @@ class Config(metaclass=SingletonMetaNaive):
     def fitness_function_type(self, value: int) -> None:
         self._fitness_function_type = value
 
-    ''' Configuration restrictions '''
+    # Configuration restrictions
     def _check_xps_op_restriction(self):
         if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
-            print('Extended Pattern Syntax is not compatible with the usage of grammar operators.')
-            print('Disabling Extended Pattern Syntax!')
+            logging.warning('Extended Pattern Syntax is not compatible with the usage of grammar operators')
+            logging.warning('Extended Pattern Syntax has been disabled!')
             self._use_extended_pattern_syntax = False
 
-    ''' Auxiliary methods '''
+    # Auxiliary methods
     def show(self):
         """ Prints current configuration in JSON format """
         return print(dict(self))
