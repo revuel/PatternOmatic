@@ -22,11 +22,11 @@ class TestIndividual(unittest.TestCase):
 
     def test_init(self):
         i = Individual(self.samples, self.grammar)
-        assert i is not None
+        super().assertNotEqual(i, None)
 
     def test_init_with_dna(self):
         i = Individual(self.samples, self.grammar, '10101010101010101010101010101010')
-        assert i is not None
+        super().assertNotEqual(i, None)
 
     def test_transcription(self):
         """ Check for transcription idempotency """
@@ -35,7 +35,8 @@ class TestIndividual(unittest.TestCase):
         i._transcription()
         i._transcription()
         i._transcription()
-        assert i.int_genotype == [127, 1]
+
+        super().assertListEqual(i.int_genotype, [127, 1])
 
     def test_translation(self):
         """ Check for translation idempotency """
@@ -44,25 +45,29 @@ class TestIndividual(unittest.TestCase):
         i._translation()
         i._translation()
         i._translation()
-        assert i.fenotype == [{'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}]
+        super().assertListEqual(
+            i.fenotype, [{'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}])
 
     def test_mutation(self):
+        config.mutation_probability = 1.0
         i = Individual(self.samples, self.grammar, '11111111')
-        assert i.bin_genotype is not '11111111'
+        super().assertNotEqual(i.bin_genotype, '11111111')
 
     def test_fitness_basic(self):
         """ Fitness "basic" sets fitness """
         config.mutation_probability = 0.0
         config.fitness_function_type = FITNESS_BASIC
         i = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
-        assert i.fitness_value == 0.4
+
+        super().assertEquals(i.fitness_value, 0.4)
 
     def test_fitness_fullmatch(self):
         """ Fitness "full match" sets fitness """
         config.mutation_probability = 0.0
         config.fitness_function_type = FITNESS_FULLMATCH
         i = Individual(self.samples, self.grammar, '11100010101000111001010100111011')
-        assert i.fitness_value == 0.25
+
+        super().assertEquals(i.fitness_value, 0.25)
 
 
 if __name__ == "__main__":
