@@ -27,4 +27,4 @@ armor:
 
 run:
 	export PYTHONPATH=`pwd`/venv/bin/python3
-	python3 scripts/patternomatic.py hola
+	python3 scripts/patternomatic.py -s hola

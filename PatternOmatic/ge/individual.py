@@ -49,7 +49,7 @@ class Individual(object):
         return self._int_genotype
 
     @property
-    def fenotype(self) -> dict:
+    def fenotype(self) -> [{}]:
         return self._fenotype
 
     @property

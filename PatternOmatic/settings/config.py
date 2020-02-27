@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 from PatternOmatic.settings.literals import *
 import configparser
+import logging
 
 
 def str2bool(vargin: str) -> bool:
@@ -71,7 +72,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._check_xps_op_restriction()
 
         except FileNotFoundError:
-            print('Unable to locate config.ini file, using default configuration parameters')
+            logging.warning('Unable to locate config.ini file, using default configuration parameters')
 
             ''' GE configuration parameters '''
             self._population_size = 10
@@ -121,7 +122,7 @@ class Config(metaclass=SingletonMetaNaive):
         yield 'Using grammar operators?', self.use_grammar_operators
         yield 'Using token wildcards?', self.use_token_wildcard
         yield 'Using extended pattern syntax?', self.use_extended_pattern_syntax
-        yield 'Finess function type', self.fitness_function_type
+        yield 'Fitness function type', self.fitness_function_type
 
     @property
     def population_size(self) -> int:

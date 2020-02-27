@@ -23,7 +23,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_initialize(self):
         p = Population(self.samples, self.grammar)
-        assert isinstance(p.generation[0], Individual)
+        super().assertIsInstance(p.generation[0], Individual)
 
     def test_best_challenge(self):
         config.max_generations = 3
@@ -33,7 +33,8 @@ class TestPopulation(unittest.TestCase):
         p.generation[0] = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
         config.mutation_probability = 0.5
         p.evolve()
-        assert p.best_individual.fitness_value >= 0.4
+
+        super().assertGreaterEqual(p.best_individual.fitness_value, 0.4)
 
     def test_binary_tournament(self):
         config.max_generations = 3
@@ -41,12 +42,13 @@ class TestPopulation(unittest.TestCase):
         config.selection_type = BINARY_TOURNAMENT
         p = Population(self.samples, self.grammar)
         mating_pool = p._selection()
-        assert p.generation != mating_pool
+
+        super().assertNotEquals(p.generation, mating_pool)
 
     def test_k_tournament(self):
         config.selection_type = K_TOURNAMENT
         p = Population(self.samples, self.grammar)
-        with self.assertRaises(NotImplementedError):
+        with super().assertRaises(NotImplementedError):
             _ = p._selection()
         config.selection_type = BINARY_TOURNAMENT
 
@@ -58,7 +60,7 @@ class TestPopulation(unittest.TestCase):
         p = Population(self.samples, self.grammar)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
-        assert p.generation != p.offspring
+        super().assertNotEquals(p.generation, p.offspring)
 
     def test_mu_plus_lambda(self):
         config.replacement_type = MU_PLUS_LAMBDA
@@ -66,7 +68,7 @@ class TestPopulation(unittest.TestCase):
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         p._replacement()
-        assert p.offspring == []
+        super().assertListEqual(p.offspring, [])
 
     def test_mu_lambda_elite(self):
         config.replacement_type = MU_LAMBDA_WITH_ELITISM
@@ -74,7 +76,7 @@ class TestPopulation(unittest.TestCase):
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         p._replacement()
-        assert p.offspring == []
+        super().assertListEqual(p.offspring, [])
 
     def test_mu_lambda_no_elite(self):
         config.replacement_type = MU_LAMBDA_WITHOUT_ELITISM
@@ -82,7 +84,7 @@ class TestPopulation(unittest.TestCase):
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         p._replacement()
-        assert p.offspring == []
+        super().assertListEqual(p.offspring, [])
 
     def test_evolve(self):
         config.max_generations = 3
@@ -92,7 +94,7 @@ class TestPopulation(unittest.TestCase):
         p.generation[0] = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
         config.mutation_probability = 0.5
         p.evolve()
-        assert p.generation[0].fitness_value >= 0.4
+        super().assertGreaterEqual(p.generation[0].fitness_value, 0.4)
 
 
 if __name__ == "__main__":
