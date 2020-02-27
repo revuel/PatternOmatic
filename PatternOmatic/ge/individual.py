@@ -31,7 +31,7 @@ class Individual(object):
         self._fenotype = self._translation()
         self._fitness_value = self.fitness()
 
-    ''' Properties & setters '''
+    # Properties & setters
     @property
     def samples(self) -> [Doc]:
         return self._samples
@@ -56,7 +56,7 @@ class Individual(object):
     def fitness_value(self) -> float:
         return self._fitness_value
 
-    ''' Specific GE methods '''
+    # Specific GE methods
     @staticmethod
     def _initialize() -> str:
         """
@@ -123,7 +123,7 @@ class Individual(object):
         symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
         return json.loads("[" + symbolic_string + "]")
 
-    ''' Generic GA methods '''
+    # Generic GA methods
     @classmethod
     def mutate(cls, dna) -> str:
         """

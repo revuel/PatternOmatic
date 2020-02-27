@@ -25,8 +25,8 @@ class TestDG(unittest.TestCase):
         super().assertIn(S, grammar.keys())
         super().assertIn(T, grammar.keys())
         super().assertIn(F, grammar.keys())
-        super().assertEquals(len(grammar[SHAPE]), 7)
-        super().assertEquals(len(grammar[F]), 10)
+        super().assertEqual(len(grammar[SHAPE]), 7)
+        super().assertEqual(len(grammar[F]), 10)
 
     def test_basic_grammar_without_uniques_dg(self):
         """ Tests that basic grammar is correctly generated is correctly generated """
