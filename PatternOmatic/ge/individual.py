@@ -82,7 +82,7 @@ class Individual(object):
 
         """
         done = False
-        symbolic_string = self.grammar[S]
+        symbolic_string = self.grammar[S][0]  # Root
         circular = cycle(self.int_genotype)
 
         while done is not True:
@@ -91,30 +91,30 @@ class Individual(object):
             for key in self.grammar.keys():
                 ci = next(circular)
                 fire = divmod(ci, len(self.grammar[key]))[1]
-                if type(self.grammar[key]) is list:
-                    if key in [T, XPS]:
-                        symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key is UNDERSCORE:
-                        symbolic_string = re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                    elif key in [S, P, T, F, EF]:
-                        symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
-                    elif key in [IN, NOT_IN]:
-                        dkey = key.replace(SLD, '').replace(SRD, '')
-                        feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
-                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                    elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
-                        feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
-                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                    else:
-                        dkey = key.replace(SLD, '').replace(SRD, '')
-                        fired_rule = str(self.grammar[key][fire])
-                        if fired_rule != XPS:
-                            feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
-                        else:
-                            feature = "\"" + dkey + "\"" + ":" + fired_rule
-                        symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                if key in [T, XPS]:
+                    symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+                elif key is UNDERSCORE:
+                    symbolic_string = \
+                        re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+                elif key in [P, T, F, EF]:
+                    symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
+                elif key in [IN, NOT_IN]:
+                    dkey = key.replace(SLD, '').replace(SRD, '')
+                    feature = \
+                        "\"" + dkey + "\"" + ":" + \
+                        str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
+                    feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
+                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
                 else:
-                    symbolic_string = re.sub(key, str(self.grammar[key]), symbolic_string, 1)
+                    dkey = key.replace(SLD, '').replace(SRD, '')
+                    fired_rule = str(self.grammar[key][fire])
+                    if fired_rule != XPS:
+                        feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
+                    else:
+                        feature = "\"" + dkey + "\"" + ":" + fired_rule
+                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:

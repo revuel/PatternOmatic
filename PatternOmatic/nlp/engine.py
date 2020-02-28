@@ -124,7 +124,7 @@ def dynagg(samples: [Doc]) -> dict:
 
     """
     # BNF root
-    pattern_grammar = {S: P}
+    pattern_grammar = {S: [P]}
 
     # Watch out features of seen samples and max number of tokens per sample
     max_length_token, min_length_token, features_dict, extended_features = features_seen(samples)
