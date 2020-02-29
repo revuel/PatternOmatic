@@ -74,7 +74,7 @@ class Config(metaclass=SingletonMetaNaive):
         except FileNotFoundError:
             logging.warning('Unable to locate config.ini file, using default configuration parameters')
 
-            # GE configuration parameters '''
+            # GE configuration parameters
             self._population_size = 10
             self._max_generations = 3
             self._codon_length = 8
@@ -85,7 +85,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._mating_probability = 0.9
             self._k_value = 3
 
-            # GE configuration methods '''
+            # GE configuration methods
             self._selection_type = BINARY_TOURNAMENT
             self._recombination_type = RANDOM_ONE_POINT_CROSSOVER
             self._replacement_type = MU_PLUS_LAMBDA
@@ -249,7 +249,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._use_token_wildcard
 
     @use_token_wildcard.setter
-    def use_token_wildcard(self, value) -> None:
+    def use_token_wildcard(self, value: bool) -> None:
         self._use_token_wildcard = value
 
     @property

@@ -24,8 +24,9 @@ class Population(object):
         self._offspring = list()
         self._best_individual = None
 
-    ''' Properties & setters '''
-
+    #
+    # Properties & setters
+    #
     @property
     def samples(self) -> [Doc]:
         return self._samples
@@ -84,8 +85,9 @@ class Population(object):
         else:
             self.best_individual = self.generation[0]
 
-    ''' Evolutionary operators dispatcher '''
-
+    #
+    # Evolutionary operators dispatcher
+    #
     def _selection(self) -> [Individual]:
         """
         Selects members of the current generation into the mating pool in order to produce offspring
@@ -129,8 +131,9 @@ class Population(object):
         else:
             raise ValueError('Invalid replacement type: ', config.replacement_type)
 
-    ''' Evolutionary operator implementations '''
-
+    #
+    # Evolutionary operator implementations
+    #
     def _binary_tournament(self):
         """
         Selection type: Selects members of the current generation into the mating pool in order to produce offspring
@@ -185,13 +188,13 @@ class Population(object):
                 cut = random.randint(1, config.codon_length - 1) * config.num_codons_per_individual
 
                 # Create children
-                child_1 = Individual(self.samples, self.grammar,
-                                     dna=parent_1.bin_genotype[:cut] +
-                                         parent_2.bin_genotype[-(config.dna_length - cut):])
+                child_1 = \
+                    Individual(self.samples, self.grammar,
+                               dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[-(config.dna_length - cut):])
 
-                child_2 = Individual(self.samples, self.grammar,
-                                     dna=parent_2.bin_genotype[:cut] +
-                                         parent_1.bin_genotype[-(config.dna_length - cut):])
+                child_2 = \
+                    Individual(self.samples, self.grammar,
+                               dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[-(config.dna_length - cut):])
 
                 offspring.append(child_1)
                 offspring.append(child_2)
@@ -227,7 +230,9 @@ class Population(object):
         self.generation = self.offspring[0:len(self.generation)]
         self.offspring = []
 
-    ''' Evolution '''
+    #
+    # Evolution
+    #
     def evolve(self):
         """ Search Engine
         1) Selects individuals of the current generation to constitute who will mate

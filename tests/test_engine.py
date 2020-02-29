@@ -92,6 +92,15 @@ class TestDG(unittest.TestCase):
         super().assertIn(UNDERSCORE, grammar.keys())
         super().assertIn(IS_SENT_START, grammar.keys())
 
+    def test_basic_grammar_with_token_wildcard_dg(self):
+        """ Tests grammar is generated with token wildcard """
+        self.config.use_token_wildcard = True
+
+        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
+        grammar = dynagg(samples)
+
+        super().assertIn(TOKEN_WILDCARD, grammar[T])
+
     def setUp(self) -> None:
         self.config = Config()
 

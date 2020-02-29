@@ -92,7 +92,11 @@ class Individual(object):
                 ci = next(circular)
                 fire = divmod(ci, len(self.grammar[key]))[1]
                 if key in [T, XPS]:
-                    symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+                    fired_rule = self.grammar[key][fire]
+                    if fired_rule == TOKEN_WILDCARD:
+                        symbolic_string = re.sub(key, "{" "}", symbolic_string, 1)
+                    else:
+                        symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
                 elif key is UNDERSCORE:
                     symbolic_string = \
                         re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
@@ -120,7 +124,6 @@ class Individual(object):
             if old_symbolic_string == symbolic_string:
                 done = True
 
-        symbolic_string = re.sub('{{}}', TOKEN_WILDCARD, symbolic_string)
         return json.loads("[" + symbolic_string + "]")
 
     # Generic GA methods
