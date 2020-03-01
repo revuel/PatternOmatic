@@ -1,6 +1,8 @@
 """ Unit testing file for GE module """
 import unittest
 import spacy
+
+from PatternOmatic.ge.stats import Stats
 from PatternOmatic.nlp.engine import dynagg as dgg
 from PatternOmatic.ge.population import Population
 from PatternOmatic.ge.individual import Individual
@@ -21,16 +23,18 @@ class TestPopulation(unittest.TestCase):
 
     grammar = dgg(samples)
 
+    stats = Stats()
+
     def test_initialize(self):
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         super().assertIsInstance(p.generation[0], Individual)
 
     def test_best_challenge(self):
         config.max_generations = 3
         config.fitness_function_type = FITNESS_BASIC
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         config.mutation_probability = 0.0
-        p.generation[0] = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
+        p.generation[0] = Individual(self.samples, self.grammar, self.stats, '00101001011010000011001111001110')
         config.mutation_probability = 0.5
         p.evolve()
 
@@ -40,14 +44,14 @@ class TestPopulation(unittest.TestCase):
         config.max_generations = 3
         config.fitness_function_type = FITNESS_FULLMATCH
         config.selection_type = BINARY_TOURNAMENT
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
 
         super().assertNotEqual(p.generation, mating_pool)
 
     def test_k_tournament(self):
         config.selection_type = K_TOURNAMENT
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         with super().assertRaises(NotImplementedError):
             _ = p._selection()
         config.selection_type = BINARY_TOURNAMENT
@@ -57,14 +61,14 @@ class TestPopulation(unittest.TestCase):
         config.fitness_function_type = FITNESS_BASIC
         config.selection_type = BINARY_TOURNAMENT
         config.recombination_type = RANDOM_ONE_POINT_CROSSOVER
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         super().assertNotEqual(p.generation, p.offspring)
 
     def test_mu_plus_lambda(self):
         config.replacement_type = MU_PLUS_LAMBDA
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         p._replacement()
@@ -72,7 +76,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_mu_lambda_elite(self):
         config.replacement_type = MU_LAMBDA_WITH_ELITISM
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         p._replacement()
@@ -80,7 +84,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_mu_lambda_no_elite(self):
         config.replacement_type = MU_LAMBDA_WITHOUT_ELITISM
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
         p._replacement()
@@ -89,9 +93,9 @@ class TestPopulation(unittest.TestCase):
     def test_evolve(self):
         config.max_generations = 3
         config.fitness_function_type = FITNESS_BASIC
-        p = Population(self.samples, self.grammar)
+        p = Population(self.samples, self.grammar, self.stats)
         config.mutation_probability = 0.0
-        p.generation[0] = Individual(self.samples, self.grammar, '00101001011010000011001111001110')
+        p.generation[0] = Individual(self.samples, self.grammar, self.stats, '00101001011010000011001111001110')
         config.mutation_probability = 0.5
         p.evolve()
         super().assertGreaterEqual(p.generation[0].fitness_value, 0.4)

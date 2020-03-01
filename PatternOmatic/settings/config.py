@@ -41,6 +41,8 @@ class Config(metaclass=SingletonMetaNaive):
                 raise FileNotFoundError
 
             # GE configuration parameters
+            self._max_runs = int(config_parser[GE][MAX_RUNS])
+            self._success_threshold = float(config_parser[GE][SUCCESS_THRESHOLD])
             self._population_size = int(config_parser[GE][POPULATION_SIZE])
             self._max_generations = int(config_parser[GE][MAX_GENERATIONS])
             self._codon_length = int(config_parser[GE][CODON_LENGTH])
@@ -75,6 +77,8 @@ class Config(metaclass=SingletonMetaNaive):
             logging.warning('Unable to locate config.ini file, using default configuration parameters')
 
             # GE configuration parameters
+            self._max_runs = 1
+            self._success_threshold = 0.8
             self._population_size = 10
             self._max_generations = 3
             self._codon_length = 8
@@ -103,6 +107,8 @@ class Config(metaclass=SingletonMetaNaive):
             self._fitness_function_type = FITNESS_FULLMATCH
 
     def __iter__(self):
+        yield 'Number of runs', self.max_runs
+        yield 'Success Threshold', self.success_threshold
         yield 'Population size', self.population_size
         yield 'Maximum number of generations', self.max_generations
         yield 'Codon length', self.codon_length
@@ -123,6 +129,14 @@ class Config(metaclass=SingletonMetaNaive):
         yield 'Using token wildcards?', self.use_token_wildcard
         yield 'Using extended pattern syntax?', self.use_extended_pattern_syntax
         yield 'Fitness function type', self.fitness_function_type
+
+    @property
+    def max_runs(self) -> int:
+        return self._max_runs
+
+    @property
+    def success_threshold(self) -> float:
+        return self._success_threshold
 
     @property
     def population_size(self) -> int:

@@ -2,6 +2,7 @@
 import random
 from spacy.tokens import Doc
 from PatternOmatic.ge.individual import Individual
+from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
 
@@ -11,7 +12,7 @@ config = Config()
 class Population(object):
     """ Population implementation of a AI Grammatical Evolution algorithm in OOP fashion """
 
-    def __init__(self, samples: [Doc], grammar: dict):
+    def __init__(self, samples: [Doc], grammar: dict, stats: Stats):
         """
         Population constructor, initializes a list of Individual objects
         Args:
@@ -20,6 +21,7 @@ class Population(object):
         """
         self._samples = samples
         self._grammar = grammar
+        self._stats = stats
         self._generation = self._initialize()
         self._offspring = list()
         self._best_individual = None
@@ -34,6 +36,10 @@ class Population(object):
     @property
     def grammar(self) -> dict:
         return self._grammar
+
+    @property
+    def stats(self):
+        return self._stats
 
     @property
     def generation(self) -> [Individual]:
@@ -72,7 +78,7 @@ class Population(object):
         Returns: A list of individual objects
 
         """
-        return [Individual(self.samples, self.grammar) for _ in range(0, config.dna_length)]
+        return [Individual(self.samples, self.grammar, self.stats) for _ in range(0, config.dna_length)]
 
     def _best_challenge(self):
         """
@@ -189,11 +195,11 @@ class Population(object):
 
                 # Create children
                 child_1 = \
-                    Individual(self.samples, self.grammar,
+                    Individual(self.samples, self.grammar, self.stats,
                                dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[-(config.dna_length - cut):])
 
                 child_2 = \
-                    Individual(self.samples, self.grammar,
+                    Individual(self.samples, self.grammar, self.stats,
                                dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[-(config.dna_length - cut):])
 
                 offspring.append(child_1)
@@ -246,3 +252,12 @@ class Population(object):
             self._replacement()
             self._best_challenge()
             # self._info()
+
+        # Stats concerns
+        self.stats.add_most_fitted(self.best_individual)
+        self.stats.add_mbf(self.best_individual.fitness_value)
+
+        if self.best_individual.fitness_value > config.success_threshold:
+            self.stats.add_sr(True)
+        else:
+            self.stats.add_sr(False)

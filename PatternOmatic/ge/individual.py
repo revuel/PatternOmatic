@@ -5,6 +5,8 @@ from random import random
 from itertools import cycle
 from spacy.tokens import Doc
 from spacy.matcher import Matcher
+
+from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
 
@@ -16,7 +18,7 @@ class Individual(object):
     Individual implementation of a AI Grammatical Evolution algorithm in OOP fashion
     """
 
-    def __init__(self, samples: [Doc], grammar: dict, dna: str = None):
+    def __init__(self, samples: [Doc], grammar: dict, stats: Stats, dna: str = None):
         """
         Individual constructor, if dna is not supplied, sets up randomly its binary genotype
         Args:
@@ -26,10 +28,14 @@ class Individual(object):
         """
         self._samples = samples
         self._grammar = grammar
+        self._stats = stats
         self._bin_genotype = self._initialize() if dna is None else self.mutate(dna)
         self._int_genotype = self._transcription()
         self._fenotype = self._translation()
         self._fitness_value = self.fitness()
+
+        # Stats concerns
+        self.is_solution(stats)
 
     # Properties & setters
     @property
@@ -39,6 +45,10 @@ class Individual(object):
     @property
     def grammar(self) -> dict:
         return self._grammar
+
+    @property
+    def stats(self) -> Stats:
+        return self._stats
 
     @property
     def bin_genotype(self) -> str:
@@ -199,3 +209,18 @@ class Individual(object):
                         contact += max_score_per_sample
 
         return contact
+
+    def is_solution(self, stats: Stats):
+        """
+        Method to manage AES for the given RUN
+        Args:
+            stats: Stats object
+
+        Returns:
+
+        """
+        if stats.solution_found is False:
+            if self.fitness_value >= config.success_threshold:
+                stats.solution_found = True
+            else:
+                stats.add_aes(1)
