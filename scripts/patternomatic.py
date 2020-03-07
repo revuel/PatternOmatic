@@ -3,15 +3,12 @@
 import sys
 import argparse
 import spacy
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from spacy.tokens.doc import Doc
-from logging import Logger
-
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.nlp.engine import dynagg as dgg
 from PatternOmatic.ge.population import Population
-
-log = Logger(__name__)
-log.setLevel(0)
 
 
 def find_pattern(text_samples: [Doc], language_model_path: str = None, configuration_path: str = None):
@@ -27,15 +24,21 @@ def find_pattern(text_samples: [Doc], language_model_path: str = None, configura
     """
     stats = Stats()
     bnf_g = dgg(text_samples)
+
     p = Population(text_samples, bnf_g, stats)
     p.evolve()
-    log.info('Best pattern found: ', str(p.best_individual.fenotype))
-    log.info('Score over sample: ', str(p.best_individual.fitness_value))
+
+    p2 = Population(text_samples, bnf_g, stats)
+    p2.evolve()
+
+    logging.info('Best pattern found: {}'.format(repr(p.best_individual.fenotype)))
+    logging.info('Score over sample: {}'.format(p.best_individual.fitness_value))
+    logging.info('Measures {}'.format(dict(stats)))
 
 
 if __name__ == "__main__":
     # execute only if run as a script
-    log.info("Parsing command line arguments...")
+    logging.info("Parsing command line arguments...")
     try:
         cli = argparse.ArgumentParser(description='Finds the Spacy\'s Matcher pattern for the given samples')
 
@@ -90,5 +93,5 @@ if __name__ == "__main__":
         find_pattern(parsed_args.sample)
 
     except Exception as ex:
-        log.critical(str(ex))
+        logging.critical(str(ex))
         raise Exception(ex)

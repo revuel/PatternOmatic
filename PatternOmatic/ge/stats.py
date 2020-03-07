@@ -1,4 +1,5 @@
 """ GE Various metrics are saved here """
+import operator
 
 
 class Stats(object):
@@ -17,15 +18,17 @@ class Stats(object):
         self._aes = None
         self._mean_time = None
 
+        self._aes_counter = 0
+
     def __iter__(self):
         yield 'SR', self._success_rate
         yield 'MBF', self._mbf
         yield 'AES', self._aes
         yield 'Mean Time', self._mean_time
-        yield 'Best Individual', repr(self.get_most_fitted())
+        yield 'Best Individual', dict(self.get_most_fitted())
 
     #
-    # Accumulators
+    # Accumulators & Counters
     #
     def add_sr(self, sr: bool) -> None:
         """
@@ -74,11 +77,23 @@ class Stats(object):
         """
         self._most_fitted_accumulator.append(indi)
 
+    def sum_aes(self, es: int) -> None:
+        """
+        Sums a new Evaluations to Solution value to the counter
+        Args:
+            es: Evalutations to Solution of a given Run
+
+        Returns:
+
+        """
+        self._aes_counter += es
+
     #
     # Metrics
     #
     def calculate_metrics(self):
         """ Calculates the common GE evaluation metrics """
+        self.add_aes(self._aes_counter)
         self._success_rate = Stats.avg(self._success_rate_accumulator)
         self._mbf = Stats.avg(self._mbf_accumulator)
         self._aes = Stats.avg(self._aes_accumulator)
@@ -137,7 +152,7 @@ class Stats(object):
         Returns: Individual with Best Fitness found for this Execution
 
         """
-        return max(indi.fitness for indi in self._most_fitted_accumulator)
+        return max(self._most_fitted_accumulator, key=operator.attrgetter('fitness_value'))
 
     @staticmethod
     def avg(al: list) -> float:
