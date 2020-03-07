@@ -1,6 +1,8 @@
 """ Individual class """
 import re
 import json
+import logging
+
 from random import random
 from itertools import cycle
 from spacy.tokens import Doc
@@ -35,7 +37,12 @@ class Individual(object):
         self._fitness_value = self.fitness()
 
         # Stats concerns
-        self.is_solution(stats)
+        self.is_solution()
+
+    def __iter__(self):
+        yield 'Genotype', self._bin_genotype
+        yield 'Fenotype', self._fenotype
+        yield 'Fitness', self._fitness_value
 
     # Properties & setters
     @property
@@ -210,17 +217,13 @@ class Individual(object):
 
         return contact
 
-    def is_solution(self, stats: Stats):
+    def is_solution(self) -> None:
         """
         Method to manage AES for the given RUN
-        Args:
-            stats: Stats object
-
-        Returns:
 
         """
-        if stats.solution_found is False:
+        if self.stats.solution_found is False:
+            self.stats.sum_aes(1)
+            logging.debug('Solution not found yet')
             if self.fitness_value >= config.success_threshold:
-                stats.solution_found = True
-            else:
-                stats.add_aes(1)
+                self.stats.solution_found = True

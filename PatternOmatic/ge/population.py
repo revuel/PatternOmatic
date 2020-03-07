@@ -261,3 +261,5 @@ class Population(object):
             self.stats.add_sr(True)
         else:
             self.stats.add_sr(False)
+
+        self.stats.calculate_metrics()
