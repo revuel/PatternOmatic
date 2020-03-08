@@ -3,11 +3,85 @@ from inspect import getmembers
 from spacy.tokens import Doc, Token
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.log import LOG
 
 config = Config()
 
 
-def features_seen(samples: [Doc]) -> int and dict:
+#
+# Dynamic Grammar (Backus Naur Grammar) Generator
+#
+def dynagg(samples: [Doc]) -> dict:
+    """
+    Dynamically generates a grammar in Backus Naur Form (BNF) notation representing the available Spacy NLP
+    Linguistic Feature values of the given sample list of Doc instances
+    Args:
+        samples: List of Spacy Doc objects
+
+    Returns: Backus Naur Form grammar notation encoded in a dictionary
+
+    """
+    # BNF root
+    pattern_grammar = {S: [P]}
+
+    # Watch out features of seen samples and max number of tokens per sample
+    max_length_token, min_length_token, features_dict, extended_features = _features_seen(samples)
+
+    # Update times token per pattern [Min length of tokens, Max length of tokens] interval
+    pattern_grammar[P] = _symbol_stacker(T, max_length_token, min_length_token)
+
+    #  Update times features per token (Max length of features)
+    pattern_grammar[T] = _symbol_stacker(F, _get_features_per_token(features_dict))
+
+    if config.use_token_wildcard is True:
+        pattern_grammar[T].append(TOKEN_WILDCARD)
+
+    # Update available features (just the features list)
+    list_of_features = list(features_dict.keys())
+    if config.use_grammar_operators is True and config.use_extended_pattern_syntax is False:
+        list_of_features_op = list()
+        for feature in list_of_features:
+            list_of_features_op.append(feature)
+            list_of_features_op.append(feature + ',' + OP)
+        pattern_grammar[F] = list_of_features_op
+        pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
+    elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
+        tmp_lengths = features_dict[LENGTH].copy()
+        full_terminal_stack = _all_feature_terminal_list(features_dict)
+        pattern_grammar[F] = list_of_features
+        pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
+        pattern_grammar[IN] = full_terminal_stack
+        pattern_grammar[NOT_IN] = full_terminal_stack
+        pattern_grammar[EQQ] = tmp_lengths
+        pattern_grammar[GEQ] = tmp_lengths
+        pattern_grammar[LEQ] = tmp_lengths
+        pattern_grammar[GTH] = tmp_lengths
+        pattern_grammar[LTH] = tmp_lengths
+    else:
+        pattern_grammar[F] = list_of_features
+
+    # Update each feature possible values
+    for k, v in features_dict.items():
+        if config.use_extended_pattern_syntax is True:
+            v.append(XPS)
+        pattern_grammar.update({k: v})
+
+    if config.use_custom_attributes is True:
+        pattern_grammar[UNDERSCORE] = _symbol_stacker(EF, _get_features_per_token(extended_features[UNDERSCORE]))
+        pattern_grammar[EF] = list(extended_features[UNDERSCORE].keys())
+        pattern_grammar.update(extended_features[UNDERSCORE].items())
+        pattern_grammar[T].append(UNDERSCORE)
+        pattern_grammar[T].append(F + "," + UNDERSCORE)
+
+    LOG.debug('Dynamically generated BNF: {}'.format(str(pattern_grammar)))
+
+    return pattern_grammar
+
+
+#
+# BNF Utilities
+#
+def _features_seen(samples: [Doc]) -> int and dict:
     """
     Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the sample
     Args:
@@ -111,71 +185,6 @@ def features_seen(samples: [Doc]) -> int and dict:
     extended_features[UNDERSCORE] = _feature_pruner(extended_features[UNDERSCORE])
 
     return max_doc_length, min_doc_length, features, extended_features
-
-
-def dynagg(samples: [Doc]) -> dict:
-    """
-    Dynamically generates a grammar in Backus Naur Form (BNF) notation representing the available Spacy NLP
-    Linguistic Feature values of the given sample list of Doc instances
-    Args:
-        samples: List of Spacy Doc objects
-
-    Returns: Backus Naur Form grammar notation encoded in a dictionary
-
-    """
-    # BNF root
-    pattern_grammar = {S: [P]}
-
-    # Watch out features of seen samples and max number of tokens per sample
-    max_length_token, min_length_token, features_dict, extended_features = features_seen(samples)
-
-    # Update times token per pattern [Min length of tokens, Max length of tokens] interval
-    pattern_grammar[P] = _symbol_stacker(T, max_length_token, min_length_token)
-
-    #  Update times features per token (Max length of features)
-    pattern_grammar[T] = _symbol_stacker(F, _get_features_per_token(features_dict))
-
-    if config.use_token_wildcard is True:
-        pattern_grammar[T].append(TOKEN_WILDCARD)
-
-    # Update available features (just the features list)
-    list_of_features = list(features_dict.keys())
-    if config.use_grammar_operators is True and config.use_extended_pattern_syntax is False:
-        list_of_features_op = list()
-        for feature in list_of_features:
-            list_of_features_op.append(feature)
-            list_of_features_op.append(feature + ',' + OP)
-        pattern_grammar[F] = list_of_features_op
-        pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
-    elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
-        tmp_lengths = features_dict[LENGTH].copy()
-        full_terminal_stack = _all_feature_terminal_list(features_dict)
-        pattern_grammar[F] = list_of_features
-        pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
-        pattern_grammar[IN] = full_terminal_stack
-        pattern_grammar[NOT_IN] = full_terminal_stack
-        pattern_grammar[EQQ] = tmp_lengths
-        pattern_grammar[GEQ] = tmp_lengths
-        pattern_grammar[LEQ] = tmp_lengths
-        pattern_grammar[GTH] = tmp_lengths
-        pattern_grammar[LTH] = tmp_lengths
-    else:
-        pattern_grammar[F] = list_of_features
-
-    # Update each feature possible values
-    for k, v in features_dict.items():
-        if config.use_extended_pattern_syntax is True:
-            v.append(XPS)
-        pattern_grammar.update({k: v})
-
-    if config.use_custom_attributes is True:
-        pattern_grammar[UNDERSCORE] = _symbol_stacker(EF, _get_features_per_token(extended_features[UNDERSCORE]))
-        pattern_grammar[EF] = list(extended_features[UNDERSCORE].keys())
-        pattern_grammar.update(extended_features[UNDERSCORE].items())
-        pattern_grammar[T].append(UNDERSCORE)
-        pattern_grammar[T].append(F + "," + UNDERSCORE)
-
-    return pattern_grammar
 
 
 def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:

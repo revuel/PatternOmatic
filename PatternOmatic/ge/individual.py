@@ -1,7 +1,6 @@
 """ Individual class """
 import re
 import json
-import logging
 
 from random import random
 from itertools import cycle
@@ -10,6 +9,7 @@ from spacy.matcher import Matcher
 
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
+from PatternOmatic.settings.log import LOG
 from PatternOmatic.settings.literals import *
 
 config = Config()
@@ -224,6 +224,5 @@ class Individual(object):
         """
         if self.stats.solution_found is False:
             self.stats.sum_aes(1)
-            logging.debug('Solution not found yet')
             if self.fitness_value >= config.success_threshold:
                 self.stats.solution_found = True

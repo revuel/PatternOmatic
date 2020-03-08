@@ -5,6 +5,7 @@ from PatternOmatic.ge.individual import Individual
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.log import LOG
 
 config = Config()
 
@@ -245,6 +246,10 @@ class Population(object):
         2) Crossover or recombination of the previously selected individuals
         3) Replace the this generation with the offspring
         4) Save the best individual by fitness """
+
+        LOG.debug('New execution run...')
+
+        self.stats.reset()
 
         for _ in range(config.max_generations):
             mating_pool = self._selection()
