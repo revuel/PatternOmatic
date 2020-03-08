@@ -12,7 +12,6 @@ class Stats(object):
         self._time_accumulator = list()
         self._most_fitted_accumulator = list()
         self._solution_found = False
-        # self._config_copy = None
         self._success_rate = None
         self._mbf = None
         self._aes = None
@@ -91,6 +90,11 @@ class Stats(object):
     #
     # Metrics
     #
+    def reset(self):
+        """ Resets variables that depend on the run """
+        self._aes_counter = 0
+        self._solution_found = False
+
     def calculate_metrics(self):
         """ Calculates the common GE evaluation metrics """
         self.add_aes(self._aes_counter)
