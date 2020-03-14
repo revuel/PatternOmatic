@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """ PatternOmatic command line """
 import sys
+import time
 import argparse
 import spacy
 from spacy.tokens.doc import Doc
@@ -28,9 +29,11 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
 
     LOG.debug('Starting Execution...')
     for _ in range(0, config.max_runs):
-
+        start = time.monotonic()
         p = Population(text_samples, bnf_g, stats)
         p.evolve()
+        end = time.monotonic()
+        stats.add_time(end - start)
 
     LOG.info('Execution report {}'.format(dict(stats)))
 

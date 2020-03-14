@@ -21,12 +21,17 @@ def str2bool(vargin: str) -> bool:
 class SingletonMetaNaive(type):
     """ The Naive Singleton Design Pattern of type Metaclass builder """
 
-    _instance: Optional[Config] = None
+    _instance: Optional[Config, None] = None
 
     def __call__(cls, config_file_path: str = None) -> Config:
         if cls._instance is None:
+            LOG.debug('Creating config object!')
             cls._instance = super().__call__(config_file_path)
         return cls._instance
+
+    def clear_instance(self):
+        LOG.debug('Removing config object!')
+        del self._instance
 
 
 class Config(metaclass=SingletonMetaNaive):
@@ -218,7 +223,9 @@ class Config(metaclass=SingletonMetaNaive):
     def fitness_function_type(self, value: int) -> None:
         self._fitness_function_type = value
 
-    # Configuration restrictions
+    #
+    # Restrictions
+    #
     def _check_xps_op_restriction(self):
         if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
             LOG.warning('Extended Pattern Syntax is not compatible with the usage of grammar operators')
@@ -320,6 +327,17 @@ class Config(metaclass=SingletonMetaNaive):
             except FileNotFoundError:
                 LOG.warning('Unable to locate configuration file, using default configuration parameters')
                 self._load_default()
+            except KeyError as ke:
+                LOG.warning('Malformed config file ({})! Using default configuration parameters'.format(repr(ke)))
+                self._load_default()
+            except ValueError as ve:
+                LOG.warning('Malformed config file ({})! Using default configuration parameters'.format(repr(ve)))
+                self._load_default()
+        else:
+            LOG.warning('Configuration file not set, using default configuration parameters')
+            self._load_default()
+
+        LOG.info('Configuration parameters: {}'.format(dict(self)))
 
     def reload(self, config_file_path: str):
         """
