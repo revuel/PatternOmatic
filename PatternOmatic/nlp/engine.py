@@ -5,8 +5,6 @@ from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
 from PatternOmatic.settings.log import LOG
 
-config = Config()
-
 
 #
 # Dynamic Grammar (Backus Naur Grammar) Generator
@@ -21,6 +19,10 @@ def dynagg(samples: [Doc]) -> dict:
     Returns: Backus Naur Form grammar notation encoded in a dictionary
 
     """
+    config = Config()
+
+    LOG.info('Generating BNF based on the following samples: {}'.format(str(samples)))
+
     # BNF root
     pattern_grammar = {S: [P]}
 
@@ -73,7 +75,7 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar[T].append(UNDERSCORE)
         pattern_grammar[T].append(F + "," + UNDERSCORE)
 
-    LOG.debug('Dynamically generated BNF: {}'.format(str(pattern_grammar)))
+    LOG.info('Dynamically generated BNF: {}'.format(str(pattern_grammar)))
 
     return pattern_grammar
 
@@ -90,6 +92,8 @@ def _features_seen(samples: [Doc]) -> int and dict:
     Returns: Integer, the max length of a doc within the sample and a dict of features
 
     """
+    config = Config()
+
     # Just tokenizer features
     orth_list = []
     text_list = []
@@ -254,6 +258,8 @@ def _get_features_per_token(features_dict: dict) -> int:
     Returns: integer
 
     """
+    config = Config()
+
     if config.features_per_token == 0:
         max_length_features = len(features_dict.keys())
     else:
@@ -326,11 +332,11 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 IS_OOV: bool_list,
                 IS_QUOTE: bool_list,
                 IS_RIGHT_PUNCT: bool_list,
-                IS_SENT_START: bool_list,
+                # IS_SENT_START: bool_list,
                 LANG: sorted(list(set([token._.CUSTOM_LANG_ for token in tokens]))),
                 NORM: sorted(list(set([token._.CUSTOM_NORM_ for token in tokens]))),
                 PREFIX: sorted(list(set([token._.CUSTOM_PREFIX_ for token in tokens]))),
-                PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
+                #PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
                 SENTIMENT: sorted(list(set([token._.CUSTOM_SENTIMENT for token in tokens]))),
                 STRING: sorted(list(set([token._.CUSTOM_STRING for token in tokens]))),
                 SUFFIX: sorted(list(set([token._.CUSTOM_SUFFIX_ for token in tokens]))),

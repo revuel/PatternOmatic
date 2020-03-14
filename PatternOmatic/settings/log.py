@@ -3,7 +3,7 @@ import sys
 from logging.handlers import TimedRotatingFileHandler
 
 FORMATTER = \
-    logging.Formatter('[%(levelname)s] %(asctime)s %(filename)s:%(funcName)s:%(lineno)d > %(message)s')
+    logging.Formatter('[%(levelname)s] %(asctime)s %(filename)s:%(funcName)s:%(lineno)d : %(message)s')
 
 LOG_FILE = '/tmp/patternomatic.log'
 
@@ -40,7 +40,7 @@ def get_logger(logger_name):
 
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.CRITICAL)
     logger.addHandler(get_console_handler())
     logger.addHandler(get_file_handler())
     logger.propagate = False
