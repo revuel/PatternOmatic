@@ -8,11 +8,11 @@ from PatternOmatic.ge.individual import Individual
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
 
-config = Config()
-
 
 class TestIndividual(unittest.TestCase):
     """ Unit Test class for GE Individual object """
+    config = Config()
+
     nlp = spacy.load("en_core_web_sm")
 
     samples = [nlp(u'I am a raccoon!'),
@@ -34,7 +34,7 @@ class TestIndividual(unittest.TestCase):
 
     def test_transcription(self):
         """ Check for transcription idempotency """
-        config.mutation_probability = 0.0
+        self.config.mutation_probability = 0.0
         i = Individual(self.samples, self.grammar, self.stats, '11111111')
         i._transcription()
         i._transcription()
@@ -44,7 +44,7 @@ class TestIndividual(unittest.TestCase):
 
     def test_translation(self):
         """ Check for translation idempotency """
-        config.mutation_probability = 0.0
+        self.config.mutation_probability = 0.0
         i = Individual(self.samples, self.grammar, self.stats, '11111111')
         i._translation()
         i._translation()
@@ -53,25 +53,31 @@ class TestIndividual(unittest.TestCase):
             i.fenotype, [{'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}])
 
     def test_mutation(self):
-        config.mutation_probability = 1.0
+        self.config.mutation_probability = 1.0
         i = Individual(self.samples, self.grammar, self.stats, '11111111')
         super().assertNotEqual(i.bin_genotype, '11111111')
 
     def test_fitness_basic(self):
         """ Fitness "basic" sets fitness """
-        config.mutation_probability = 0.0
-        config.fitness_function_type = FITNESS_BASIC
+        self.config.mutation_probability = 0.0
+        self.config.fitness_function_type = FITNESS_BASIC
         i = Individual(self.samples, self.grammar, self.stats, '00101001011010000011001111001110')
 
         super().assertEqual(i.fitness_value, 0.4)
 
     def test_fitness_fullmatch(self):
         """ Fitness "full match" sets fitness """
-        config.mutation_probability = 0.0
-        config.fitness_function_type = FITNESS_FULLMATCH
+        self.config.mutation_probability = 0.0
+        self.config.fitness_function_type = FITNESS_FULLMATCH
         i = Individual(self.samples, self.grammar, self.stats, '11100010101000111001010100111011')
 
         super().assertEqual(i.fitness_value, 0.25)
+
+    def setUp(self) -> None:
+        self.config = Config()
+
+    def tearDown(self) -> None:
+        Config.clear_instance()
 
 
 if __name__ == "__main__":
