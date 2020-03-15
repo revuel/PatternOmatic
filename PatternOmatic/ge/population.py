@@ -263,7 +263,7 @@ class Population(object):
             self._best_challenge()
             # self._info()
 
-        LOG.debug('Best candidate found on this run: {}'.format(dict(self.best_individual)))
+        LOG.info('Best candidate found on this run: {}'.format(dict(self.best_individual)))
 
         # Stats concerns
         self.stats.add_most_fitted(self.best_individual)
