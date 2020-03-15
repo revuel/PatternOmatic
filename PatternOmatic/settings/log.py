@@ -40,7 +40,7 @@ def get_logger(logger_name):
 
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.CRITICAL)
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(get_console_handler())
     logger.addHandler(get_file_handler())
     logger.propagate = False

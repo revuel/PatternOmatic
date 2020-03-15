@@ -16,7 +16,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
     """
     Given some samples, this function finds an optimized pattern to be used by the Spacy's Rule Based Matcher
     Args:
-        text_samples: Text phrases
+        text_samples: List of Docs (as samples)
         config_file_path: Optional path for configuration file
 
     Returns: None

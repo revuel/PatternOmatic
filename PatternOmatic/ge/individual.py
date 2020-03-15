@@ -109,8 +109,8 @@ class Individual(object):
         while done is not True:
             # First save previous iteration copy
             old_symbolic_string = symbolic_string
+            ci = next(circular)
             for key in self.grammar.keys():
-                ci = next(circular)
                 fire = divmod(ci, len(self.grammar[key]))[1]
                 if key in [T, XPS]:
                     fired_rule = self.grammar[key][fire]
@@ -177,7 +177,6 @@ class Individual(object):
         Returns: Float
 
         """
-        LOG.debug('Calculating fitness')
         if self.config.fitness_function_type == FITNESS_BASIC:
             return self._fitness_basic()
         elif self.config.fitness_function_type == FITNESS_FULLMATCH:
@@ -238,6 +237,7 @@ class Individual(object):
         if self.stats.solution_found is False:
             self.stats.sum_aes(1)
             if self.fitness_value >= self.config.success_threshold:
+                LOG.debug('Solution found for this run!')
                 self.stats.solution_found = True
 
     #

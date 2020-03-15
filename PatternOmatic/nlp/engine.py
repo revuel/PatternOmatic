@@ -7,7 +7,7 @@ from PatternOmatic.settings.log import LOG
 
 
 #
-# Dynamic Grammar (Backus Naur Grammar) Generator
+# Dynamic Grammar (Backus Naur Form) Generator
 #
 def dynagg(samples: [Doc]) -> dict:
     """

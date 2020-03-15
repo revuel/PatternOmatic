@@ -50,7 +50,7 @@ class TestIndividual(unittest.TestCase):
         i._translation()
         i._translation()
         super().assertListEqual(
-            i.fenotype, [{'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}])
+            i.fenotype, [{'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}])
 
     def test_mutation(self):
         self.config.mutation_probability = 1.0
@@ -61,15 +61,15 @@ class TestIndividual(unittest.TestCase):
         """ Fitness "basic" sets fitness """
         self.config.mutation_probability = 0.0
         self.config.fitness_function_type = FITNESS_BASIC
-        i = Individual(self.samples, self.grammar, self.stats, '00101001011010000011001111001110')
+        i = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
 
-        super().assertEqual(i.fitness_value, 0.4)
+        super().assertEqual(i.fitness_value, 0.2)
 
     def test_fitness_fullmatch(self):
         """ Fitness "full match" sets fitness """
         self.config.mutation_probability = 0.0
         self.config.fitness_function_type = FITNESS_FULLMATCH
-        i = Individual(self.samples, self.grammar, self.stats, '11100010101000111001010100111011')
+        i = Individual(self.samples, self.grammar, self.stats, '01101010100001101000110111000100')
 
         super().assertEqual(i.fitness_value, 0.25)
 
