@@ -1,11 +1,12 @@
 """ GE Various metrics are saved here """
 import operator
+from PatternOmatic.settings.log import LOG
 
 
 class Stats(object):
     """ Class responsible of handling performance metrics """
     def __init__(self):
-        """ Stats instances constructor"""
+        """ Stats instances constructor """
         self._success_rate_accumulator = list()
         self._mbf_accumulator = list()
         self._aes_accumulator = list()
@@ -160,8 +161,46 @@ class Stats(object):
 
     @staticmethod
     def avg(al: list) -> float:
+        """
+        Returns the mean of a list if the list is not empty
+        Args:
+            al: List instance
+
+        Returns: float, the mean/average of the list
+
+        """
         return sum(al) / len(al) if len(al) > 0 else 0.0
 
-    @staticmethod
-    def persist(stats: any):
-        pass
+    def persist(self, report_format: str = 'csv') -> None:
+        """
+        Makes or append execution result to file
+        Args:
+            report_format: Append stats as json or csv without headers
+
+        Returns: None
+
+        """
+        if report_format is 'json':
+            with open('patternomatic_report.txt', mode='a') as f:
+                f.writelines(str(dict(self)) + '\n')
+        elif report_format is 'csv':
+            with open('patternomatic_report.txt', mode='a') as f:
+                f.writelines(self._to_csv() + '\n')
+        else:
+            LOG.warning(f'Unexpected format {format}, falling back to default format (csv)')
+            with open('patternomatic_report.txt', mode='a') as f:
+                f.writelines(self._to_csv() + '\n')
+
+    def _to_csv(self):
+        """
+        Comma Separated Value representation of a Stats instance object
+        Returns: String, csv self
+
+        """
+        csv = ''
+        for k, v in dict(self).items():
+            if not type(v) is dict:
+                csv = csv + str(v) + ','
+            else:
+                csv = csv + str(v['Fitness']) + ',' + str(v['Fenotype'])
+        return csv

@@ -36,6 +36,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
         stats.add_time(end - start)
 
     LOG.info('Execution report {}'.format(dict(stats)))
+    stats.persist()
 
 
 if __name__ == '__main__':
@@ -89,7 +90,7 @@ if __name__ == '__main__':
 
         # Convert to Doc sample arguments
         for index, item in enumerate(parsed_args.sample):
-            parsed_args.sample[index] = nlp(u" ".join(item))
+            parsed_args.sample[index] = nlp(u' '.join(item))
 
         #
         # Find pattern
