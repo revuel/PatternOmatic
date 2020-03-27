@@ -1,5 +1,10 @@
 all: reqs cvrg build sscas
 
+clean:
+	rm -rf `pwd`/build
+	rm -rf `pwd`/dist
+	rm -rf `pwd`/PatternOmatic.egg-info
+
 reqs:
 	pip install -r requirements.txt
 
@@ -19,7 +24,6 @@ sscas:
 build:
 	export PYTHONPATH=`pwd`/venv/bin/python3
 	`pwd`/venv/bin/python3 setup.py sdist bdist_wheel
-	# `pwd`/venv/bin/python3 setup.py sdist bdist_wheel
 
 armor:
 	export PYTHONPATH=`pwd`/venv/bin/python3
@@ -27,4 +31,4 @@ armor:
 
 run:
 	export PYTHONPATH=`pwd`/venv/bin/python3
-	python3 scripts/patternomatic.py -s hola
+	`pwd`/venv/bin/python3 `pwd`/scripts/patternomatic.py -s hello Mr. Puffin -s Goodbye Mrs. Muffin
