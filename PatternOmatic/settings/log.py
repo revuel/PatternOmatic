@@ -1,3 +1,4 @@
+""" Logging module for patternOmatic"""
 import logging
 import sys
 from logging.handlers import TimedRotatingFileHandler
@@ -8,7 +9,7 @@ FORMATTER = \
 LOG_FILE = '/tmp/patternomatic.log'
 
 
-def get_console_handler():
+def _get_console_handler():
     """
     Console handler logger
     Returns:
@@ -19,7 +20,7 @@ def get_console_handler():
     return console_handler
 
 
-def get_file_handler():
+def _get_file_handler():
     """
     File handler logger
     Returns:
@@ -41,8 +42,8 @@ def get_logger(logger_name):
     """
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
-    logger.addHandler(get_console_handler())
-    logger.addHandler(get_file_handler())
+    logger.addHandler(_get_console_handler())
+    logger.addHandler(_get_file_handler())
     logger.propagate = False
     return logger
 

@@ -9,7 +9,7 @@ from PatternOmatic.settings.log import LOG
 
 
 class Population(object):
-    """ Population implementation of a AI Grammatical Evolution algorithm in OOP fashion """
+    """ Population implementation of an AI Grammatical Evolution algorithm in OOP fashion """
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats):
         """
@@ -23,7 +23,7 @@ class Population(object):
         self._samples = samples
         self._grammar = grammar
         self._stats = stats
-        self._generation = self._initialize()
+        self._generation = self._birth()
         self._offspring = list()
         self._best_individual = None
 
@@ -70,14 +70,7 @@ class Population(object):
     def best_individual(self, best_individual: Individual):
         self._best_individual = best_individual
 
-    def _info(self):
-        """
-        Prints current generation individuals' fenotype and fitness value
-        """
-        for individual in self.generation:
-            print("Fenotype: ", str(individual.fenotype), "Fitness value: ", individual.fitness_value)
-
-    def _initialize(self) -> [Individual]:
+    def _birth(self) -> [Individual]:
         """
         Initializes the first generation
         Returns: A list of individual objects
@@ -202,11 +195,13 @@ class Population(object):
                 # Create children
                 child_1 = \
                     Individual(self.samples, self.grammar, self.stats,
-                               dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[-(self.config.dna_length - cut):])
+                               dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[
+                                                                 -(self.config.dna_length - cut):])
 
                 child_2 = \
                     Individual(self.samples, self.grammar, self.stats,
-                               dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[-(self.config.dna_length - cut):])
+                               dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[
+                                                                 -(self.config.dna_length - cut):])
 
                 offspring.append(child_1)
                 offspring.append(child_2)
@@ -249,8 +244,9 @@ class Population(object):
         """ Search Engine
         1) Selects individuals of the current generation to constitute who will mate
         2) Crossover or recombination of the previously selected individuals
-        3) Replace the this generation with the offspring
-        4) Save the best individual by fitness """
+        3) Replace/mix the this generation with the offspring
+        4) Save the best individual by fitness
+        5) Calculates statistics for this Run """
 
         LOG.info('Evolution taking place!')
 
@@ -261,9 +257,8 @@ class Population(object):
             self.offspring = self._recombination(mating_pool)
             self._replacement()
             self._best_challenge()
-            # self._info()
 
-        LOG.info('Best candidate found on this run: {}'.format(dict(self.best_individual)))
+        LOG.info(f'Best candidate found on this run: {dict(self.best_individual)}')
 
         # Stats concerns
         self.stats.add_most_fitted(self.best_individual)

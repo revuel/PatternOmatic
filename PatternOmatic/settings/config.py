@@ -70,6 +70,7 @@ class Config(metaclass=SingletonMetaNaive):
         yield 'Using token wildcards?', self.use_token_wildcard
         yield 'Using extended pattern syntax?', self.use_extended_pattern_syntax
         yield 'Fitness function type', self.fitness_function_type
+        yield 'Report path', self.report_path
 
     @property
     def max_runs(self) -> int:
@@ -223,6 +224,14 @@ class Config(metaclass=SingletonMetaNaive):
     def fitness_function_type(self, value: int) -> None:
         self._fitness_function_type = value
 
+    @property
+    def report_path(self):
+        return self._report_path
+
+    @report_path.setter
+    def report_path(self, value: str) -> None:
+        self._report_path = value
+
     #
     # Restrictions
     #
@@ -275,6 +284,9 @@ class Config(metaclass=SingletonMetaNaive):
         # Problem specific configuration options
         self._fitness_function_type = FITNESS_FULLMATCH
 
+        # Other
+        self.report_path = '/tmp/patternOmatic_report.txt'
+
     def _load_from_file(self, config_file_path: str = None):
         """
 
@@ -321,23 +333,26 @@ class Config(metaclass=SingletonMetaNaive):
                 # Problem specific configuration options
                 self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
 
-                # CONFIGURATION CHECKS (FILE ONLY)
+                # Configuration validation (only when reading from config.ini)
                 self._check_xps_op_restriction()
+
+                # Other
+                self.report_path = config_parser['OS'][REPORT_PATH]
 
             except FileNotFoundError:
                 LOG.warning('Unable to locate configuration file, using default configuration parameters')
                 self._load_default()
             except KeyError as ke:
-                LOG.warning('Malformed config file ({})! Using default configuration parameters'.format(repr(ke)))
+                LOG.warning(f'Malformed config file ({repr(ke)})! Using default configuration parameters')
                 self._load_default()
             except ValueError as ve:
-                LOG.warning('Malformed config file ({})! Using default configuration parameters'.format(repr(ve)))
+                LOG.warning(f'Malformed config file ({repr(ve)})! Using default configuration parameters')
                 self._load_default()
         else:
             LOG.warning('Configuration file not set, using default configuration parameters')
             self._load_default()
 
-        LOG.info('Configuration parameters: {}'.format(dict(self)))
+        LOG.info(f'Configuration parameters: {dict(self)}')
 
     def reload(self, config_file_path: str):
         """
