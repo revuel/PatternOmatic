@@ -336,7 +336,7 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 LANG: sorted(list(set([token._.CUSTOM_LANG_ for token in tokens]))),
                 NORM: sorted(list(set([token._.CUSTOM_NORM_ for token in tokens]))),
                 PREFIX: sorted(list(set([token._.CUSTOM_PREFIX_ for token in tokens]))),
-                #PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
+                # PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
                 SENTIMENT: sorted(list(set([token._.CUSTOM_SENTIMENT for token in tokens]))),
                 STRING: sorted(list(set([token._.CUSTOM_STRING for token in tokens]))),
                 SUFFIX: sorted(list(set([token._.CUSTOM_SUFFIX_ for token in tokens]))),

@@ -1,4 +1,5 @@
 """ Literals & constants module """
+REPORT_PATH = 'REPORT_PATH'
 
 ''' GE Related literals '''
 # Selection types

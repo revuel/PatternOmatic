@@ -36,7 +36,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
         stats.add_time(end - start)
 
     LOG.info('Execution report {}'.format(dict(stats)))
-    stats.persist()
+    stats.persist(config.report_path)
 
 
 if __name__ == '__main__':

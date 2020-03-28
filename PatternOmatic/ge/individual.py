@@ -14,9 +14,7 @@ from PatternOmatic.settings.literals import *
 
 
 class Individual(object):
-    """
-    Individual implementation of a AI Grammatical Evolution algorithm in OOP fashion
-    """
+    """ Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion """
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats, dna: str = None):
         """
@@ -24,6 +22,7 @@ class Individual(object):
         Args:
             samples: list of Spacy doc objects
             grammar: Backus Naur Form grammar notation encoded in a dictionary
+            stats (Stats): statistics object related with this run
             dna: Optional, binary string representation
         """
         self._config = Config()
@@ -40,6 +39,7 @@ class Individual(object):
         self._is_solution()
 
     def __iter__(self):
+        """ Iterable instance """
         yield 'Genotype', self._bin_genotype
         yield 'Fenotype', self._fenotype
         yield 'Fitness', self._fitness_value
@@ -204,8 +204,8 @@ class Individual(object):
 
     def _fitness_fullmatch(self) -> float:
         """
-        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals full length
-        of the sample
+        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals the full
+        length of the sample
         Returns: Float
 
         """

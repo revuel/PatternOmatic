@@ -21,6 +21,7 @@ class Stats(object):
         self._aes_counter = 0
 
     def __iter__(self):
+        """ Iterable instance """
         yield 'SR', self._success_rate
         yield 'MBF', self._mbf
         yield 'AES', self._aes
@@ -171,30 +172,31 @@ class Stats(object):
         """
         return sum(al) / len(al) if len(al) > 0 else 0.0
 
-    def persist(self, report_format: str = 'csv') -> None:
+    def persist(self, report_path: str, report_format: str = 'csv') -> None:
         """
         Makes or append execution result to file
         Args:
+            report_path: Full Os path and filename for the report
             report_format: Append stats as json or csv without headers
 
         Returns: None
 
         """
         if report_format is 'json':
-            with open('patternomatic_report.txt', mode='a') as f:
+            with open(report_path, mode='a+') as f:
                 f.writelines(str(dict(self)) + '\n')
         elif report_format is 'csv':
-            with open('patternomatic_report.txt', mode='a') as f:
+            with open(report_path, mode='a+') as f:
                 f.writelines(self._to_csv() + '\n')
         else:
             LOG.warning(f'Unexpected format {format}, falling back to default format (csv)')
-            with open('patternomatic_report.txt', mode='a') as f:
+            with open(report_path, mode='a+') as f:
                 f.writelines(self._to_csv() + '\n')
 
     def _to_csv(self):
         """
-        Comma Separated Value representation of a Stats instance object
-        Returns: String, csv self
+        Generates Comma Separated Value (csv) representation of a Stats instance object
+        Returns: String, csv instance representation
 
         """
         csv = ''
@@ -202,5 +204,6 @@ class Stats(object):
             if not type(v) is dict:
                 csv = csv + str(v) + ','
             else:
-                csv = csv + str(v['Fitness']) + ',' + str(v['Fenotype'])
+                # Fenotype json representation requires adjustment
+                csv = csv + str(v['Fitness']) + ',' + str(v['Fenotype']).replace(', ', '|')
         return csv
