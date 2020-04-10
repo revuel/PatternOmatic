@@ -12,7 +12,7 @@ def str2bool(vargin: str) -> bool:
     Args:
         vargin: argument to evaluate
 
-    Returns: True if v in string set, False otherwise
+    Returns: True if vargin in string set, False otherwise
 
     """
     return vargin.lower() in ('Yes', 'yes', 'True', 'true', '1')
@@ -76,9 +76,17 @@ class Config(metaclass=SingletonMetaNaive):
     def max_runs(self) -> int:
         return self._max_runs
 
+    @max_runs.setter
+    def max_runs(self, value) -> None:
+        self._max_runs = value
+
     @property
     def success_threshold(self) -> float:
         return self._success_threshold
+
+    @success_threshold.setter
+    def success_threshold(self, value: float) -> None:
+        self._success_threshold = value
 
     @property
     def population_size(self) -> int:
@@ -86,7 +94,7 @@ class Config(metaclass=SingletonMetaNaive):
 
     @population_size.setter
     def population_size(self, value: int) -> None:
-        self.population_size = value
+        self._population_size = value
 
     @property
     def max_generations(self) -> int:
@@ -101,8 +109,8 @@ class Config(metaclass=SingletonMetaNaive):
         return self._codon_length
 
     @codon_length.setter
-    def codon_length(self, value) -> None:
-        self.codon_length = value
+    def codon_length(self, value: int) -> None:
+        self._codon_length = value
 
     @property
     def num_codons_per_individual(self) -> int:
@@ -132,9 +140,17 @@ class Config(metaclass=SingletonMetaNaive):
     def mating_probability(self) -> float:
         return self._mating_probability
 
+    @mating_probability.setter
+    def mating_probability(self, value: float) -> None:
+        self._mating_probability = value
+
     @property
     def k_value(self) -> int:
         return self._k_value
+
+    @k_value.setter
+    def k_value(self, value: int):
+        self._k_value = value
 
     @property
     def selection_type(self) -> str:
