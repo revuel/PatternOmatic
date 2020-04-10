@@ -47,6 +47,8 @@ class Config(metaclass=SingletonMetaNaive):
         else:
             self._load_default()
 
+        LOG.debug(f'Configuration parameters: {dict(self)}')
+
     def __iter__(self):
         yield 'Number of runs', self.max_runs
         yield 'Success Threshold', self.success_threshold
@@ -77,7 +79,7 @@ class Config(metaclass=SingletonMetaNaive):
         return self._max_runs
 
     @max_runs.setter
-    def max_runs(self, value) -> None:
+    def max_runs(self, value: int) -> None:
         self._max_runs = value
 
     @property
