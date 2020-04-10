@@ -190,19 +190,20 @@ class Individual(object):
 
     def _fitness_basic(self) -> float:
         """
-        Sets the fitness value for an individual.
+        Sets the fitness value for an individual. If makes a partial match over a sample, a score is added
+        for that sample even if the matches are only a portion of the sample's length
         Returns: Float (fitness value)
 
         """
+        max_score_per_sample = 1 / len(self.samples)
         matchy = Matcher(self.samples[0].vocab)
         matchy.add("basic", None, self.fenotype)
         contact = 0.0
+
         for sample in self.samples:
             matches = matchy(sample)
             if len(matches) > 0:
-                for match in matches:
-                    contact += (match[2] - match[1]) / len(sample)
-        contact = contact / len(self.samples) if contact != 0.0 else contact
+                contact += max_score_per_sample
 
         return self._wildcard_penalty(contact)
 

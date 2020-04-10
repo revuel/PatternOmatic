@@ -25,10 +25,12 @@ class TestIndividual(unittest.TestCase):
     stats = Stats()
 
     def test_init(self):
+        """ Test that Individual instantiation works"""
         i = Individual(self.samples, self.grammar, self.stats)
         super().assertNotEqual(i, None)
 
     def test_init_with_dna(self):
+        """ Test that Individual instantiation works when providing dna"""
         i = Individual(self.samples, self.grammar, self.stats,  '10101010101010101010101010101010')
         super().assertNotEqual(i, None)
 
@@ -53,6 +55,7 @@ class TestIndividual(unittest.TestCase):
             i.fenotype, [{'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}, {'TEXT': '?'}, {'TEXT': 'am'}])
 
     def test_mutation(self):
+        """ Checks that mutation works """
         self.config.mutation_probability = 1.0
         i = Individual(self.samples, self.grammar, self.stats, '11111111')
         super().assertNotEqual(i.bin_genotype, '11111111')
@@ -63,7 +66,7 @@ class TestIndividual(unittest.TestCase):
         self.config.fitness_function_type = FITNESS_BASIC
         i = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
 
-        super().assertEqual(i.fitness_value, 0.2)
+        super().assertEqual(i.fitness_value, 0.25)
 
     def test_fitness_fullmatch(self):
         """ Fitness "full match" sets fitness """
