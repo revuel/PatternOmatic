@@ -1,7 +1,9 @@
-""" Literals & constants module """
+""" Literals/constants module """
 REPORT_PATH = 'REPORT_PATH'
 
-''' GE Related literals '''
+#
+# GE Related literals
+#
 # Selection types
 BINARY_TOURNAMENT = 'Binary tournament'
 K_TOURNAMENT = 'K tournament'
@@ -15,7 +17,9 @@ MU_LAMBDA_WITHOUT_ELITISM = 'Mu lambda without elitism'
 FITNESS_BASIC = 'Basic fitness function'
 FITNESS_FULLMATCH = 'Fullmatch fitness function'
 
-''' Dynamic grammar generation related literals '''
+#
+# Dynamic grammar generation related literals
+#
 # Symbol delimiters
 SLD = '<'
 SRD = '>'
@@ -94,7 +98,9 @@ SUFFIX = SLD + 'CUSTOM_SUFFIX_' + SRD
 TEXT_WITH_WS = SLD + 'CUSTOM_TEXT_WITH_WS' + SRD
 WHITESPACE = SLD + 'CUSTOM_WHITESPACE_' + SRD
 
-''' Config ini literals '''
+#
+# Config ini literals
+#
 GE = 'GE'
 MAX_RUNS = 'MAX_RUNS'
 SUCCESS_THRESHOLD = 'SUCCESS_THRESHOLD'

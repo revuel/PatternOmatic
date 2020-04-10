@@ -12,7 +12,7 @@ from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.log import LOG
 
 
-def find_pattern(text_samples: [Doc], config_file_path: str = None):
+def find_pattern(text_samples: [Doc], config_file_path: str = None) -> None:
     """
     Given some samples, this function finds an optimized pattern to be used by the Spacy's Rule Based Matcher
     Args:
@@ -40,7 +40,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
 
 
 if __name__ == '__main__':
-    # execute only if run as a script
+    # Execute only if run as a script
     LOG.info('Parsing command line arguments...')
     try:
         cli = argparse.ArgumentParser(description='Finds the Spacy\'s Matcher pattern for the given samples')
