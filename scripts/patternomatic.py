@@ -22,8 +22,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
     Returns: None
 
     """
-    config = Config()
-    config.reload(config_file_path)
+    config = Config(config_file_path=config_file_path)
     stats = Stats()
     bnf_g = dgg(text_samples)
 
@@ -34,8 +33,9 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None):
         p.evolve()
         end = time.monotonic()
         stats.add_time(end - start)
+        stats.calculate_metrics()
 
-    LOG.info('Execution report {}'.format(dict(stats)))
+    LOG.info(f'Execution report {dict(stats)}')
     stats.persist(config.report_path)
 
 
@@ -83,8 +83,8 @@ if __name__ == '__main__':
         try:
             nlp = spacy.load(parsed_args.language)
         except OSError:
-            LOG.warning('Model {} not found, falling back to patternOmatic\'s default langugage model: '
-                        'en_core_web_sm'.format(parsed_args.language))
+            LOG.warning(f'Model {parsed_args.language} not found, falling back to patternOmatic\'s default '
+                        f'langugage model: en_core_web_sm')
 
             nlp = spacy.load('en_core_web_sm')
 
@@ -98,5 +98,5 @@ if __name__ == '__main__':
         find_pattern(parsed_args.sample, config_file_path=parsed_args.config)
 
     except Exception as ex:
-        LOG.critical(repr(ex))
+        LOG.critical(f'Fatal error: {repr(ex)}')
         raise Exception(ex)

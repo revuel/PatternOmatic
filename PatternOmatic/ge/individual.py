@@ -145,7 +145,11 @@ class Individual(object):
             if old_symbolic_string == symbolic_string:
                 done = True
 
-        return json.loads("[" + symbolic_string + "]")
+        translated_individual = '[' + symbolic_string + ']'
+
+        # # LOG.debug(f'Individual\'s fenotype: {str(translated_individual)}')
+
+        return json.loads(translated_individual)
 
     # Generic GA methods
     @classmethod
