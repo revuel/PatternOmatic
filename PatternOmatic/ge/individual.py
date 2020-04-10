@@ -1,7 +1,6 @@
 """ Individual class """
 import re
 import json
-import logging
 
 from random import random
 from itertools import cycle
@@ -10,15 +9,12 @@ from spacy.matcher import Matcher
 
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
+from PatternOmatic.settings.log import LOG
 from PatternOmatic.settings.literals import *
-
-config = Config()
 
 
 class Individual(object):
-    """
-    Individual implementation of a AI Grammatical Evolution algorithm in OOP fashion
-    """
+    """ Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion """
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats, dna: str = None):
         """
@@ -26,25 +22,33 @@ class Individual(object):
         Args:
             samples: list of Spacy doc objects
             grammar: Backus Naur Form grammar notation encoded in a dictionary
+            stats (Stats): statistics object related with this run
             dna: Optional, binary string representation
         """
+        self._config = Config()
+
         self._samples = samples
         self._grammar = grammar
         self._stats = stats
-        self._bin_genotype = self._initialize() if dna is None else self.mutate(dna)
+        self._bin_genotype = self._initialize() if dna is None else self.mutate(dna, self._config.mutation_probability)
         self._int_genotype = self._transcription()
         self._fenotype = self._translation()
         self._fitness_value = self.fitness()
 
         # Stats concerns
-        self.is_solution()
+        self._is_solution()
 
     def __iter__(self):
+        """ Iterable instance """
         yield 'Genotype', self._bin_genotype
         yield 'Fenotype', self._fenotype
         yield 'Fitness', self._fitness_value
 
     # Properties & setters
+    @property
+    def config(self) -> Config:
+        return self._config
+
     @property
     def samples(self) -> [Doc]:
         return self._samples
@@ -74,14 +78,14 @@ class Individual(object):
         return self._fitness_value
 
     # Specific GE methods
-    @staticmethod
-    def _initialize() -> str:
+    def _initialize(self) -> str:
         """
         Sets up randomly the binary string representation of an individual
         Returns: String, binary fashion
 
         """
-        return ''.join([''.join('1') if random() > 0.5 else ''.join('0') for _ in range(0, config.dna_length)]).strip()
+        return ''.join([''.join('1') if random() > 0.5
+                        else ''.join('0') for _ in range(0, self.config.dna_length)]).strip()
 
     def _transcription(self) -> [int]:
         """
@@ -89,8 +93,8 @@ class Individual(object):
         Returns: List of integers
 
         """
-        return [int(self.bin_genotype[i:(i+config.codon_length-1)], 2)
-                for i in range(0, len(self.bin_genotype), config.codon_length-1)]
+        return [int(self.bin_genotype[i:(i+self.config.codon_length-1)], 2)
+                for i in range(0, len(self.bin_genotype), self.config.codon_length-1)]
 
     def _translation(self):
         """
@@ -105,8 +109,8 @@ class Individual(object):
         while done is not True:
             # First save previous iteration copy
             old_symbolic_string = symbolic_string
+            ci = next(circular)
             for key in self.grammar.keys():
-                ci = next(circular)
                 fire = divmod(ci, len(self.grammar[key]))[1]
                 if key in [T, XPS]:
                     fired_rule = self.grammar[key][fire]
@@ -141,15 +145,20 @@ class Individual(object):
             if old_symbolic_string == symbolic_string:
                 done = True
 
-        return json.loads("[" + symbolic_string + "]")
+        translated_individual = '[' + symbolic_string + ']'
+
+        # # LOG.debug(f'Individual\'s fenotype: {str(translated_individual)}')
+
+        return json.loads(translated_individual)
 
     # Generic GA methods
     @classmethod
-    def mutate(cls, dna) -> str:
+    def mutate(cls, dna, mutation_probability) -> str:
         """
         Mutates a given dna string by a mutation probability
         Args:
             dna: binary string representation of a dna sequence
+            mutation_probability: Chances of each gen to be mutated
 
         Returns: Binary string
 
@@ -157,7 +166,7 @@ class Individual(object):
         mutated_dna = ''
 
         for gen in dna:
-            if random() < config.mutation_probability:
+            if random() < mutation_probability:
                 if gen == '1':
                     mutated_dna += '0'
                 else:
@@ -172,39 +181,44 @@ class Individual(object):
         Returns: Float
 
         """
-        if config.fitness_function_type == FITNESS_BASIC:
+        if self.config.fitness_function_type == FITNESS_BASIC:
             return self._fitness_basic()
-        elif config.fitness_function_type == FITNESS_FULLMATCH:
+        elif self.config.fitness_function_type == FITNESS_FULLMATCH:
             return self._fitness_fullmatch()
         else:
-            raise ValueError('Invalid fitness function type: ', config.fitness_function_type)
+            raise ValueError('Invalid fitness function type: ', self.config.fitness_function_type)
 
     def _fitness_basic(self) -> float:
         """
-        Sets the fitness value for an individual.
+        Sets the fitness value for an individual. If makes a partial match over a sample, a score is added
+        for that sample even if the matches are only a portion of the sample's length
         Returns: Float (fitness value)
 
         """
+        max_score_per_sample = 1 / len(self.samples)
         matchy = Matcher(self.samples[0].vocab)
         matchy.add("basic", None, self.fenotype)
         contact = 0.0
+
         for sample in self.samples:
             matches = matchy(sample)
             if len(matches) > 0:
-                for match in matches:
-                    contact += (match[2] - match[1]) / len(sample)
-        return contact / len(self.samples) if contact != 0.0 else contact
+                contact += max_score_per_sample
+
+        return self._wildcard_penalty(contact)
 
     def _fitness_fullmatch(self) -> float:
         """
-        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals full length
-        of the sample
+        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals the full
+        length of the sample
         Returns: Float
 
         """
         max_score_per_sample = 1 / len(self.samples)
 
-        matchy = Matcher(self.samples[0].vocab)
+        current_vocab = self.samples[0].vocab
+
+        matchy = Matcher(current_vocab)
         matchy.add("basic", None, self.fenotype)
         contact = 0.0
 
@@ -215,15 +229,40 @@ class Individual(object):
                     if match[2] == len(sample) and match[1] == 0:
                         contact += max_score_per_sample
 
-        return contact
+        return self._wildcard_penalty(contact)
 
-    def is_solution(self) -> None:
+    #
+    # Stats concerns
+    #
+    def _is_solution(self) -> None:
         """
         Method to manage AES for the given RUN
 
         """
         if self.stats.solution_found is False:
             self.stats.sum_aes(1)
-            logging.debug('Solution not found yet')
-            if self.fitness_value >= config.success_threshold:
+            if self.fitness_value >= self.config.success_threshold:
+                LOG.debug('Solution found for this run!')
                 self.stats.solution_found = True
+
+    #
+    # Token Wildcard Penalty
+    #
+    def _wildcard_penalty(self, contact: float) -> float:
+        """
+        Applies a penalty for the usage of token wildcard if usage of token wildcard is enabled
+        Args:
+            contact: Temporary fitness value for the current individual
+
+        Returns: Final fitness value for the current individual
+
+        """
+        if self.config.use_token_wildcard:
+            num_tokens = len(self.fenotype)
+            for item in self.fenotype:
+                if item == {}:
+                    LOG.debug('Applying token wildcard penalty!')
+                    penalty = 1/num_tokens
+                    contact = contact - penalty
+
+        return contact
