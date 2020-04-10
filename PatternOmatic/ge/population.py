@@ -5,12 +5,11 @@ from PatternOmatic.ge.individual import Individual
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import *
-
-config = Config()
+from PatternOmatic.settings.log import LOG
 
 
 class Population(object):
-    """ Population implementation of a AI Grammatical Evolution algorithm in OOP fashion """
+    """ Population implementation of an AI Grammatical Evolution algorithm in OOP fashion """
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats):
         """
@@ -19,16 +18,22 @@ class Population(object):
             samples: list of Spacy doc objets
             grammar: Backus Naur Form grammar notation encoded in a dictionary
         """
+        self._config = Config()
+
         self._samples = samples
         self._grammar = grammar
         self._stats = stats
-        self._generation = self._initialize()
+        self._generation = self._birth()
         self._offspring = list()
         self._best_individual = None
 
     #
     # Properties & setters
     #
+    @property
+    def config(self) -> Config:
+        return self._config
+
     @property
     def samples(self) -> [Doc]:
         return self._samples
@@ -65,20 +70,13 @@ class Population(object):
     def best_individual(self, best_individual: Individual):
         self._best_individual = best_individual
 
-    def _info(self):
-        """
-        Prints current generation individuals' fenotype and fitness value
-        """
-        for individual in self.generation:
-            print("Fenotype: ", str(individual.fenotype), "Fitness value: ", individual.fitness_value)
-
-    def _initialize(self) -> [Individual]:
+    def _birth(self) -> [Individual]:
         """
         Initializes the first generation
         Returns: A list of individual objects
 
         """
-        return [Individual(self.samples, self.grammar, self.stats) for _ in range(0, config.dna_length)]
+        return [Individual(self.samples, self.grammar, self.stats) for _ in range(0, self.config.dna_length)]
 
     def _best_challenge(self):
         """
@@ -100,12 +98,13 @@ class Population(object):
         Returns: a list of individuals
 
         """
-        if config.selection_type == BINARY_TOURNAMENT:
+        LOG.debug('Selecting members...')
+        if self.config.selection_type == BINARY_TOURNAMENT:
             return self._binary_tournament()
-        elif config.selection_type == K_TOURNAMENT:
+        elif self.config.selection_type == K_TOURNAMENT:
             return self._k_tournament()
         else:
-            raise ValueError('Invalid selection type: ', config.selection_type)
+            raise ValueError('Invalid selection type: ', self.config.selection_type)
 
     def _recombination(self, mating_pool: [Individual]):
         """
@@ -116,26 +115,26 @@ class Population(object):
         Returns: A list of new individuals, offspring of the current generation
 
         """
-
-        if config.recombination_type == RANDOM_ONE_POINT_CROSSOVER:
+        LOG.debug('Spawning offspring...')
+        if self.config.recombination_type == RANDOM_ONE_POINT_CROSSOVER:
             return self._random_one_point_crossover(mating_pool)
         else:
-            raise ValueError('Invalid recombination type: ', config.recombination_type)
+            raise ValueError('Invalid recombination type: ', self.config.recombination_type)
 
     def _replacement(self) -> None:
         """
         A pseudo-factory to different recombination types
 
         """
-
-        if config.replacement_type == MU_PLUS_LAMBDA:
+        LOG.debug('Replacing...')
+        if self.config.replacement_type == MU_PLUS_LAMBDA:
             return self._mu_plus_lambda()
-        elif config.replacement_type == MU_LAMBDA_WITH_ELITISM:
+        elif self.config.replacement_type == MU_LAMBDA_WITH_ELITISM:
             return self._mu_lambda_elite()
-        elif config.replacement_type == MU_LAMBDA_WITHOUT_ELITISM:
+        elif self.config.replacement_type == MU_LAMBDA_WITHOUT_ELITISM:
             return self._mu_lambda_no_elite()
         else:
-            raise ValueError('Invalid replacement type: ', config.replacement_type)
+            raise ValueError('Invalid replacement type: ', self.config.replacement_type)
 
     #
     # Evolutionary operator implementations
@@ -184,23 +183,25 @@ class Population(object):
 
         """
         offspring = []
-        offspring_max_size = round(len(self.generation) * config.offspring_max_size_factor)
+        offspring_max_size = round(len(self.generation) * self.config.offspring_max_size_factor)
 
         while len(offspring) <= offspring_max_size:
             parent_1 = random.choice(mating_pool)
             parent_2 = random.choice(mating_pool)
 
-            if random.random() < config.mating_probability:
-                cut = random.randint(1, config.codon_length - 1) * config.num_codons_per_individual
+            if random.random() < self.config.mating_probability:
+                cut = random.randint(1, self.config.codon_length - 1) * self.config.num_codons_per_individual
 
                 # Create children
                 child_1 = \
                     Individual(self.samples, self.grammar, self.stats,
-                               dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[-(config.dna_length - cut):])
+                               dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[
+                                                                 -(self.config.dna_length - cut):])
 
                 child_2 = \
                     Individual(self.samples, self.grammar, self.stats,
-                               dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[-(config.dna_length - cut):])
+                               dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[
+                                                                 -(self.config.dna_length - cut):])
 
                 offspring.append(child_1)
                 offspring.append(child_2)
@@ -243,23 +244,27 @@ class Population(object):
         """ Search Engine
         1) Selects individuals of the current generation to constitute who will mate
         2) Crossover or recombination of the previously selected individuals
-        3) Replace the this generation with the offspring
-        4) Save the best individual by fitness """
+        3) Replace/mix the this generation with the offspring
+        4) Save the best individual by fitness
+        5) Calculates statistics for this Run """
 
-        for _ in range(config.max_generations):
+        LOG.info('Evolution taking place!')
+
+        self.stats.reset()
+
+        for _ in range(self.config.max_generations):
             mating_pool = self._selection()
             self.offspring = self._recombination(mating_pool)
             self._replacement()
             self._best_challenge()
-            # self._info()
+
+        LOG.info(f'Best candidate found on this run: {dict(self.best_individual)}')
 
         # Stats concerns
         self.stats.add_most_fitted(self.best_individual)
         self.stats.add_mbf(self.best_individual.fitness_value)
 
-        if self.best_individual.fitness_value > config.success_threshold:
+        if self.best_individual.fitness_value > self.config.success_threshold:
             self.stats.add_sr(True)
         else:
             self.stats.add_sr(False)
-
-        self.stats.calculate_metrics()
