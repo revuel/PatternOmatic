@@ -287,7 +287,7 @@ class Config(metaclass=SingletonMetaNaive):
         # Other
         self.report_path = '/tmp/patternOmatic_report.txt'
 
-    def _load_from_file(self, config_file_path: str = None):
+    def _load_from_file(self, config_file_path: str):
         """
 
         Args:
@@ -296,60 +296,57 @@ class Config(metaclass=SingletonMetaNaive):
         Returns:
 
         """
-        if config_file_path:
-            try:
-                config_parser = configparser.ConfigParser()
-                file_list = config_parser.read(config_file_path)
-                if len(file_list) == 0:
-                    raise FileNotFoundError
+        try:
+            config_parser = configparser.ConfigParser()
+            file_list = config_parser.read(config_file_path)
 
-                # GE configuration parameters
-                self._max_runs = int(config_parser[GE][MAX_RUNS])
-                self._success_threshold = float(config_parser[GE][SUCCESS_THRESHOLD])
-                self._population_size = int(config_parser[GE][POPULATION_SIZE])
-                self._max_generations = int(config_parser[GE][MAX_GENERATIONS])
-                self._codon_length = int(config_parser[GE][CODON_LENGTH])
-                self._num_codons_per_individual = int(config_parser[GE][CODONS_X_INDIVIDUAL])
-                self._dna_length = self._codon_length * self._num_codons_per_individual
-                self._mutation_probability = float(config_parser[GE][MUTATION_PROBABILITY])
-                self._offspring_max_size_factor = float(config_parser[GE][OFFSPRING_FACTOR])
-                self._mating_probability = float(config_parser[GE][MATING_PROBABILITY])
-                self._k_value = int(config_parser[GE][K_VALUE])
+            if len(file_list) == 0:
+                raise FileNotFoundError
 
-                # GE configuration methods
-                self._selection_type = globals()[config_parser[GE][SELECTION_TYPE]]
-                self._recombination_type = globals()[config_parser[GE][RECOMBINATION_TYPE]]
-                self._replacement_type = globals()[config_parser[GE][REPLACEMENT_TYPE]]
+            # GE configuration parameters
+            self._max_runs = int(config_parser[GE][MAX_RUNS])
+            self._success_threshold = float(config_parser[GE][SUCCESS_THRESHOLD])
+            self._population_size = int(config_parser[GE][POPULATION_SIZE])
+            self._max_generations = int(config_parser[GE][MAX_GENERATIONS])
+            self._codon_length = int(config_parser[GE][CODON_LENGTH])
+            self._num_codons_per_individual = int(config_parser[GE][CODONS_X_INDIVIDUAL])
+            self._dna_length = self._codon_length * self._num_codons_per_individual
+            self._mutation_probability = float(config_parser[GE][MUTATION_PROBABILITY])
+            self._offspring_max_size_factor = float(config_parser[GE][OFFSPRING_FACTOR])
+            self._mating_probability = float(config_parser[GE][MATING_PROBABILITY])
+            self._k_value = int(config_parser[GE][K_VALUE])
 
-                # Dynamic Grammar Generation configuration options
-                self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
-                self._use_boolean_features = str2bool(config_parser[DGG][USE_BOOLEAN_FEATURES])
-                self._use_custom_attributes = str2bool(config_parser[DGG][USE_CUSTOM_ATTRIBUTES])
-                self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
-                self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
-                self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
-                self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
+            # GE configuration methods
+            self._selection_type = globals()[config_parser[GE][SELECTION_TYPE]]
+            self._recombination_type = globals()[config_parser[GE][RECOMBINATION_TYPE]]
+            self._replacement_type = globals()[config_parser[GE][REPLACEMENT_TYPE]]
 
-                # Problem specific configuration options
-                self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
+            # Dynamic Grammar Generation configuration options
+            self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
+            self._use_boolean_features = str2bool(config_parser[DGG][USE_BOOLEAN_FEATURES])
+            self._use_custom_attributes = str2bool(config_parser[DGG][USE_CUSTOM_ATTRIBUTES])
+            self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
+            self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
+            self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
+            self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
 
-                # Configuration validation (only when reading from config.ini)
-                self._check_xps_op_restriction()
+            # Problem specific configuration options
+            self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
 
-                # Other
-                self.report_path = config_parser['OS'][REPORT_PATH]
+            # Configuration validation (only when reading from config.ini)
+            self._check_xps_op_restriction()
 
-            except FileNotFoundError:
-                LOG.warning('Unable to locate configuration file, using default configuration parameters')
-                self._load_default()
-            except KeyError as ke:
-                LOG.warning(f'Malformed config file ({repr(ke)})! Using default configuration parameters')
-                self._load_default()
-            except ValueError as ve:
-                LOG.warning(f'Malformed config file ({repr(ve)})! Using default configuration parameters')
-                self._load_default()
-        else:
-            LOG.warning('Configuration file not set, using default configuration parameters')
+            # Other
+            self.report_path = config_parser['OS'][REPORT_PATH]
+
+        except FileNotFoundError:
+            LOG.warning('Unable to locate configuration file, using default configuration parameters')
+            self._load_default()
+        except KeyError as ke:
+            LOG.warning(f'Malformed config file ({repr(ke)})! Using default configuration parameters')
+            self._load_default()
+        except ValueError as ve:
+            LOG.warning(f'Malformed config file ({repr(ve)})! Using default configuration parameters')
             self._load_default()
 
         LOG.info(f'Configuration parameters: {dict(self)}')

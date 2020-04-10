@@ -21,7 +21,7 @@ def dynagg(samples: [Doc]) -> dict:
     """
     config = Config()
 
-    LOG.info('Generating BNF based on the following samples: {}'.format(str(samples)))
+    LOG.info(f'Generating BNF based on the following samples: {str(samples)}')
 
     # BNF root
     pattern_grammar = {S: [P]}
@@ -75,7 +75,7 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar[T].append(UNDERSCORE)
         pattern_grammar[T].append(F + "," + UNDERSCORE)
 
-    LOG.info('Dynamically generated BNF: {}'.format(str(pattern_grammar)))
+    LOG.info(f'Dynamically generated BNF: {str(pattern_grammar)}')
 
     return pattern_grammar
 
