@@ -7,7 +7,7 @@ from PatternOmatic.nlp.engine import dynagg as dgg
 from PatternOmatic.ge.population import Population
 from PatternOmatic.ge.individual import Individual
 from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import FitnessType, SelectionType, RecombinationType, ReplacementType
 
 
 class TestPopulation(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestPopulation(unittest.TestCase):
     def test_best_challenge(self):
         """ Tests that the most fitted individual occupies the population's best_individual slot """
         self.config.max_generations = 3
-        self.config.fitness_function_type = FITNESS_BASIC
+        self.config.fitness_function_type = FitnessType.BASIC
         p = Population(self.samples, self.grammar, self.stats)
         self.config.mutation_probability = 0.0
         p.generation[0] = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
@@ -45,8 +45,8 @@ class TestPopulation(unittest.TestCase):
     def test_binary_tournament(self):
         """ Test that binary tournament works as expected """
         self.config.max_generations = 3
-        self.config.fitness_function_type = FITNESS_FULLMATCH
-        self.config.selection_type = BINARY_TOURNAMENT
+        self.config.fitness_function_type = FitnessType.FULL_MATCH
+        self.config.selection_type = SelectionType.BINARY_TOURNAMENT
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
 
@@ -54,18 +54,17 @@ class TestPopulation(unittest.TestCase):
 
     def test_k_tournament(self):
         """ Test that k tournament raises error """
-        self.config.selection_type = K_TOURNAMENT
+        self.config.selection_type = SelectionType.K_TOURNAMENT
         p = Population(self.samples, self.grammar, self.stats)
         with super().assertRaises(NotImplementedError):
             _ = p._selection()
-        self.config.selection_type = BINARY_TOURNAMENT
 
     def test_random_one_point_crossover(self):
         """ Test that crossover 'random one point' works as expected """
         self.config.max_generations = 3
-        self.config.fitness_function_type = FITNESS_BASIC
-        self.config.selection_type = BINARY_TOURNAMENT
-        self.config.recombination_type = RANDOM_ONE_POINT_CROSSOVER
+        self.config.fitness_function_type = FitnessType.BASIC
+        self.config.selection_type = SelectionType.BINARY_TOURNAMENT
+        self.config.recombination_type = RecombinationType.RANDOM_ONE_POINT_CROSSOVER
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
@@ -73,7 +72,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_mu_plus_lambda(self):
         """ Tests that replacement 'mu plus lambda' works as expected """
-        self.config.replacement_type = MU_PLUS_LAMBDA
+        self.config.replacement_type = ReplacementType.MU_PLUS_LAMBDA
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
@@ -82,7 +81,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_mu_lambda_elite(self):
         """ Tests that replacement 'mu lambda with elitism' works as expected """
-        self.config.replacement_type = MU_LAMBDA_WITH_ELITISM
+        self.config.replacement_type = ReplacementType.MU_LAMBDA_WITH_ELITISM
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
@@ -91,7 +90,7 @@ class TestPopulation(unittest.TestCase):
 
     def test_mu_lambda_no_elite(self):
         """ Tests that replacement 'mu lambda without elitism' works as expected """
-        self.config.replacement_type = MU_LAMBDA_WITHOUT_ELITISM
+        self.config.replacement_type = ReplacementType.MU_LAMBDA_WITHOUT_ELITISM
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p._selection()
         p.offspring = p._recombination(mating_pool)
@@ -101,7 +100,7 @@ class TestPopulation(unittest.TestCase):
     def test_evolve(self):
         """ Tests that an evolution works, preserving a fitted individual """
         self.config.max_generations = 3
-        self.config.fitness_function_type = FITNESS_BASIC
+        self.config.fitness_function_type = FitnessType.BASIC
         p = Population(self.samples, self.grammar, self.stats)
         self.config.mutation_probability = 0.0
         p.generation[0] = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
