@@ -61,9 +61,9 @@ class Config(metaclass=SingletonMetaNaive):
         yield 'Offspring maximum size factor', self.offspring_max_size_factor
         yield 'Mating probability', self.mating_probability
         yield 'K tournament size value', self.k_value
-        yield 'Selection algorithm', self.selection_type
-        yield 'Recombination algorithm', self.recombination_type
-        yield 'Replacement algorithm', self.replacement_type
+        yield 'Selection algorithm', self.selection_type.name
+        yield 'Recombination algorithm', self.recombination_type.name
+        yield 'Replacement algorithm', self.replacement_type.name
         yield 'Maximum number of features per token', self.features_per_token
         yield 'Using boolean features?', self.use_boolean_features
         yield 'Using custom attributes?', self.use_custom_attributes
@@ -71,7 +71,7 @@ class Config(metaclass=SingletonMetaNaive):
         yield 'Using grammar operators?', self.use_grammar_operators
         yield 'Using token wildcards?', self.use_token_wildcard
         yield 'Using extended pattern syntax?', self.use_extended_pattern_syntax
-        yield 'Fitness function type', self.fitness_function_type
+        yield 'Fitness function type', self.fitness_function_type.name
         yield 'Report path', self.report_path
 
     @property
@@ -155,7 +155,7 @@ class Config(metaclass=SingletonMetaNaive):
         self._k_value = value
 
     @property
-    def selection_type(self) -> str:
+    def selection_type(self) -> SelectionType:
         return self._selection_type
 
     @selection_type.setter
@@ -163,7 +163,7 @@ class Config(metaclass=SingletonMetaNaive):
         self._selection_type = value
 
     @property
-    def recombination_type(self) -> str:
+    def recombination_type(self) -> ReplacementType:
         return self._recombination_type
 
     @recombination_type.setter
@@ -171,7 +171,7 @@ class Config(metaclass=SingletonMetaNaive):
         self._recombination_type = value
 
     @property
-    def replacement_type(self) -> str:
+    def replacement_type(self) -> ReplacementType:
         return self._replacement_type
 
     @replacement_type.setter
@@ -235,7 +235,7 @@ class Config(metaclass=SingletonMetaNaive):
         self._use_extended_pattern_syntax = value
 
     @property
-    def fitness_function_type(self):
+    def fitness_function_type(self) -> FitnessType:
         return self._fitness_function_type
 
     @fitness_function_type.setter
@@ -286,9 +286,9 @@ class Config(metaclass=SingletonMetaNaive):
         self._k_value = 3
 
         # GE configuration methods
-        self._selection_type = BINARY_TOURNAMENT
-        self._recombination_type = RANDOM_ONE_POINT_CROSSOVER
-        self._replacement_type = MU_PLUS_LAMBDA
+        self._selection_type = SelectionType.BINARY_TOURNAMENT
+        self._recombination_type = RecombinationType.RANDOM_ONE_POINT_CROSSOVER
+        self._replacement_type = ReplacementType.MU_PLUS_LAMBDA
 
         # Dynamic Grammar Generation configuration options
         self._features_per_token = 1
@@ -300,7 +300,7 @@ class Config(metaclass=SingletonMetaNaive):
         self._use_extended_pattern_syntax = False
 
         # Problem specific configuration options
-        self._fitness_function_type = FITNESS_FULLMATCH
+        self._fitness_function_type = FitnessType.FULL_MATCH
 
         # Other
         self.report_path = '/tmp/patternOmatic_report.txt'
@@ -335,9 +335,9 @@ class Config(metaclass=SingletonMetaNaive):
             self._k_value = int(config_parser[GE][K_VALUE])
 
             # GE configuration methods
-            self._selection_type = globals()[config_parser[GE][SELECTION_TYPE]]
-            self._recombination_type = globals()[config_parser[GE][RECOMBINATION_TYPE]]
-            self._replacement_type = globals()[config_parser[GE][REPLACEMENT_TYPE]]
+            self._selection_type = SelectionType(int(config_parser[GE][SELECTION_TYPE]))
+            self._recombination_type = RecombinationType(int(config_parser[GE][REPLACEMENT_TYPE]))
+            self._replacement_type = ReplacementType(int(config_parser[GE][REPLACEMENT_TYPE]))
 
             # Dynamic Grammar Generation configuration options
             self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
@@ -349,7 +349,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
 
             # Problem specific configuration options
-            self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
+            self._fitness_function_type = FitnessType(int(config_parser[GE][FITNESS_FUNCTION_TYPE]))
 
             # Configuration validation (only when reading from config.ini)
             self._check_xps_op_restriction()

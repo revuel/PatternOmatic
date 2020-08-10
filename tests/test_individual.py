@@ -6,7 +6,7 @@ from PatternOmatic.ge.stats import Stats
 from PatternOmatic.nlp.engine import dynagg as dgg
 from PatternOmatic.ge.individual import Individual
 from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import FitnessType
 
 
 class TestIndividual(unittest.TestCase):
@@ -63,7 +63,7 @@ class TestIndividual(unittest.TestCase):
     def test_fitness_basic(self):
         """ Fitness "basic" sets fitness """
         self.config.mutation_probability = 0.0
-        self.config.fitness_function_type = FITNESS_BASIC
+        self.config.fitness_function_type = FitnessType.BASIC
         i = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
 
         super().assertEqual(i.fitness_value, 0.25)
@@ -71,7 +71,7 @@ class TestIndividual(unittest.TestCase):
     def test_fitness_fullmatch(self):
         """ Fitness "full match" sets fitness """
         self.config.mutation_probability = 0.0
-        self.config.fitness_function_type = FITNESS_FULLMATCH
+        self.config.fitness_function_type = FitnessType.FULL_MATCH
         i = Individual(self.samples, self.grammar, self.stats, '01101010100001101000110111000100')
 
         super().assertEqual(i.fitness_value, 0.25)
