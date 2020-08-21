@@ -7,7 +7,7 @@ from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ON
     SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
     IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, IS_SENT_START, LIKE_NUM, LIKE_EMAIL, \
     LANG, NORM, PREFIX, SENTIMENT, STRING, SUFFIX, TEXT_WITH_WS, WHITESPACE, LIKE_URL, MATCHER_SUPPORTED_ATTRIBUTES, \
-    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR
+    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR, PROB
 from PatternOmatic.settings.log import LOG
 
 
@@ -338,11 +338,11 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 IS_OOV: bool_list,
                 IS_QUOTE: bool_list,
                 IS_RIGHT_PUNCT: bool_list,
-                # IS_SENT_START: bool_list,
+                IS_SENT_START: bool_list,
                 LANG: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_LANG_') for token in tokens]))),
                 NORM: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_NORM_') for token in tokens]))),
                 PREFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PREFIX_') for token in tokens]))),
-                # PROB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PROB' ) for token in tokens]))),
+                PROB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PROB' ) for token in tokens]))),
                 SENTIMENT: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SENTIMENT') for token in tokens]))),
                 STRING: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_STRING') for token in tokens]))),
                 SUFFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SUFFIX_') for token in tokens]))),
