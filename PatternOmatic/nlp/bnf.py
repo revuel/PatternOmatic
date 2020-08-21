@@ -324,12 +324,13 @@ def _extended_features_seen(tokens: [Token]) -> dict:
 
     """
     bool_list = [True, False]
+
     extended_features = \
         {
             UNDERSCORE: {
-                ENT_ID: sorted(list(set([token._.CUSTOM_ENT_ID_ for token in tokens]))),
-                ENT_IOB: sorted(list(set([token._.CUSTOM_ENT_IOB_ for token in tokens]))),
-                ENT_KB_ID: sorted(list(set([token._.CUSTOM_ENT_KB_ID_ for token in tokens]))),
+                ENT_ID: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_ID_') for token in tokens]))),
+                ENT_IOB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_IOB_') for token in tokens]))),
+                ENT_KB_ID: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_KB_ID_') for token in tokens]))),
                 HAS_VECTOR: bool_list,
                 IS_BRACKET: bool_list,
                 IS_CURRENCY: bool_list,
@@ -338,15 +339,16 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 IS_QUOTE: bool_list,
                 IS_RIGHT_PUNCT: bool_list,
                 # IS_SENT_START: bool_list,
-                LANG: sorted(list(set([token._.CUSTOM_LANG_ for token in tokens]))),
-                NORM: sorted(list(set([token._.CUSTOM_NORM_ for token in tokens]))),
-                PREFIX: sorted(list(set([token._.CUSTOM_PREFIX_ for token in tokens]))),
-                # PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
-                SENTIMENT: sorted(list(set([token._.CUSTOM_SENTIMENT for token in tokens]))),
-                STRING: sorted(list(set([token._.CUSTOM_STRING for token in tokens]))),
-                SUFFIX: sorted(list(set([token._.CUSTOM_SUFFIX_ for token in tokens]))),
-                TEXT_WITH_WS: sorted(list(set([token._.CUSTOM_TEXT_WITH_WS for token in tokens]))),
-                WHITESPACE: sorted(list(set([token._.CUSTOM_WHITESPACE_ for token in tokens])))
+                LANG: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_LANG_') for token in tokens]))),
+                NORM: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_NORM_') for token in tokens]))),
+                PREFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PREFIX_') for token in tokens]))),
+                # PROB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PROB' ) for token in tokens]))),
+                SENTIMENT: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SENTIMENT') for token in tokens]))),
+                STRING: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_STRING') for token in tokens]))),
+                SUFFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SUFFIX_') for token in tokens]))),
+                TEXT_WITH_WS: sorted(list(set(
+                    [getattr(getattr(token, '_'), 'CUSTOM_TEXT_WITH_WS') for token in tokens]))),
+                WHITESPACE: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_WHITESPACE_') for token in tokens])))
             }
         }
 
