@@ -1,7 +1,6 @@
 """ Unit testing file for DG Engine """
 import unittest
 import spacy
-import gc
 from spacy.tokens.doc import Underscore
 
 from PatternOmatic.nlp.engine import dynagg
