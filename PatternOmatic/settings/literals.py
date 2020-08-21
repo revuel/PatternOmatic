@@ -1,21 +1,38 @@
 """ Literals/constants module """
-REPORT_PATH = 'REPORT_PATH'
+from enum import Enum, unique
+
 
 #
 # GE Related literals
 #
-# Selection types
-BINARY_TOURNAMENT = 'Binary tournament'
-K_TOURNAMENT = 'K tournament'
-# Recombination types
-RANDOM_ONE_POINT_CROSSOVER = 'Random one point crossover'
-# Replacement types
-MU_PLUS_LAMBDA = 'Mu plus lambda'
-MU_LAMBDA_WITH_ELITISM = 'Mu lambda with elitism'
-MU_LAMBDA_WITHOUT_ELITISM = 'Mu lambda without elitism'
+@unique
+class SelectionType(Enum):
+    """ Evolutionary selection types """
+    BINARY_TOURNAMENT = 0
+    K_TOURNAMENT = 1
+
+
+@unique
+class RecombinationType(Enum):
+    """ Evolutionary recombination types enum """
+    RANDOM_ONE_POINT_CROSSOVER = 0
+
+
+@unique
+class ReplacementType(Enum):
+    """ Evolutionary replacement types enum """
+    MU_PLUS_LAMBDA = 0
+    MU_LAMBDA_WITH_ELITISM = 1
+    MU_LAMBDA_WITHOUT_ELITISM = 2
+
+
 # Fitness types
-FITNESS_BASIC = 'Basic fitness function'
-FITNESS_FULLMATCH = 'Fullmatch fitness function'
+@unique
+class FitnessType(Enum):
+    """ Fitness function type """
+    BASIC = 0
+    FULL_MATCH = 1
+
 
 #
 # Dynamic grammar generation related literals
@@ -115,6 +132,7 @@ K_VALUE = 'K_VALUE'
 SELECTION_TYPE = 'SELECTION_TYPE'
 RECOMBINATION_TYPE = 'RECOMBINATION_TYPE'
 REPLACEMENT_TYPE = 'REPLACEMENT_TYPE'
+FITNESS_FUNCTION_TYPE = 'FITNESS_FUNCTION_TYPE'
 DGG = 'DGG'
 FEATURES_X_TOKEN = 'FEATURES_X_TOKEN'
 USE_BOOLEAN_FEATURES = 'USE_BOOLEAN_FEATURES'
@@ -123,5 +141,4 @@ USE_GRAMMAR_OPERATORS = 'USE_GRAMMAR_OPERATORS'
 USE_TOKEN_WILDCARD = 'USE_TOKEN_WILDCARD'
 USE_EXTENDED_PATTERN_SYNTAX = 'USE_EXTENDED_PATTERN_SYNTAX'
 USE_CUSTOM_ATTRIBUTES = 'USE_CUSTOM_ATTRIBUTES'
-FITNESS_FUNCTION_TYPE = 'FITNESS_FUNCTION_TYPE'
-
+REPORT_PATH = 'REPORT_PATH'

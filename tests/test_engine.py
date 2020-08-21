@@ -1,7 +1,6 @@
 """ Unit testing file for DG Engine """
 import unittest
 import spacy
-import gc
 from spacy.tokens.doc import Underscore
 
 from PatternOmatic.nlp.engine import dynagg
@@ -13,12 +12,12 @@ class TestDG(unittest.TestCase):
     """ Test class for Dynamic Grammar """
 
     nlp = spacy.load('en_core_web_sm')
+    samples = [nlp(u'This is a test.'), nlp(u'Checks for Backus Naur Form grammars')]
     config = None
 
     def test_basic_grammar_dg(self):
         """ Tests that basic grammar is correctly generated """
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertIn(S, grammar.keys())
         super().assertIn(T, grammar.keys())
@@ -29,18 +28,14 @@ class TestDG(unittest.TestCase):
     def test_basic_grammar_without_uniques_dg(self):
         """ Tests that basic grammar is correctly generated when use uniques is false """
         self.config.use_uniques = False
-
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertEqual(len(grammar[SHAPE]), 11)
 
     def test_basic_grammar_with_booleans_dg(self):
         """ Tests that basic grammar with booleans is correctly generated """
         self.config.use_boolean_features = True
-
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -50,8 +45,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_grammar_operators = True
 
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -63,8 +57,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_extended_pattern_syntax = True
 
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -76,8 +69,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_custom_attributes = True
 
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -88,8 +80,7 @@ class TestDG(unittest.TestCase):
         """ Tests grammar is generated with token wildcard """
         self.config.use_token_wildcard = True
 
-        samples = [self.nlp(u'This is a test.'), self.nlp(u'Checks for Backus Naur Form grammars')]
-        grammar = dynagg(samples)
+        grammar = dynagg(self.samples)
 
         super().assertIn(TOKEN_WILDCARD, grammar[T])
 
