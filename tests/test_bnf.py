@@ -3,7 +3,7 @@ import unittest
 import spacy
 from spacy.tokens.doc import Underscore
 
-from PatternOmatic.nlp.engine import dynagg
+from PatternOmatic.nlp.bnf import dynamic_generator
 from PatternOmatic.settings.literals import *
 from PatternOmatic.settings.config import Config
 
@@ -17,7 +17,7 @@ class TestDG(unittest.TestCase):
 
     def test_basic_grammar_dg(self):
         """ Tests that basic grammar is correctly generated """
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertIn(S, grammar.keys())
         super().assertIn(T, grammar.keys())
@@ -28,14 +28,14 @@ class TestDG(unittest.TestCase):
     def test_basic_grammar_without_uniques_dg(self):
         """ Tests that basic grammar is correctly generated when use uniques is false """
         self.config.use_uniques = False
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertEqual(len(grammar[SHAPE]), 11)
 
     def test_basic_grammar_with_booleans_dg(self):
         """ Tests that basic grammar with booleans is correctly generated """
         self.config.use_boolean_features = True
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -45,7 +45,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_grammar_operators = True
 
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -57,7 +57,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_extended_pattern_syntax = True
 
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -69,7 +69,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_custom_attributes = True
 
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -80,7 +80,7 @@ class TestDG(unittest.TestCase):
         """ Tests grammar is generated with token wildcard """
         self.config.use_token_wildcard = True
 
-        grammar = dynagg(self.samples)
+        grammar = dynamic_generator(self.samples)
 
         super().assertIn(TOKEN_WILDCARD, grammar[T])
 
