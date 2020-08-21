@@ -10,7 +10,8 @@ from spacy.matcher import Matcher
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.log import LOG
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import FitnessType, S, T, XPS, TOKEN_WILDCARD, UNDERSCORE, P, F, EF, IN, NOT_IN, \
+    SLD, SRD, GTH, LTH, GEQ, LEQ, EQQ, XPS_AS
 
 
 class Individual(object):
@@ -115,7 +116,7 @@ class Individual(object):
                 if key in [T, XPS]:
                     fired_rule = self.grammar[key][fire]
                     if fired_rule == TOKEN_WILDCARD:
-                        symbolic_string = re.sub(key, "{" "}", symbolic_string, 1)
+                        symbolic_string = re.sub(key, "{}", symbolic_string, 1)
                     else:
                         symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
                 elif key is UNDERSCORE:
@@ -181,9 +182,9 @@ class Individual(object):
         Returns: Float
 
         """
-        if self.config.fitness_function_type == FITNESS_BASIC:
+        if self.config.fitness_function_type == FitnessType.BASIC:
             return self._fitness_basic()
-        elif self.config.fitness_function_type == FITNESS_FULLMATCH:
+        elif self.config.fitness_function_type == FitnessType.FULL_MATCH:
             return self._fitness_fullmatch()
         else:
             raise ValueError('Invalid fitness function type: ', self.config.fitness_function_type)

@@ -4,7 +4,7 @@ from spacy.tokens import Doc
 from PatternOmatic.ge.individual import Individual
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import SelectionType, RecombinationType, ReplacementType
 from PatternOmatic.settings.log import LOG
 
 
@@ -99,9 +99,9 @@ class Population(object):
 
         """
         LOG.debug('Selecting members...')
-        if self.config.selection_type == BINARY_TOURNAMENT:
+        if self.config.selection_type == SelectionType.BINARY_TOURNAMENT:
             return self._binary_tournament()
-        elif self.config.selection_type == K_TOURNAMENT:
+        elif self.config.selection_type == SelectionType.K_TOURNAMENT:
             return self._k_tournament()
         else:
             raise ValueError('Invalid selection type: ', self.config.selection_type)
@@ -116,7 +116,7 @@ class Population(object):
 
         """
         LOG.debug('Spawning offspring...')
-        if self.config.recombination_type == RANDOM_ONE_POINT_CROSSOVER:
+        if self.config.recombination_type == RecombinationType.RANDOM_ONE_POINT_CROSSOVER:
             return self._random_one_point_crossover(mating_pool)
         else:
             raise ValueError('Invalid recombination type: ', self.config.recombination_type)
@@ -127,11 +127,11 @@ class Population(object):
 
         """
         LOG.debug('Replacing...')
-        if self.config.replacement_type == MU_PLUS_LAMBDA:
+        if self.config.replacement_type == ReplacementType.MU_PLUS_LAMBDA:
             return self._mu_plus_lambda()
-        elif self.config.replacement_type == MU_LAMBDA_WITH_ELITISM:
+        elif self.config.replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
             return self._mu_lambda_elite()
-        elif self.config.replacement_type == MU_LAMBDA_WITHOUT_ELITISM:
+        elif self.config.replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
             return self._mu_lambda_no_elite()
         else:
             raise ValueError('Invalid replacement type: ', self.config.replacement_type)
