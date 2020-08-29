@@ -98,11 +98,6 @@ class Individual(object):
                 for i in range(0, len(self.bin_genotype), self.config.codon_length-1)]
 
     def _translation(self):
-        """
-        Translates the transcription of the genotype to set an individual fenotype given a grammar.
-        Returns: List of dictionaries
-
-        """
         done = False
         symbolic_string = self.grammar[S][0]  # Root
         circular = cycle(self.int_genotype)
@@ -111,36 +106,9 @@ class Individual(object):
             # First save previous iteration copy
             old_symbolic_string = symbolic_string
             ci = next(circular)
+
             for key in self.grammar.keys():
-                fire = divmod(ci, len(self.grammar[key]))[1]
-                if key in [T, XPS]:
-                    fired_rule = self.grammar[key][fire]
-                    if fired_rule == TOKEN_WILDCARD:
-                        symbolic_string = re.sub(key, "{}", symbolic_string, 1)
-                    else:
-                        symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                elif key is UNDERSCORE:
-                    symbolic_string = \
-                        re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
-                elif key in [P, T, F, EF]:
-                    symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
-                elif key in [IN, NOT_IN]:
-                    dkey = key.replace(SLD, '').replace(SRD, '')
-                    feature = \
-                        "\"" + dkey + "\"" + ":" + \
-                        str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
-                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
-                    feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
-                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
-                else:
-                    dkey = key.replace(SLD, '').replace(SRD, '')
-                    fired_rule = str(self.grammar[key][fire])
-                    if fired_rule != XPS:
-                        feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
-                    else:
-                        feature = "\"" + dkey + "\"" + ":" + fired_rule
-                    symbolic_string = re.sub(key, feature, symbolic_string, 1)
+                symbolic_string = self.__translation(ci, key, symbolic_string)
 
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:
@@ -152,7 +120,53 @@ class Individual(object):
 
         return json.loads(translated_individual)
 
-    # Generic GA methods
+    def __translation(self, ci: iter, key, symbolic_string: str):
+        """
+        Helper method to reduce cognitive overload of the public method with the same name (_translation)
+        Args:
+            ci: Last circular iterator
+            key: Last key in the grammar dict
+            symbolic_string: String representation of the individual's Spacy's Rule Based Matcher pattern
+
+        Returns: String representation of the individual's Spacy's Rule Based Matcher pattern
+
+        """
+        fire = divmod(ci, len(self.grammar[key]))[1]
+
+        if key in [T, XPS]:
+            fired_rule = self.grammar[key][fire]
+            if fired_rule == TOKEN_WILDCARD:
+                symbolic_string = re.sub(key, "{}", symbolic_string, 1)
+            else:
+                symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+
+        elif key is UNDERSCORE:
+            symbolic_string = re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+
+        elif key in [P, T, F, EF]:
+            symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
+
+        elif key in [IN, NOT_IN]:
+            dkey = key.replace(SLD, '').replace(SRD, '')
+            feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+            symbolic_string = re.sub(key, feature, symbolic_string, 1)
+
+        elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
+            feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
+            symbolic_string = re.sub(key, feature, symbolic_string, 1)
+
+        else:
+            dkey = key.replace(SLD, '').replace(SRD, '')
+            fired_rule = str(self.grammar[key][fire])
+            if fired_rule != XPS:
+                feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
+            else:
+                feature = "\"" + dkey + "\"" + ":" + fired_rule
+            symbolic_string = re.sub(key, feature, symbolic_string, 1)
+
+        return symbolic_string
+
+# Generic GA methods
     @classmethod
     def mutate(cls, dna, mutation_probability) -> str:
         """
