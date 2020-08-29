@@ -24,6 +24,7 @@ class TestDG(unittest.TestCase):
         """ Tests that basic grammar is correctly generated """
         grammar = dynamic_generator(self.samples)
 
+        super().assertIn(P, grammar.keys())
         super().assertIn(S, grammar.keys())
         super().assertIn(T, grammar.keys())
         super().assertIn(F, grammar.keys())
