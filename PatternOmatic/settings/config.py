@@ -262,10 +262,6 @@ class Config(metaclass=SingletonMetaNaive):
     #
     # Auxiliary methods
     #
-    def show(self):
-        """ Prints current configuration in JSON format """
-        return print(dict(self))
-
     def _load_default(self):
         """
 
