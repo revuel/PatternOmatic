@@ -1,15 +1,20 @@
-""" NLP Engines """
+""" Backus Naur Form Grammar Generator through Spacy NLP Engine """
 from inspect import getmembers
 from spacy.tokens import Doc, Token
 from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
+    XPS, IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, EF, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, \
+    SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
+    IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, IS_SENT_START, LIKE_NUM, LIKE_EMAIL, \
+    LANG, NORM, PREFIX, SENTIMENT, STRING, SUFFIX, TEXT_WITH_WS, WHITESPACE, LIKE_URL, MATCHER_SUPPORTED_ATTRIBUTES, \
+    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR, PROB
 from PatternOmatic.settings.log import LOG
 
 
 #
 # Dynamic Grammar (Backus Naur Form) Generator
 #
-def dynagg(samples: [Doc]) -> dict:
+def dynamic_generator(samples: [Doc]) -> dict:
     """
     Dynamically generates a grammar in Backus Naur Form (BNF) notation representing the available Spacy NLP
     Linguistic Feature values of the given sample list of Doc instances
@@ -32,7 +37,7 @@ def dynagg(samples: [Doc]) -> dict:
     # Update times token per pattern [Min length of tokens, Max length of tokens] interval
     pattern_grammar[P] = _symbol_stacker(T, max_length_token, min_length_token)
 
-    #  Update times features per token (Max length of features)
+    # Update times features per token (Max length of features)
     pattern_grammar[T] = _symbol_stacker(F, _get_features_per_token(features_dict))
 
     if config.use_token_wildcard is True:
@@ -41,24 +46,9 @@ def dynagg(samples: [Doc]) -> dict:
     # Update available features (just the features list)
     list_of_features = list(features_dict.keys())
     if config.use_grammar_operators is True and config.use_extended_pattern_syntax is False:
-        list_of_features_op = list()
-        for feature in list_of_features:
-            list_of_features_op.append(feature)
-            list_of_features_op.append(feature + ',' + OP)
-        pattern_grammar[F] = list_of_features_op
-        pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
+        pattern_grammar = _add_grammar_operators(pattern_grammar, list_of_features)
     elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
-        tmp_lengths = features_dict[LENGTH].copy()
-        full_terminal_stack = _all_feature_terminal_list(features_dict)
-        pattern_grammar[F] = list_of_features
-        pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
-        pattern_grammar[IN] = full_terminal_stack
-        pattern_grammar[NOT_IN] = full_terminal_stack
-        pattern_grammar[EQQ] = tmp_lengths
-        pattern_grammar[GEQ] = tmp_lengths
-        pattern_grammar[LEQ] = tmp_lengths
-        pattern_grammar[GTH] = tmp_lengths
-        pattern_grammar[LTH] = tmp_lengths
+        pattern_grammar = _add_extended_pattern_syntax(pattern_grammar, list_of_features, features_dict)
     else:
         pattern_grammar[F] = list_of_features
 
@@ -69,11 +59,7 @@ def dynagg(samples: [Doc]) -> dict:
         pattern_grammar.update({k: v})
 
     if config.use_custom_attributes is True:
-        pattern_grammar[UNDERSCORE] = _symbol_stacker(EF, _get_features_per_token(extended_features[UNDERSCORE]))
-        pattern_grammar[EF] = list(extended_features[UNDERSCORE].keys())
-        pattern_grammar.update(extended_features[UNDERSCORE].items())
-        pattern_grammar[T].append(UNDERSCORE)
-        pattern_grammar[T].append(F + "," + UNDERSCORE)
+        pattern_grammar = _add_custom_attributes(pattern_grammar, extended_features)
 
     LOG.info(f'Dynamically generated BNF: {str(pattern_grammar)}')
 
@@ -83,7 +69,7 @@ def dynagg(samples: [Doc]) -> dict:
 #
 # BNF Utilities
 #
-def _features_seen(samples: [Doc]) -> int and dict:
+def _features_seen(samples: [Doc]) -> (int, int, dict, dict):
     """
     Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the sample
     Args:
@@ -191,6 +177,106 @@ def _features_seen(samples: [Doc]) -> int and dict:
     return max_doc_length, min_doc_length, features, extended_features
 
 
+def _set_token_extension_attributes(token: Token) -> None:
+    """
+    Given a Spacy Token instance, register all the Spacy token attributes not accepted by the Spacy Matcher
+    as custom attributes inside the Token Extensions (token._. space)
+    Returns: None
+
+    """
+    # Retrieve cleaned up Token Attributes
+    token_attributes = _clean_token_attributes(
+        {k: v for k, v in getmembers(token) if type(v) in (str, bool, float)})
+
+    # Set token custom attributes
+    lambda_list = []
+    i = 0
+    for k, v in token_attributes.items():
+        lambda_list.append(lambda token_=token, k_=k: getattr(token_, k_))
+        token.set_extension(str('custom_'+k).upper(), getter=lambda_list[i])
+        i += 1
+
+
+def _clean_token_attributes(token_attributes: dict) -> dict:
+    """
+    Removes from input dict keys contained in a set that represents the Spacy Matcher supported token attributes
+    Args:
+        token_attributes: dict of token features
+
+    Returns: Token attributes dict without Spacy Matcher's supported attribute keys
+
+    """
+    token_attributes.pop('__doc__')
+    for item in MATCHER_SUPPORTED_ATTRIBUTES:
+        token_attributes.pop(item)
+
+    return token_attributes
+
+
+def _extended_features_seen(tokens: [Token]) -> dict:
+    """
+    Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the
+    input token list extended attributes (those attributes not accepted by the Spacy Matcher by default,
+    included as token extensions)
+    Args:
+        tokens: List of Spacy Token instances
+
+    Returns: dict of features
+
+    """
+    bool_list = [True, False]
+
+    extended_features = \
+        {
+            UNDERSCORE: {
+                ENT_ID: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_ID_') for token in tokens]))),
+                ENT_IOB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_IOB_') for token in tokens]))),
+                ENT_KB_ID: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_KB_ID_') for token in tokens]))),
+                HAS_VECTOR: bool_list,
+                IS_BRACKET: bool_list,
+                IS_CURRENCY: bool_list,
+                IS_LEFT_PUNCT: bool_list,
+                IS_OOV: bool_list,
+                IS_QUOTE: bool_list,
+                IS_RIGHT_PUNCT: bool_list,
+                IS_SENT_START: bool_list,
+                LANG: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_LANG_') for token in tokens]))),
+                NORM: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_NORM_') for token in tokens]))),
+                PREFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PREFIX_') for token in tokens]))),
+                PROB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PROB') for token in tokens]))),
+                SENTIMENT: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SENTIMENT') for token in tokens]))),
+                STRING: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_STRING') for token in tokens]))),
+                SUFFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SUFFIX_') for token in tokens]))),
+                TEXT_WITH_WS: sorted(list(set(
+                    [getattr(getattr(token, '_'), 'CUSTOM_TEXT_WITH_WS') for token in tokens]))),
+                WHITESPACE: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_WHITESPACE_') for token in tokens])))
+            }
+        }
+
+    return extended_features
+
+
+def _feature_pruner(features: dict) -> dict:
+    """
+    Prunes dict keys whose values contain a list of repeated items
+    Args:
+        features: dict
+
+    Returns: pruned dict
+
+    """
+    # Drop all observations equal to empty string
+    to_del_list = list()
+    for k in features.keys():
+        if len(features[k]) == 1 and features[k][0] == '':
+            to_del_list.append(k)
+
+    for k_item in to_del_list:
+        features.pop(k_item)
+
+    return features
+
+
 def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
     """
     Given a symbol creates a list of length max_length where each item is symbol concat previous list item
@@ -222,6 +308,73 @@ def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
     return symbol_times_list
 
 
+def _get_features_per_token(features_dict: dict) -> int:
+    """
+    Given the configuration set up, determine the maximum number of features per token at grammar
+    Args:
+        features_dict: dictionary of features keys with all possible feature value options
+
+    Returns: integer
+
+    """
+    config = Config()
+
+    if config.features_per_token == 0:
+        max_length_features = len(features_dict.keys())
+    else:
+        if len(features_dict.keys()) < config.features_per_token + 1:
+            max_length_features = len(features_dict.keys())
+        else:
+            max_length_features = config.features_per_token
+
+    return max_length_features
+
+
+def _add_grammar_operators(pattern_grammar: dict, list_of_features: list) -> dict:
+    """
+    Adds support to Spacy's grammar operators usage
+    Args:
+        pattern_grammar: BNF dict
+        list_of_features: list of token features
+
+    Returns: Backus Naur Form grammar notation encoded in a dictionary with Spacy's grammar operators
+
+    """
+    list_of_features_op = list()
+    for feature in list_of_features:
+        list_of_features_op.append(feature)
+        list_of_features_op.append(feature + ',' + OP)
+    pattern_grammar[F] = list_of_features_op
+    pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
+    return pattern_grammar
+
+
+def _add_extended_pattern_syntax(pattern_grammar: dict, list_of_features: list, features_dict: dict) -> dict:
+    """
+    Adds support to the extended pattern syntax at BNF dicts
+    Args:
+        pattern_grammar: BNF dict
+        list_of_features: list of token features
+        features_dict: dict of token features
+
+    Returns:
+        dict: Backus Naur Form grammar notation encoded in a dictionary with Spacy's extended pattern syntax
+    """
+    tmp_lengths = features_dict[LENGTH].copy()
+    full_terminal_stack = _all_feature_terminal_list(features_dict)
+    pattern_grammar[F] = list_of_features
+    pattern_grammar[XPS] = [IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH]
+    pattern_grammar[IN] = full_terminal_stack
+    pattern_grammar[NOT_IN] = full_terminal_stack
+    pattern_grammar[EQQ] = tmp_lengths
+    pattern_grammar[GEQ] = tmp_lengths
+    pattern_grammar[LEQ] = tmp_lengths
+    pattern_grammar[GTH] = tmp_lengths
+    pattern_grammar[LTH] = tmp_lengths
+
+    return pattern_grammar
+
+
 def _all_feature_terminal_list(features_dict: dict) -> list:
     """
     Stacks all feature terminal options in a list of lists to be used for the extended pattern syntax set operators
@@ -246,124 +399,23 @@ def _all_feature_terminal_list(features_dict: dict) -> list:
 
         all_terminal_list += current_terminal_holder
 
+    all_terminal_list = [ele for ind, ele in enumerate(all_terminal_list) if ele not in all_terminal_list[:ind]]
     return all_terminal_list
 
 
-def _get_features_per_token(features_dict: dict) -> int:
+def _add_custom_attributes(pattern_grammar: dict, extended_features: dict) -> dict:
     """
-    Given the configuration set up, determine the maximum number of features per token at grammar
+    Adds support to a specific set of custom attributes at BNF dict
     Args:
-        features_dict: dictionary of features keys with all possible feature value options
+        pattern_grammar: BNF dict
+        extended_features: dict of token features not supported by default by the Spacy's Matcher
 
-    Returns: integer
-
-    """
-    config = Config()
-
-    if config.features_per_token == 0:
-        max_length_features = len(features_dict.keys())
-    else:
-        if len(features_dict.keys()) < config.features_per_token + 1:
-            max_length_features = len(features_dict.keys())
-        else:
-            max_length_features = config.features_per_token
-
-    return max_length_features
-
-
-def _set_token_extension_attributes(token: Token) -> None:
-    """
-    Given a Spacy Token instance, register all the Spacy token attributes not accepted by the Spacy Matcher
-    as custom attributes inside the Token Extensions (token._. space)
-    Returns: None
+    Returns: Backus Naur Form grammar notation encoded in a dictionary with Spacy's custom attributes
 
     """
-    # Retrieve cleaned up Token Attributes
-    token_attributes = _clean_token_attributes(
-        {k: v for k, v in getmembers(token) if type(v) in (str, bool, float)})
-
-    # Set token custom attributes
-    lambda_list = []
-    i = 0
-    for k, v in token_attributes.items():
-        lambda_list.append(lambda token_=token, k_=k: getattr(token_, k_))
-        token.set_extension(str('custom_'+k).upper(), getter=lambda_list[i])
-        i += 1
-
-
-def _clean_token_attributes(token_attributes: dict) -> dict:
-    """
-    Removes from input dict keys contained in a set that represents the Spacy Matcher supported token attributes
-    Args:
-        token_attributes: dict of token features
-
-    Returns: None
-
-    """
-    token_attributes.pop('__doc__')
-    for item in MATCHER_SUPPORTED_ATTRIBUTES:
-        token_attributes.pop(item)
-
-    return token_attributes
-
-
-def _extended_features_seen(tokens: [Token]) -> dict:
-    """
-    Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the
-    input token list extended attributes (those attributes not accepted by the Spacy Matcher by default,
-    included as token extensions)
-    Args:
-        tokens: List of Spacy Token instances
-
-    Returns: dict of features
-
-    """
-    bool_list = [True, False]
-    extended_features = \
-        {
-            UNDERSCORE: {
-                ENT_ID: sorted(list(set([token._.CUSTOM_ENT_ID_ for token in tokens]))),
-                ENT_IOB: sorted(list(set([token._.CUSTOM_ENT_IOB_ for token in tokens]))),
-                ENT_KB_ID: sorted(list(set([token._.CUSTOM_ENT_KB_ID_ for token in tokens]))),
-                HAS_VECTOR: bool_list,
-                IS_BRACKET: bool_list,
-                IS_CURRENCY: bool_list,
-                IS_LEFT_PUNCT: bool_list,
-                IS_OOV: bool_list,
-                IS_QUOTE: bool_list,
-                IS_RIGHT_PUNCT: bool_list,
-                # IS_SENT_START: bool_list,
-                LANG: sorted(list(set([token._.CUSTOM_LANG_ for token in tokens]))),
-                NORM: sorted(list(set([token._.CUSTOM_NORM_ for token in tokens]))),
-                PREFIX: sorted(list(set([token._.CUSTOM_PREFIX_ for token in tokens]))),
-                # PROB: sorted(list(set([token._.CUSTOM_PROB for token in tokens]))),
-                SENTIMENT: sorted(list(set([token._.CUSTOM_SENTIMENT for token in tokens]))),
-                STRING: sorted(list(set([token._.CUSTOM_STRING for token in tokens]))),
-                SUFFIX: sorted(list(set([token._.CUSTOM_SUFFIX_ for token in tokens]))),
-                TEXT_WITH_WS: sorted(list(set([token._.CUSTOM_TEXT_WITH_WS for token in tokens]))),
-                WHITESPACE: sorted(list(set([token._.CUSTOM_WHITESPACE_ for token in tokens])))
-            }
-        }
-
-    return extended_features
-
-
-def _feature_pruner(features: dict) -> dict:
-    """
-    Prunes dict keys whose values contain a list of repeated items
-    Args:
-        features: dict
-
-    Returns: pruned dict
-
-    """
-    # Drop all observations equal to empty string
-    to_del_list = list()
-    for k in features.keys():
-        if len(features[k]) == 1 and features[k][0] == '':
-            to_del_list.append(k)
-
-    for k_item in to_del_list:
-        features.pop(k_item)
-
-    return features
+    pattern_grammar[UNDERSCORE] = _symbol_stacker(EF, _get_features_per_token(extended_features[UNDERSCORE]))
+    pattern_grammar[EF] = list(extended_features[UNDERSCORE].keys())
+    pattern_grammar.update(extended_features[UNDERSCORE].items())
+    pattern_grammar[T].append(UNDERSCORE)
+    pattern_grammar[T].append(F + "," + UNDERSCORE)
+    return pattern_grammar

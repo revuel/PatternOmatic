@@ -6,7 +6,7 @@ import argparse
 import spacy
 from spacy.tokens.doc import Doc
 from PatternOmatic.ge.stats import Stats
-from PatternOmatic.nlp.engine import dynagg as dgg
+from PatternOmatic.nlp.bnf import dynamic_generator as dgg
 from PatternOmatic.ge.population import Population
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.log import LOG
