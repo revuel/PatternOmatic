@@ -234,7 +234,7 @@ class Individual(object):
         current_vocab = self.samples[0].vocab
 
         matchy = Matcher(current_vocab)
-        matchy.add("basic", None, self.fenotype)
+        matchy.add('full_match', None, self.fenotype)
         contact = 0.0
 
         for sample in self.samples:

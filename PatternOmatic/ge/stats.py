@@ -202,8 +202,8 @@ class Stats(object):
         csv = ''
         for k, v in dict(self).items():
             if not type(v) is dict:
-                csv = csv + str(v) + ','
+                csv = csv + str(v) + '\t'
             else:
                 # Fenotype json representation requires adjustment
-                csv = csv + str(v['Fitness']) + ',' + str(v['Fenotype']).replace(', ', '|')
+                csv = csv + str(v['Fitness']) + '\t' + str(v['Fenotype']).replace(', ', '|')
         return csv

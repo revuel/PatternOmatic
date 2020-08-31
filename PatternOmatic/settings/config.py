@@ -1,21 +1,10 @@
-""" Configuration Management class """
+""" Configuration Management module """
 from __future__ import annotations
 import configparser
+from configparser import Error
 from typing import Optional
 from PatternOmatic.settings.log import LOG
 from PatternOmatic.settings.literals import *
-
-
-def str2bool(vargin: str) -> bool:
-    """
-    Auxiliary method to parse boolean configuration file options
-    Args:
-        vargin: argument to evaluate
-
-    Returns: True if vargin in string set, False otherwise
-
-    """
-    return vargin.lower() in ('Yes', 'yes', 'True', 'true', '1')
 
 
 class SingletonMetaNaive(type):
@@ -31,6 +20,7 @@ class SingletonMetaNaive(type):
 
     def clear_instance(self):
         LOG.debug('Removing config object!')
+        self._instance = None
         del self._instance
 
 
@@ -42,10 +32,58 @@ class Config(metaclass=SingletonMetaNaive):
         Args:
             config_file_path: Path for a configuration file
         """
-        if config_file_path:
-            self._load_from_file(config_file_path)
+        self._config_parser = configparser.ConfigParser()
+        config_parser = self._config_parser
+
+        if config_file_path is None:
+            LOG.warning(f'Configuration file not provided. Falling back to default values')
+
         else:
-            self._load_default()
+            file_list = config_parser.read(config_file_path)
+            if len(file_list) == 0:
+                LOG.warning(f'File {config_file_path} not found. Falling back to default values')
+
+        # GE configuration parameters
+        # self._max_runs = config_parser.getint(GE, MAX_RUNS, fallback=4)
+        self._max_runs = self._validate_config_argument(GE, MAX_RUNS, 4, config_parser)
+        self._success_threshold = self._validate_config_argument(GE, SUCCESS_THRESHOLD, 0.8, config_parser)
+
+        self._population_size = self._validate_config_argument(GE, POPULATION_SIZE, 10, config_parser)
+        self._max_generations = self._validate_config_argument(GE, MAX_GENERATIONS, 3, config_parser)
+        self._codon_length = self._validate_config_argument(GE, CODON_LENGTH, 8, config_parser)
+        self._num_codons_per_individual = self._validate_config_argument(GE, CODONS_X_INDIVIDUAL, 4, config_parser)
+        self._dna_length = self._codon_length * self._num_codons_per_individual
+        self._mutation_probability = self._validate_config_argument(GE, MUTATION_PROBABILITY, 0.5, config_parser)
+        self._offspring_max_size_factor = self._validate_config_argument(GE, OFFSPRING_FACTOR, 3.5, config_parser)
+        self._mating_probability = self._validate_config_argument(GE, MATING_PROBABILITY, 0.9, config_parser)
+        self._k_value = self._validate_config_argument(GE, K_VALUE, 3, config_parser)
+
+        # GE configuration methods
+        self._selection_type = SelectionType(self._validate_config_argument(GE, SELECTION_TYPE, 0, config_parser))
+        self._recombination_type = \
+            RecombinationType(self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
+        self._replacement_type = ReplacementType(self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
+
+        # Dynamic Grammar Generation configuration options
+        self._features_per_token = self._validate_config_argument(DGG, FEATURES_X_TOKEN, 1, config_parser)
+        self._use_boolean_features = self._validate_config_argument(DGG, USE_BOOLEAN_FEATURES, False, config_parser)
+        self._use_custom_attributes = self._validate_config_argument(DGG, USE_CUSTOM_ATTRIBUTES, False, config_parser)
+        self._use_uniques = self._validate_config_argument(DGG, USE_UNIQUES, True, config_parser)
+        self._use_grammar_operators = self._validate_config_argument(DGG, USE_GRAMMAR_OPERATORS, False, config_parser)
+        self._use_token_wildcard = self._validate_config_argument(DGG, TOKEN_WILDCARD, False, config_parser)
+        self._use_extended_pattern_syntax = \
+            self._validate_config_argument(DGG, USE_EXTENDED_PATTERN_SYNTAX, False, config_parser)
+
+        # Problem specific configuration options
+        self._fitness_function_type = \
+            FitnessType(self._validate_config_argument(GE, FITNESS_FUNCTION_TYPE, 1, config_parser))
+
+        # Configuration validation (only when reading from config.ini)
+        self._check_xps_op_restriction()
+
+        # Other
+        self._report_path = \
+            self._validate_config_argument('OS', REPORT_PATH, '/tmp/patternOmatic_report.txt', config_parser)
 
         LOG.debug(f'Configuration parameters: {dict(self)}')
 
@@ -74,13 +112,50 @@ class Config(metaclass=SingletonMetaNaive):
         yield 'Fitness function type', self.fitness_function_type.name
         yield 'Report path', self.report_path
 
+    def _validate_config_argument(self, section, option, default, config_parser):
+        """
+
+        Args:
+            section:
+            option:
+            default:
+            config_parser:
+
+        Returns:
+
+        """
+        try:
+            if isinstance(default, bool):
+                value = config_parser.getboolean(section, option, fallback=default)
+                LOG.error(f'[{section}][{option}] {value}')
+            elif isinstance(default, int):
+                value = config_parser.getint(section, option, fallback=default)
+                LOG.error(f'[{section}][{option}] {value}')
+            elif isinstance(default, float):
+                value = config_parser.getfloat(section, option, fallback=default)
+                LOG.error(f'[{section}][{option}] {value}')
+            elif isinstance(default, str):
+                value = config_parser.get(section, option, fallback=default)
+                LOG.error(f'[{section}][{option}] {value}')
+            else:
+                value = default
+        except ValueError:
+            LOG.warning(f'[{section}][{option}] configuration parameter wrongly set. '
+                        f'Falling back to its default value: {default}')
+            value = default
+        return value
+
+    def _preserve_property_type(self, property, value):
+        return isinstance(value, type(property))
+
     @property
     def max_runs(self) -> int:
         return self._max_runs
 
     @max_runs.setter
     def max_runs(self, value: int) -> None:
-        self._max_runs = value
+        if self._preserve_property_type(self._max_runs, value):
+            self._max_runs = value
 
     @property
     def success_threshold(self) -> float:
@@ -88,7 +163,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @success_threshold.setter
     def success_threshold(self, value: float) -> None:
-        self._success_threshold = value
+        if self._preserve_property_type(self._success_threshold, value):
+            self._success_threshold = value
 
     @property
     def population_size(self) -> int:
@@ -96,7 +172,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @population_size.setter
     def population_size(self, value: int) -> None:
-        self._population_size = value
+        if self._preserve_property_type(self._population_size, value):
+            self._population_size = value
 
     @property
     def max_generations(self) -> int:
@@ -104,7 +181,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @max_generations.setter
     def max_generations(self, value: int) -> None:
-        self._max_generations = value
+        if self._preserve_property_type(self._max_generations, value):
+            self._max_generations = value
 
     @property
     def codon_length(self) -> int:
@@ -112,7 +190,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @codon_length.setter
     def codon_length(self, value: int) -> None:
-        self._codon_length = value
+        if self._preserve_property_type(self._codon_length, value):
+            self._codon_length = value
 
     @property
     def num_codons_per_individual(self) -> int:
@@ -120,7 +199,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @num_codons_per_individual.setter
     def num_codons_per_individual(self, value: int) -> None:
-        self.num_codons_per_individual = value
+        if self._preserve_property_type(self._num_codons_per_individual, value):
+            self._num_codons_per_individual = value
 
     @property
     def dna_length(self) -> int:
@@ -132,11 +212,17 @@ class Config(metaclass=SingletonMetaNaive):
 
     @mutation_probability.setter
     def mutation_probability(self, value: float) -> None:
-        self._mutation_probability = value
+        if self._preserve_property_type(self._mutation_probability, value):
+            self._mutation_probability = value
 
     @property
     def offspring_max_size_factor(self) -> float:
         return self._offspring_max_size_factor
+
+    @offspring_max_size_factor.setter
+    def offspring_max_size_factor(self, value: float) -> None:
+        if self._preserve_property_type(self._offspring_max_size_factor, value):
+            self._offspring_max_size_factor = value
 
     @property
     def mating_probability(self) -> float:
@@ -144,7 +230,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @mating_probability.setter
     def mating_probability(self, value: float) -> None:
-        self._mating_probability = value
+        if self._preserve_property_type(self._mating_probability, value):
+            self._mating_probability = value
 
     @property
     def k_value(self) -> int:
@@ -152,7 +239,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @k_value.setter
     def k_value(self, value: int):
-        self._k_value = value
+        if self._preserve_property_type(self._k_value, value):
+            self._k_value = value
 
     @property
     def selection_type(self) -> SelectionType:
@@ -160,7 +248,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @selection_type.setter
     def selection_type(self, value) -> None:
-        self._selection_type = value
+        if self._preserve_property_type(self._selection_type, value):
+            self._selection_type = value
 
     @property
     def recombination_type(self) -> ReplacementType:
@@ -168,7 +257,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @recombination_type.setter
     def recombination_type(self, value) -> None:
-        self._recombination_type = value
+        if self._preserve_property_type(self._recombination_type, value):
+            self._recombination_type = value
 
     @property
     def replacement_type(self) -> ReplacementType:
@@ -176,7 +266,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @replacement_type.setter
     def replacement_type(self, value) -> None:
-        self._replacement_type = value
+        if self._preserve_property_type(self._replacement_type, value):
+            self._replacement_type = value
 
     @property
     def features_per_token(self) -> int:
@@ -184,7 +275,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @features_per_token.setter
     def features_per_token(self, value: int) -> None:
-        self._features_per_token = value
+        if self._preserve_property_type(self._features_per_token, value):
+            self._features_per_token = value
 
     @property
     def use_boolean_features(self) -> bool:
@@ -192,7 +284,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @use_boolean_features.setter
     def use_boolean_features(self, value: int) -> None:
-        self._use_boolean_features = value
+        if self._preserve_property_type(self._use_boolean_features, value):
+            self._use_boolean_features = value
 
     @property
     def use_custom_attributes(self) -> bool:
@@ -200,7 +293,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @use_custom_attributes.setter
     def use_custom_attributes(self, value: int) -> None:
-        self._use_custom_attributes = value
+        if self._preserve_property_type(self._use_custom_attributes, value):
+            self._use_custom_attributes = value
 
     @property
     def use_uniques(self) -> bool:
@@ -208,7 +302,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @use_uniques.setter
     def use_uniques(self, value: int) -> None:
-        self._use_uniques = value
+        if self._preserve_property_type(self._use_uniques, value):
+            self._use_uniques = value
 
     @property
     def use_grammar_operators(self) -> bool:
@@ -216,7 +311,9 @@ class Config(metaclass=SingletonMetaNaive):
 
     @use_grammar_operators.setter
     def use_grammar_operators(self, value: int) -> None:
-        self._use_grammar_operators = value
+        if self._preserve_property_type(self._use_grammar_operators, value):
+            self._use_grammar_operators = value
+            self._check_xps_op_restriction()
 
     @property
     def use_token_wildcard(self) -> bool:
@@ -224,7 +321,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @use_token_wildcard.setter
     def use_token_wildcard(self, value: bool) -> None:
-        self._use_token_wildcard = value
+        if self._preserve_property_type(self._use_token_wildcard, value):
+            self._use_token_wildcard = value
 
     @property
     def use_extended_pattern_syntax(self) -> bool:
@@ -232,7 +330,9 @@ class Config(metaclass=SingletonMetaNaive):
 
     @use_extended_pattern_syntax.setter
     def use_extended_pattern_syntax(self, value) -> None:
-        self._use_extended_pattern_syntax = value
+        if self._preserve_property_type(self._use_extended_pattern_syntax, value):
+            self._use_extended_pattern_syntax = value
+            self._check_xps_op_restriction()
 
     @property
     def fitness_function_type(self) -> FitnessType:
@@ -240,7 +340,8 @@ class Config(metaclass=SingletonMetaNaive):
 
     @fitness_function_type.setter
     def fitness_function_type(self, value: int) -> None:
-        self._fitness_function_type = value
+        if self._preserve_property_type(self._fitness_function_type, value):
+            self._fitness_function_type = value
 
     @property
     def report_path(self):
@@ -248,130 +349,24 @@ class Config(metaclass=SingletonMetaNaive):
 
     @report_path.setter
     def report_path(self, value: str) -> None:
-        self._report_path = value
+        if self._preserve_property_type(self._report_path, value):
+            self._report_path = value
 
     #
     # Restrictions
     #
-    def _check_xps_op_restriction(self):
+    def _check_xps_op_restriction(self) -> None:
+        """
+        Spacy's Grammar Operators and Quantifiers and the Spacy's Extended Pattern Syntax can not be used together  at
+        the same time in a pattern for the Spacy's Rule Based Matcher.
+
+        This method checks the provided configuration and disables the Spacy's Extended Pattern Syntax if both
+        mechanisms are found enabled at the provided configuration.
+
+        Returns: None
+
+        """
         if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
-            LOG.warning('Extended Pattern Syntax is not compatible with the usage of grammar operators')
-            LOG.warning('Extended Pattern Syntax has been disabled!')
+            LOG.warning(f'Extended Pattern Syntax is not compatible with the usage of grammar operators '
+                        f'Extended Pattern Syntax has been disabled!')
             self._use_extended_pattern_syntax = False
-
-    #
-    # Auxiliary methods
-    #
-    def _load_default(self):
-        """
-
-        Returns:
-
-        """
-        # GE configuration parameters
-        self._max_runs = 1
-        self._success_threshold = 0.8
-        self._population_size = 10
-        self._max_generations = 3
-        self._codon_length = 8
-        self._num_codons_per_individual = 4
-        self._dna_length = self._codon_length * self._num_codons_per_individual
-        self._mutation_probability = 0.5
-        self._offspring_max_size_factor = 3.5
-        self._mating_probability = 0.9
-        self._k_value = 3
-
-        # GE configuration methods
-        self._selection_type = SelectionType.BINARY_TOURNAMENT
-        self._recombination_type = RecombinationType.RANDOM_ONE_POINT_CROSSOVER
-        self._replacement_type = ReplacementType.MU_PLUS_LAMBDA
-
-        # Dynamic Grammar Generation configuration options
-        self._features_per_token = 1
-        self._use_boolean_features = False
-        self._use_custom_attributes = False
-        self._use_uniques = True
-        self._use_grammar_operators = False
-        self._use_token_wildcard = False
-        self._use_extended_pattern_syntax = False
-
-        # Problem specific configuration options
-        self._fitness_function_type = FitnessType.FULL_MATCH
-
-        # Other
-        self.report_path = '/tmp/patternOmatic_report.txt'
-
-    def _load_from_file(self, config_file_path: str):
-        """
-
-        Args:
-            config_file_path:
-
-        Returns:
-
-        """
-        try:
-            config_parser = configparser.ConfigParser()
-            file_list = config_parser.read(config_file_path)
-
-            if len(file_list) == 0:
-                raise FileNotFoundError
-
-            # GE configuration parameters
-            self._max_runs = int(config_parser[GE][MAX_RUNS])
-            self._success_threshold = float(config_parser[GE][SUCCESS_THRESHOLD])
-            self._population_size = int(config_parser[GE][POPULATION_SIZE])
-            self._max_generations = int(config_parser[GE][MAX_GENERATIONS])
-            self._codon_length = int(config_parser[GE][CODON_LENGTH])
-            self._num_codons_per_individual = int(config_parser[GE][CODONS_X_INDIVIDUAL])
-            self._dna_length = self._codon_length * self._num_codons_per_individual
-            self._mutation_probability = float(config_parser[GE][MUTATION_PROBABILITY])
-            self._offspring_max_size_factor = float(config_parser[GE][OFFSPRING_FACTOR])
-            self._mating_probability = float(config_parser[GE][MATING_PROBABILITY])
-            self._k_value = int(config_parser[GE][K_VALUE])
-
-            # GE configuration methods
-            self._selection_type = SelectionType(int(config_parser[GE][SELECTION_TYPE]))
-            self._recombination_type = RecombinationType(int(config_parser[GE][REPLACEMENT_TYPE]))
-            self._replacement_type = ReplacementType(int(config_parser[GE][REPLACEMENT_TYPE]))
-
-            # Dynamic Grammar Generation configuration options
-            self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
-            self._use_boolean_features = str2bool(config_parser[DGG][USE_BOOLEAN_FEATURES])
-            self._use_custom_attributes = str2bool(config_parser[DGG][USE_CUSTOM_ATTRIBUTES])
-            self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
-            self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
-            self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
-            self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
-
-            # Problem specific configuration options
-            self._fitness_function_type = FitnessType(int(config_parser[GE][FITNESS_FUNCTION_TYPE]))
-
-            # Configuration validation (only when reading from config.ini)
-            self._check_xps_op_restriction()
-
-            # Other
-            self.report_path = config_parser['OS'][REPORT_PATH]
-
-        except FileNotFoundError:
-            LOG.warning('Unable to locate configuration file, using default configuration parameters')
-            self._load_default()
-        except KeyError as ke:
-            LOG.warning(f'Malformed config file ({repr(ke)})! Using default configuration parameters')
-            self._load_default()
-        except ValueError as ve:
-            LOG.warning(f'Malformed config file ({repr(ve)})! Using default configuration parameters')
-            self._load_default()
-
-        LOG.info(f'Configuration parameters: {dict(self)}')
-
-    def reload(self, config_file_path: str):
-        """
-        Loads of reloads Config's attributes from the given input str argument presenting configuration's file path
-        Args:
-            config_file_path: Configuration .ini file path and name to be used
-
-        Returns:
-
-        """
-        return self._load_from_file(config_file_path)
