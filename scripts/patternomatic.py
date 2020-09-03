@@ -83,8 +83,8 @@ if __name__ == '__main__':
         try:
             nlp = spacy.load(parsed_args.language)
         except OSError:
-            LOG.warning(f'Model {parsed_args.language} not found, falling back to patternOmatic\'s default '
-                        f'langugage model: en_core_web_sm')
+            LOG.warning(f'Model {parsed_args.language} not found, '
+                        f'falling back to patternOmatic\'s default language model: en_core_web_sm')
 
             nlp = spacy.load('en_core_web_sm')
 
