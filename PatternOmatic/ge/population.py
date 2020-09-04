@@ -1,6 +1,6 @@
 """ Population class """
 import random
-from typing import List
+from typing import List, Tuple
 
 from spacy.tokens import Doc
 from PatternOmatic.ge.individual import Individual
@@ -8,6 +8,200 @@ from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import SelectionType, RecombinationType, ReplacementType
 from PatternOmatic.settings.log import LOG
+
+
+class Selection(object):
+    """ Dispatches the proper selection type for population instances """
+
+    def __init__(self, selection_type):
+        self.__dispatch_selection(selection_type)
+
+    def __call__(self, generation, *args, **kwargs) -> List[Individual]:
+        LOG.debug(f'Selecting individuals...')
+        return self.selection(generation)
+
+    def selection(self, generation) -> List[Individual]:
+        """ Gets overridden """
+        pass
+
+    def __dispatch_selection(self, selection_type: SelectionType):
+        if isinstance(selection_type, SelectionType):
+            if selection_type == SelectionType.BINARY_TOURNAMENT:
+                self.selection = self._binary_tournament
+            elif selection_type == SelectionType.K_TOURNAMENT:
+                self.selection = self._k_tournament
+        else:
+            self.selection = self._binary_tournament
+
+    def _binary_tournament(self, generation):
+        """
+        Selection type: Selects members of the current generation into the mating pool in order to produce offspring
+        Returns:
+
+        """
+        mating_pool = []
+
+        while len(mating_pool) <= len(generation):
+            i = random.randint(0, len(generation) - 1)
+            j = i
+
+            while j == i:
+                j = random.randint(0, len(generation) - 1)
+
+            i = generation[i]
+            j = generation[j]
+
+            if i.fitness_value >= j.fitness_value:
+                mating_pool.append(i)
+            else:
+                mating_pool.append(j)
+
+        return mating_pool
+
+    def _k_tournament(self, generation):
+        """
+        Selection type: Selects members of the current generation into the mating pool in order to produce offspring
+        Returns:
+
+        """
+        # TODO(me): k tournament
+        raise NotImplementedError
+
+
+class Recombination(object):
+    """ Dispatches the proper recombination type for population instances """
+
+    def __init__(self, recombination_type, grammar, samples, stats):
+        self._config = Config()
+        self._grammar = grammar
+        self._samples = samples
+        self._stats = stats
+        self.__dispatch_recombination_type(recombination_type)
+
+    @property
+    def config(self):
+        return self._config
+
+    @property
+    def grammar(self):
+        return self._grammar
+
+    @property
+    def samples(self):
+        return self._samples
+
+    @property
+    def stats(self):
+        return self._stats
+
+    def __call__(self, mating_pool, generation, *args, **kwargs):
+        LOG.debug(f'Combining individuals...')
+        return self.recombination(mating_pool, generation)
+
+    def recombination(self, mating_pool: List[Individual], generation: List[Individual]):
+        """ Gets overridden """
+        pass
+
+    def __dispatch_recombination_type(self, recombination_type: RecombinationType):
+        if isinstance(recombination_type, RecombinationType):
+            if recombination_type == RecombinationType.RANDOM_ONE_POINT_CROSSOVER:
+                self.recombination = self._random_one_point_crossover
+            else:
+                self.recombination = self._random_one_point_crossover
+        else:
+            self.recombination = self._random_one_point_crossover
+
+    def _random_one_point_crossover(
+            self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
+        """
+        Recombination type: Creates the offspring recombining the mating pool
+        Args:
+            mating_pool: A list of individuals selected from the current generation
+
+        Returns: A list of new individuals, offspring of the current generation
+
+        """
+        offspring = []
+        offspring_max_size = round(len(generation) * self.config.offspring_max_size_factor)
+
+        while len(offspring) <= offspring_max_size:
+            parent_1 = random.choice(mating_pool)
+            parent_2 = random.choice(mating_pool)
+
+            if random.random() < self.config.mating_probability:
+                cut = random.randint(1, self.config.codon_length - 1) * self.config.num_codons_per_individual
+
+                # Create children
+                child_1 = Individual(self.samples, self.grammar, self.stats,
+                                     dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[
+                                                                       -(self.config.dna_length - cut):])
+
+                child_2 = Individual(self.samples, self.grammar, self.stats,
+                                     dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[
+                                                                 -(self.config.dna_length - cut):])
+
+                offspring.append(child_1)
+                offspring.append(child_2)
+
+        return offspring
+
+
+class Replacement(object):
+    """ Dispatches the proper recombination type for population instances """
+    def __init__(self, replacement_type):
+        self.__dispatch_replacement_type(replacement_type)
+
+    def __call__(self, generation, offspring, *args, **kwargs) -> Tuple[List[Individual], List[Individual]]:
+        return self.replacement(generation, offspring)
+
+    def replacement(self):
+        pass
+
+    def __dispatch_replacement_type(self, replacement_type: ReplacementType):
+        if isinstance(replacement_type, ReplacementType):
+            if replacement_type == ReplacementType.MU_PLUS_LAMBDA:
+                self.replacement = self._mu_plus_lambda
+            elif replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
+                self.replacement = self._mu_lambda_elite
+            elif replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
+                self.replacement = self._mu_lambda_no_elite
+        else:
+            self.replacement = self._mu_plus_lambda
+
+    def _mu_plus_lambda(self, generation, offspring):
+        """
+        Replacement type: Produces the new generation and cleans up the offspring pool
+
+        """
+        replacement_pool = generation + offspring
+        replacement_pool.sort(key=lambda i: i.fitness_value, reverse=True)
+        generation = replacement_pool[:len(generation)]
+        offspring = []
+
+        return generation, offspring
+
+    def _mu_lambda_elite(self, generation, offspring):
+        """
+        Replacement type: Produces the new generation and cleans up the offspring pool
+
+        """
+        generation.sort(key=lambda i: i.fitness_value, reverse=True)
+        offspring.sort(key=lambda i: i.fitness_value, reverse=True)
+        generation[1:len(generation)] = offspring[0:len(generation)]
+        offspring = []
+
+        return generation, offspring
+
+    def _mu_lambda_no_elite(self, generation, offspring):
+        """
+        Replacement type: Produces the new generation and cleans up the offspring pool
+
+        """
+        offspring.sort(key=lambda i: i.fitness_value, reverse=True)
+        generation = offspring[0:len(generation)]
+        offspring = []
+
+        return generation, offspring
 
 
 class Population(object):
@@ -29,9 +223,9 @@ class Population(object):
         self._offspring = list()
         self._best_individual = None
 
-        self._use_selection(self._config.selection_type)
-        self._use_recombination(self._config.recombination_type)
-        self._use_replacement(self._config.replacement_type)
+        self.selection = Selection(self._config.selection_type)
+        self.recombination = Recombination(self._config.recombination_type, grammar, samples, stats)
+        self.replacement = Replacement(self._config.replacement_type)
 
     #
     # Properties & setters
@@ -96,153 +290,6 @@ class Population(object):
             self.best_individual = self.generation[0]
 
     #
-    # Evolutionary operators placeholders
-    #
-    def selection(self) -> List[Individual]:
-        """ Gets overridden """
-        pass
-
-    def recombination(self, mating_pool: List[Individual]):
-        """ Gets overridden """
-        pass
-
-    def replacement(self):
-        pass
-
-    #
-    # Evolutionary operators dispatchers
-    #
-    def _use_selection(self, selection_type: SelectionType):
-        if isinstance(selection_type, SelectionType):
-            if selection_type == SelectionType.BINARY_TOURNAMENT:
-                self.selection = self._binary_tournament
-            elif selection_type == SelectionType.K_TOURNAMENT:
-                self.selection = self._k_tournament
-        else:
-            self.selection = self._binary_tournament
-
-    def _use_recombination(self, recombination_type: RecombinationType):
-        if isinstance(recombination_type, RecombinationType):
-            if recombination_type == RecombinationType.RANDOM_ONE_POINT_CROSSOVER:
-                self.recombination = self._random_one_point_crossover
-            else:
-                self.recombination = self._random_one_point_crossover
-        else:
-            self.recombination = self._random_one_point_crossover
-
-    def _use_replacement(self, replacement_type: ReplacementType):
-        if isinstance(replacement_type, ReplacementType):
-            if replacement_type == ReplacementType.MU_PLUS_LAMBDA:
-                self.replacement = self._mu_plus_lambda
-            elif replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
-                self.replacement = self._mu_lambda_elite
-            elif replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
-                self.replacement = self._mu_lambda_no_elite
-        else:
-            self.replacement = self._mu_plus_lambda
-
-    #
-    # Evolutionary operator implementations
-    #
-    def _binary_tournament(self):
-        """
-        Selection type: Selects members of the current generation into the mating pool in order to produce offspring
-        Returns:
-
-        """
-        mating_pool = []
-
-        while len(mating_pool) <= len(self.generation):
-            i = random.randint(0, len(self.generation) - 1)
-            j = i
-
-            while j == i:
-                j = random.randint(0, len(self.generation) - 1)
-
-            i = self.generation[i]
-            j = self.generation[j]
-
-            if i.fitness_value >= j.fitness_value:
-                mating_pool.append(i)
-            else:
-                mating_pool.append(j)
-
-        return mating_pool
-
-    def _k_tournament(self):
-        """
-        Selection type: Selects members of the current generation into the mating pool in order to produce offspring
-        Returns:
-
-        """
-        # TODO(me): k tournament
-        raise NotImplementedError
-
-    def _random_one_point_crossover(self, mating_pool: [Individual]) -> [Individual]:
-        """
-        Recombination type: Creates the offspring recombining the mating pool
-        Args:
-            mating_pool: A list of individuals selected from the current generation
-
-        Returns: A list of new individuals, offspring of the current generation
-
-        """
-        offspring = []
-        offspring_max_size = round(len(self.generation) * self.config.offspring_max_size_factor)
-
-        while len(offspring) <= offspring_max_size:
-            parent_1 = random.choice(mating_pool)
-            parent_2 = random.choice(mating_pool)
-
-            if random.random() < self.config.mating_probability:
-                cut = random.randint(1, self.config.codon_length - 1) * self.config.num_codons_per_individual
-
-                # Create children
-                child_1 = \
-                    Individual(self.samples, self.grammar, self.stats,
-                               dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[
-                                                                 -(self.config.dna_length - cut):])
-
-                child_2 = \
-                    Individual(self.samples, self.grammar, self.stats,
-                               dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[
-                                                                 -(self.config.dna_length - cut):])
-
-                offspring.append(child_1)
-                offspring.append(child_2)
-
-        return offspring
-
-    def _mu_plus_lambda(self):
-        """
-        Replacement type: Produces the new generation and cleans up the offspring pool
-
-        """
-        replacement_pool = self.generation + self.offspring
-        replacement_pool.sort(key=lambda i: i.fitness_value, reverse=True)
-        self.generation = replacement_pool[:len(self.generation)]
-        self.offspring = []
-
-    def _mu_lambda_elite(self):
-        """
-        Replacement type: Produces the new generation and cleans up the offspring pool
-
-        """
-        self.generation.sort(key=lambda i: i.fitness_value, reverse=True)
-        self.offspring.sort(key=lambda i: i.fitness_value, reverse=True)
-        self.generation[1:len(self.generation)] = self.offspring[0:len(self.generation)]
-        self.offspring = []
-
-    def _mu_lambda_no_elite(self):
-        """
-        Replacement type: Produces the new generation and cleans up the offspring pool
-
-        """
-        self.offspring.sort(key=lambda i: i.fitness_value, reverse=True)
-        self.generation = self.offspring[0:len(self.generation)]
-        self.offspring = []
-
-    #
     # Evolution
     #
     def evolve(self):
@@ -258,9 +305,9 @@ class Population(object):
         self.stats.reset()
 
         for _ in range(self.config.max_generations):
-            mating_pool = self.selection()
-            self.offspring = self.recombination(mating_pool)
-            self.replacement()
+            mating_pool = self.selection(self.generation)
+            self.offspring = self.recombination(mating_pool, self.generation)
+            self.generation, self.offspring = self.replacement(self.generation, self.offspring)
             self._best_challenge()
 
         LOG.info(f'Best candidate found on this run: {dict(self.best_individual)}')

@@ -49,7 +49,7 @@ class TestPopulation(unittest.TestCase):
         self.config.fitness_function_type = FitnessType.FULL_MATCH
         self.config.selection_type = SelectionType.BINARY_TOURNAMENT
         p = Population(self.samples, self.grammar, self.stats)
-        mating_pool = p.selection()
+        mating_pool = p.selection(p.generation)
 
         super().assertNotEqual(p.generation, mating_pool)
 
@@ -58,7 +58,7 @@ class TestPopulation(unittest.TestCase):
         self.config.selection_type = SelectionType.K_TOURNAMENT
         p = Population(self.samples, self.grammar, self.stats)
         with super().assertRaises(NotImplementedError):
-            _ = p.selection()
+            _ = p.selection(p.generation)
 
     def test_random_one_point_crossover(self):
         """ Test that crossover 'random one point' works as expected """
@@ -67,35 +67,35 @@ class TestPopulation(unittest.TestCase):
         self.config.selection_type = SelectionType.BINARY_TOURNAMENT
         self.config.recombination_type = RecombinationType.RANDOM_ONE_POINT_CROSSOVER
         p = Population(self.samples, self.grammar, self.stats)
-        mating_pool = p.selection()
-        p.offspring = p.recombination(mating_pool)
+        mating_pool = p.selection(p.generation)
+        p.offspring = p.recombination(mating_pool, p.generation)
         super().assertNotEqual(p.generation, p.offspring)
 
     def test_mu_plus_lambda(self):
         """ Tests that replacement 'mu plus lambda' works as expected """
         self.config.replacement_type = ReplacementType.MU_PLUS_LAMBDA
         p = Population(self.samples, self.grammar, self.stats)
-        mating_pool = p.selection()
-        p.offspring = p.recombination(mating_pool)
-        p.replacement()
+        mating_pool = p.selection(p.generation)
+        p.offspring = p.recombination(mating_pool, p.generation)
+        p.generation, p.offspring = p.replacement(p.generation, p.offspring)
         super().assertListEqual(p.offspring, [])
 
     def test_mu_lambda_elite(self):
         """ Tests that replacement 'mu lambda with elitism' works as expected """
         self.config.replacement_type = ReplacementType.MU_LAMBDA_WITH_ELITISM
         p = Population(self.samples, self.grammar, self.stats)
-        mating_pool = p.selection()
-        p.offspring = p.recombination(mating_pool)
-        p.replacement()
+        mating_pool = p.selection(p.generation)
+        p.offspring = p.recombination(mating_pool, p.generation)
+        p.generation, p.offspring = p.replacement(p.generation, p.offspring)
         super().assertListEqual(p.offspring, [])
 
     def test_mu_lambda_no_elite(self):
         """ Tests that replacement 'mu lambda without elitism' works as expected """
         self.config.replacement_type = ReplacementType.MU_LAMBDA_WITHOUT_ELITISM
         p = Population(self.samples, self.grammar, self.stats)
-        mating_pool = p.selection()
-        p.offspring = p.recombination(mating_pool)
-        p.replacement()
+        mating_pool = p.selection(p.generation)
+        p.offspring = p.recombination(mating_pool, p.generation)
+        p.generation, p.offspring = p.replacement(p.generation, p.offspring)
         super().assertListEqual(p.offspring, [])
 
     def test_evolve(self):
