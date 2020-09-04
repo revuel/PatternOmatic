@@ -252,7 +252,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._selection_type = value
 
     @property
-    def recombination_type(self) -> ReplacementType:
+    def recombination_type(self) -> RecombinationType:
         return self._recombination_type
 
     @recombination_type.setter

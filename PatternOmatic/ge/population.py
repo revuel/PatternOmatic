@@ -1,5 +1,7 @@
 """ Population class """
 import random
+from typing import List
+
 from spacy.tokens import Doc
 from PatternOmatic.ge.individual import Individual
 from PatternOmatic.ge.stats import Stats
@@ -23,9 +25,13 @@ class Population(object):
         self._samples = samples
         self._grammar = grammar
         self._stats = stats
-        self._generation = self._birth()
+        self._generation = self._genesis()
         self._offspring = list()
         self._best_individual = None
+
+        self._use_selection(self._config.selection_type)
+        self._use_recombination(self._config.recombination_type)
+        self._use_replacement(self._config.replacement_type)
 
     #
     # Properties & setters
@@ -70,7 +76,7 @@ class Population(object):
     def best_individual(self, best_individual: Individual):
         self._best_individual = best_individual
 
-    def _birth(self) -> [Individual]:
+    def _genesis(self) -> [Individual]:
         """
         Initializes the first generation
         Returns: A list of individual objects
@@ -90,51 +96,50 @@ class Population(object):
             self.best_individual = self.generation[0]
 
     #
-    # Evolutionary operators dispatcher
+    # Evolutionary operators placeholders
     #
-    def _selection(self) -> [Individual]:
-        """
-        Selects members of the current generation into the mating pool in order to produce offspring
-        Returns: a list of individuals
+    def selection(self) -> List[Individual]:
+        """ Gets overridden """
+        pass
 
-        """
-        LOG.debug('Selecting members...')
-        if self.config.selection_type == SelectionType.BINARY_TOURNAMENT:
-            return self._binary_tournament()
-        elif self.config.selection_type == SelectionType.K_TOURNAMENT:
-            return self._k_tournament()
+    def recombination(self, mating_pool: List[Individual]):
+        """ Gets overridden """
+        pass
+
+    def replacement(self):
+        pass
+
+    #
+    # Evolutionary operators dispatchers
+    #
+    def _use_selection(self, selection_type: SelectionType):
+        if isinstance(selection_type, SelectionType):
+            if selection_type == SelectionType.BINARY_TOURNAMENT:
+                self.selection = self._binary_tournament
+            elif selection_type == SelectionType.K_TOURNAMENT:
+                self.selection = self._k_tournament
         else:
-            raise ValueError('Invalid selection type: ', self.config.selection_type)
+            self.selection = self._binary_tournament
 
-    def _recombination(self, mating_pool: [Individual]):
-        """
-        A pseudo-factory to different recombination types
-        Args:
-            mating_pool: A list of individuals selected from the current generation
-
-        Returns: A list of new individuals, offspring of the current generation
-
-        """
-        LOG.debug('Spawning offspring...')
-        if self.config.recombination_type == RecombinationType.RANDOM_ONE_POINT_CROSSOVER:
-            return self._random_one_point_crossover(mating_pool)
+    def _use_recombination(self, recombination_type: RecombinationType):
+        if isinstance(recombination_type, RecombinationType):
+            if recombination_type == RecombinationType.RANDOM_ONE_POINT_CROSSOVER:
+                self.recombination = self._random_one_point_crossover
+            else:
+                self.recombination = self._random_one_point_crossover
         else:
-            raise ValueError('Invalid recombination type: ', self.config.recombination_type)
+            self.recombination = self._random_one_point_crossover
 
-    def _replacement(self) -> None:
-        """
-        A pseudo-factory to different recombination types
-
-        """
-        LOG.debug('Replacing...')
-        if self.config.replacement_type == ReplacementType.MU_PLUS_LAMBDA:
-            return self._mu_plus_lambda()
-        elif self.config.replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
-            return self._mu_lambda_elite()
-        elif self.config.replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
-            return self._mu_lambda_no_elite()
+    def _use_replacement(self, replacement_type: ReplacementType):
+        if isinstance(replacement_type, ReplacementType):
+            if replacement_type == ReplacementType.MU_PLUS_LAMBDA:
+                self.replacement = self._mu_plus_lambda
+            elif replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
+                self.replacement = self._mu_lambda_elite
+            elif replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
+                self.replacement = self._mu_lambda_no_elite
         else:
-            raise ValueError('Invalid replacement type: ', self.config.replacement_type)
+            self.replacement = self._mu_plus_lambda
 
     #
     # Evolutionary operator implementations
@@ -253,9 +258,9 @@ class Population(object):
         self.stats.reset()
 
         for _ in range(self.config.max_generations):
-            mating_pool = self._selection()
-            self.offspring = self._recombination(mating_pool)
-            self._replacement()
+            mating_pool = self.selection()
+            self.offspring = self.recombination(mating_pool)
+            self.replacement()
             self._best_challenge()
 
         LOG.info(f'Best candidate found on this run: {dict(self.best_individual)}')
