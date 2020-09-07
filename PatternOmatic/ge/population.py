@@ -1,42 +1,61 @@
-""" Population class """
+""" Population classes """
 import random
-from typing import List, Tuple
-
+from typing import List, Tuple, Dict
 from spacy.tokens import Doc
+
 from PatternOmatic.ge.individual import Individual
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.literals import SelectionType, RecombinationType, ReplacementType
+from PatternOmatic.settings.literals import SelectionType, ReplacementType
 from PatternOmatic.settings.log import LOG
 
 
 class Selection(object):
     """ Dispatches the proper selection type for population instances """
 
-    def __init__(self, selection_type):
+    def __init__(self, selection_type: SelectionType):
+        self._select = None
         self.__dispatch_selection(selection_type)
 
-    def __call__(self, generation, *args, **kwargs) -> List[Individual]:
+    def __call__(self, generation: List[Individual]) -> List[Individual]:
+        """
+        Performs a selection operation for the population
+        Args:
+            generation: A list of Individual instances
+
+        Returns: A list of Individual instances
+
+        """
         LOG.debug(f'Selecting individuals...')
-        return self.selection(generation)
+        return self._select(generation)
 
-    def selection(self, generation) -> List[Individual]:
-        """ Gets overridden """
-        pass
+    def __dispatch_selection(self, selection_type: SelectionType) -> None:
+        """
+        Sets the type of the selection operation for the current evolution
+        Args:
+            selection_type: SelectionType Enum
 
-    def __dispatch_selection(self, selection_type: SelectionType):
+        Returns: None
+
+        """
         if isinstance(selection_type, SelectionType):
             if selection_type == SelectionType.BINARY_TOURNAMENT:
-                self.selection = self._binary_tournament
+                self._select = self._binary_tournament
             elif selection_type == SelectionType.K_TOURNAMENT:
-                self.selection = self._k_tournament
+                self._select = self._k_tournament
         else:
-            self.selection = self._binary_tournament
+            self._select = self._binary_tournament
 
-    def _binary_tournament(self, generation):
+    @staticmethod
+    def _binary_tournament(generation: List[Individual]) -> List[Individual]:
         """
-        Selection type: Selects members of the current generation into the mating pool in order to produce offspring
-        Returns:
+        Selects members of the current generation into the mating pool in order to produce offspring by comparing pairs
+        of Individuals and adding the best of each pair to the "mating pool" until its filled
+
+        Args:
+            generation: A list of Individual instances
+
+        Returns: A list of Individual instances
 
         """
         mating_pool = []
@@ -58,10 +77,15 @@ class Selection(object):
 
         return mating_pool
 
-    def _k_tournament(self, generation):
+    @staticmethod
+    def _k_tournament(generation: List[Individual]) -> List[Individual]:
         """
-        Selection type: Selects members of the current generation into the mating pool in order to produce offspring
-        Returns:
+        Not implemented
+        Args:
+            generation: A list of Individual instances
+
+        Raises: NotImplementedError
+        Returns: A list of Individual instances
 
         """
         # TODO(me): k tournament
@@ -69,14 +93,17 @@ class Selection(object):
 
 
 class Recombination(object):
-    """ Dispatches the proper recombination type for population instances """
+    """
+    Dispatches the proper recombination type for population instances
+    """
 
-    def __init__(self, recombination_type, grammar, samples, stats):
+    def __init__(self, grammar: Dict, samples: List[Doc], stats: Stats):
+        self._recombine = None
         self._config = Config()
         self._grammar = grammar
         self._samples = samples
         self._stats = stats
-        self.__dispatch_recombination_type(recombination_type)
+        self.__dispatch_recombination_type()
 
     @property
     def config(self):
@@ -94,31 +121,28 @@ class Recombination(object):
     def stats(self):
         return self._stats
 
-    def __call__(self, mating_pool, generation, *args, **kwargs):
+    def __call__(self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
         LOG.debug(f'Combining individuals...')
-        return self.recombination(mating_pool, generation)
+        return self._recombine(mating_pool, generation)
 
-    def recombination(self, mating_pool: List[Individual], generation: List[Individual]):
-        """ Gets overridden """
-        pass
+    def __dispatch_recombination_type(self) -> None:
+        """
+        Sets the type of the selection operation for the current evolution
 
-    def __dispatch_recombination_type(self, recombination_type: RecombinationType):
-        if isinstance(recombination_type, RecombinationType):
-            if recombination_type == RecombinationType.RANDOM_ONE_POINT_CROSSOVER:
-                self.recombination = self._random_one_point_crossover
-            else:
-                self.recombination = self._random_one_point_crossover
-        else:
-            self.recombination = self._random_one_point_crossover
+        Returns: None
+
+        """
+        self._recombine = self._random_one_point_crossover
 
     def _random_one_point_crossover(
             self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
         """
-        Recombination type: Creates the offspring recombining the mating pool
+        For each pair of Individual instances, recombines them produce two offsprings. Puts them all into the offspring
         Args:
-            mating_pool: A list of individuals selected from the current generation
+            mating_pool: A list of Individual instances
+            generation: A list of Individual instances
 
-        Returns: A list of new individuals, offspring of the current generation
+        Returns: A list of Individual instances
 
         """
         offspring = []
@@ -149,28 +173,43 @@ class Recombination(object):
 class Replacement(object):
     """ Dispatches the proper recombination type for population instances """
     def __init__(self, replacement_type):
+        self._replace = None
         self.__dispatch_replacement_type(replacement_type)
 
-    def __call__(self, generation, offspring, *args, **kwargs) -> Tuple[List[Individual], List[Individual]]:
-        return self.replacement(generation, offspring)
+    def __call__(self, generation: List[Individual], offspring: List[Individual]) \
+            -> Tuple[List[Individual], List[Individual]]:
+        LOG.info(f'Replacing individuals...')
+        return self._replace(generation, offspring)
 
-    def replacement(self):
-        pass
+    def __dispatch_replacement_type(self, replacement_type: ReplacementType) -> None:
+        """
+        Sets the type of the replacement operation for the current evolution
+        Args:
+            replacement_type: ReplacementType Enum
 
-    def __dispatch_replacement_type(self, replacement_type: ReplacementType):
+        Returns: None
+
+        """
         if isinstance(replacement_type, ReplacementType):
             if replacement_type == ReplacementType.MU_PLUS_LAMBDA:
-                self.replacement = self._mu_plus_lambda
+                self._replace = self._mu_plus_lambda
             elif replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
-                self.replacement = self._mu_lambda_elite
+                self._replace = self._mu_lambda_elite
             elif replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
-                self.replacement = self._mu_lambda_no_elite
+                self._replace = self._mu_lambda_no_elite
         else:
-            self.replacement = self._mu_plus_lambda
+            self._replace = self._mu_plus_lambda
 
-    def _mu_plus_lambda(self, generation, offspring):
+    @staticmethod
+    def _mu_plus_lambda(generation: List[Individual], offspring: List[Individual]) \
+            -> Tuple[List[Individual], List[Individual]]:
         """
-        Replacement type: Produces the new generation and cleans up the offspring pool
+        Produces the next generation combining the current generation with the offspring
+        Args:
+            generation: A list of Individual instances
+            offspring: A list of Individual instances
+
+        Returns: A tuple containing two list of Individual instances
 
         """
         replacement_pool = generation + offspring
@@ -180,9 +219,16 @@ class Replacement(object):
 
         return generation, offspring
 
-    def _mu_lambda_elite(self, generation, offspring):
+    @staticmethod
+    def _mu_lambda_elite(generation: List[Individual], offspring: List[Individual]) \
+            -> Tuple[List[Individual], List[Individual]]:
         """
-        Replacement type: Produces the new generation and cleans up the offspring pool
+        Produces the next generation using the offspring and the best Individual of the current generation
+        Args:
+            generation: A list of Individual instances
+            offspring: A list of Individual instances
+
+        Returns: A tuple containing two list of Individual instances
 
         """
         generation.sort(key=lambda i: i.fitness_value, reverse=True)
@@ -192,9 +238,16 @@ class Replacement(object):
 
         return generation, offspring
 
-    def _mu_lambda_no_elite(self, generation, offspring):
+    @staticmethod
+    def _mu_lambda_no_elite(generation: List[Individual], offspring: List[Individual]) \
+            -> Tuple[List[Individual], List[Individual]]:
         """
-        Replacement type: Produces the new generation and cleans up the offspring pool
+        Produces the next generation totally replacing the current generation with the offspring
+        Args:
+            generation: A list of Individual instances
+            offspring: A list of Individual instances
+
+        Returns: A tuple containing two list of Individual instances
 
         """
         offspring.sort(key=lambda i: i.fitness_value, reverse=True)
@@ -224,7 +277,7 @@ class Population(object):
         self._best_individual = None
 
         self.selection = Selection(self._config.selection_type)
-        self.recombination = Recombination(self._config.recombination_type, grammar, samples, stats)
+        self.recombination = Recombination(grammar, samples, stats)
         self.replacement = Replacement(self._config.replacement_type)
 
     #
@@ -235,7 +288,7 @@ class Population(object):
         return self._config
 
     @property
-    def samples(self) -> [Doc]:
+    def samples(self) -> List[Doc]:
         return self._samples
 
     @property
@@ -243,23 +296,23 @@ class Population(object):
         return self._grammar
 
     @property
-    def stats(self):
+    def stats(self) -> Stats:
         return self._stats
 
     @property
-    def generation(self) -> [Individual]:
+    def generation(self) -> List[Individual]:
         return self._generation
 
     @generation.setter
-    def generation(self, generation: [Individual]):
+    def generation(self, generation: List[Individual]):
         self._generation = generation
 
     @property
-    def offspring(self) -> [Individual]:
+    def offspring(self) -> List[Individual]:
         return self._offspring
 
     @offspring.setter
-    def offspring(self, offspring: [Individual]):
+    def offspring(self, offspring: List[Individual]):
         self._offspring = offspring
 
     @property
@@ -270,7 +323,10 @@ class Population(object):
     def best_individual(self, best_individual: Individual):
         self._best_individual = best_individual
 
-    def _genesis(self) -> [Individual]:
+    #
+    # Population specific methods
+    #
+    def _genesis(self) -> List[Individual]:
         """
         Initializes the first generation
         Returns: A list of individual objects
@@ -278,7 +334,7 @@ class Population(object):
         """
         return [Individual(self.samples, self.grammar, self.stats) for _ in range(0, self.config.dna_length)]
 
-    def _best_challenge(self):
+    def _best_challenge(self) -> None:
         """
         Compares current generation best fitness individual against previous generation best fitness individual.
         Updates the best individual attribute accordingly
@@ -293,12 +349,14 @@ class Population(object):
     # Evolution
     #
     def evolve(self):
-        """ Search Engine
-        1) Selects individuals of the current generation to constitute who will mate
-        2) Crossover or recombination of the previously selected individuals
-        3) Replace/mix the this generation with the offspring
-        4) Save the best individual by fitness
-        5) Calculates statistics for this Run """
+        """
+        Search Engine:
+            1) Selects individuals of the current generation to constitute who will mate
+            2) Crossover or recombination of the previously selected individuals
+            3) Replace/mix the this generation with the offspring
+            4) Save the best individual by fitness
+            5) Calculate statistics for this Run
+        """
 
         LOG.info('Evolution taking place!')
 
