@@ -12,9 +12,9 @@ from PatternOmatic.settings.log import LOG
 
 class Selection(object):
     """ Dispatches the proper selection type for population instances """
+    __slots__ = ['_select']
 
     def __init__(self, selection_type: SelectionType):
-        self._select = None
         self.__dispatch_selection(selection_type)
 
     def __call__(self, generation: List[Individual]) -> List[Individual]:
@@ -93,33 +93,16 @@ class Selection(object):
 
 
 class Recombination(object):
-    """
-    Dispatches the proper recombination type for population instances
-    """
+    """ Dispatches the proper recombination type for population instances """
+    __slots__ = ['_recombine', 'config', 'grammar', 'samples', 'stats']
 
     def __init__(self, grammar: Dict, samples: List[Doc], stats: Stats):
         self._recombine = None
-        self._config = Config()
-        self._grammar = grammar
-        self._samples = samples
-        self._stats = stats
+        self.config = Config()
+        self.grammar = grammar
+        self.samples = samples
+        self.stats = stats
         self.__dispatch_recombination_type()
-
-    @property
-    def config(self):
-        return self._config
-
-    @property
-    def grammar(self):
-        return self._grammar
-
-    @property
-    def samples(self):
-        return self._samples
-
-    @property
-    def stats(self):
-        return self._stats
 
     def __call__(self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
         LOG.debug(f'Combining individuals...')
@@ -172,8 +155,9 @@ class Recombination(object):
 
 class Replacement(object):
     """ Dispatches the proper recombination type for population instances """
+    __slots__ = ['_replace']
+
     def __init__(self, replacement_type):
-        self._replace = None
         self.__dispatch_replacement_type(replacement_type)
 
     def __call__(self, generation: List[Individual], offspring: List[Individual]) \
@@ -259,6 +243,8 @@ class Replacement(object):
 
 class Population(object):
     """ Population implementation of an AI Grammatical Evolution algorithm in OOP fashion """
+    __slots__ = ['config', 'samples', 'grammar', 'stats', 'generation', 'offspring', 'best_individual',
+                 'selection', 'recombination', 'replacement']
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats):
         """
@@ -267,61 +253,18 @@ class Population(object):
             samples: list of Spacy doc objets
             grammar: Backus Naur Form grammar notation encoded in a dictionary
         """
-        self._config = Config()
+        self.config = Config()
 
-        self._samples = samples
-        self._grammar = grammar
-        self._stats = stats
-        self._generation = self._genesis()
-        self._offspring = list()
-        self._best_individual = None
+        self.samples = samples
+        self.grammar = grammar
+        self.stats = stats
+        self.generation = self._genesis()
+        self.offspring = list()
+        self.best_individual = None
 
-        self.selection = Selection(self._config.selection_type)
+        self.selection = Selection(self.config.selection_type)
         self.recombination = Recombination(grammar, samples, stats)
-        self.replacement = Replacement(self._config.replacement_type)
-
-    #
-    # Properties & setters
-    #
-    @property
-    def config(self) -> Config:
-        return self._config
-
-    @property
-    def samples(self) -> List[Doc]:
-        return self._samples
-
-    @property
-    def grammar(self) -> dict:
-        return self._grammar
-
-    @property
-    def stats(self) -> Stats:
-        return self._stats
-
-    @property
-    def generation(self) -> List[Individual]:
-        return self._generation
-
-    @generation.setter
-    def generation(self, generation: List[Individual]):
-        self._generation = generation
-
-    @property
-    def offspring(self) -> List[Individual]:
-        return self._offspring
-
-    @offspring.setter
-    def offspring(self, offspring: List[Individual]):
-        self._offspring = offspring
-
-    @property
-    def best_individual(self) -> Individual:
-        return self._best_individual
-
-    @best_individual.setter
-    def best_individual(self, best_individual: Individual):
-        self._best_individual = best_individual
+        self.replacement = Replacement(self.config.replacement_type)
 
     #
     # Population specific methods
