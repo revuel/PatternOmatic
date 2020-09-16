@@ -16,6 +16,7 @@ from PatternOmatic.settings.literals import FitnessType, S, T, XPS, TOKEN_WILDCA
 
 class Individual(object):
     """ Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion """
+    __slots__ = ['config', 'samples', 'grammar', 'stats', 'bin_genotype', 'int_genotype', 'fenotype', 'fitness_value']
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats, dna: str = None):
         """
@@ -26,57 +27,24 @@ class Individual(object):
             stats (Stats): statistics object related with this run
             dna: Optional, binary string representation
         """
-        self._config = Config()
+        self.config = Config()
 
-        self._samples = samples
-        self._grammar = grammar
-        self._stats = stats
-        self._bin_genotype = self._initialize() if dna is None else self.mutate(dna, self._config.mutation_probability)
-        self._int_genotype = self._transcription()
-        self._fenotype = self._translation()
-        self._fitness_value = self.fitness()
+        self.samples = samples
+        self.grammar = grammar
+        self.stats = stats
+        self.bin_genotype = self._initialize() if dna is None else self.mutate(dna, self.config.mutation_probability)
+        self.int_genotype = self._transcription()
+        self.fenotype = self._translation()
+        self.fitness_value = self.fitness()
 
         # Stats concerns
         self._is_solution()
 
     def __iter__(self):
         """ Iterable instance """
-        yield 'Genotype', self._bin_genotype
-        yield 'Fenotype', self._fenotype
-        yield 'Fitness', self._fitness_value
-
-    # Properties & setters
-    @property
-    def config(self) -> Config:
-        return self._config
-
-    @property
-    def samples(self) -> [Doc]:
-        return self._samples
-
-    @property
-    def grammar(self) -> dict:
-        return self._grammar
-
-    @property
-    def stats(self) -> Stats:
-        return self._stats
-
-    @property
-    def bin_genotype(self) -> str:
-        return self._bin_genotype
-
-    @property
-    def int_genotype(self) -> [int]:
-        return self._int_genotype
-
-    @property
-    def fenotype(self) -> [{}]:
-        return self._fenotype
-
-    @property
-    def fitness_value(self) -> float:
-        return self._fitness_value
+        yield 'Genotype', self.bin_genotype
+        yield 'Fenotype', self.fenotype
+        yield 'Fitness', self.fitness_value
 
     # Specific GE methods
     def _initialize(self) -> str:
