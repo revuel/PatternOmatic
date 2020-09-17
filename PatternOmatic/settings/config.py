@@ -1,7 +1,6 @@
 """ Configuration Management module """
 from __future__ import annotations
 import configparser
-from configparser import Error
 from typing import Optional
 from PatternOmatic.settings.log import LOG
 from PatternOmatic.settings.literals import *
@@ -32,22 +31,20 @@ class Config(metaclass=SingletonMetaNaive):
         Args:
             config_file_path: Path for a configuration file
         """
-        self._config_parser = configparser.ConfigParser()
-        config_parser = self._config_parser
+        config_parser = configparser.ConfigParser()
 
         if config_file_path is None:
             LOG.warning(f'Configuration file not provided. Falling back to default values')
-
         else:
             file_list = config_parser.read(config_file_path)
             if len(file_list) == 0:
                 LOG.warning(f'File {config_file_path} not found. Falling back to default values')
 
+        #
         # GE configuration parameters
-        # self._max_runs = config_parser.getint(GE, MAX_RUNS, fallback=4)
+        #
         self._max_runs = self._validate_config_argument(GE, MAX_RUNS, 4, config_parser)
         self._success_threshold = self._validate_config_argument(GE, SUCCESS_THRESHOLD, 0.8, config_parser)
-
         self._population_size = self._validate_config_argument(GE, POPULATION_SIZE, 10, config_parser)
         self._max_generations = self._validate_config_argument(GE, MAX_GENERATIONS, 3, config_parser)
         self._codon_length = self._validate_config_argument(GE, CODON_LENGTH, 8, config_parser)
@@ -58,13 +55,19 @@ class Config(metaclass=SingletonMetaNaive):
         self._mating_probability = self._validate_config_argument(GE, MATING_PROBABILITY, 0.9, config_parser)
         self._k_value = self._validate_config_argument(GE, K_VALUE, 3, config_parser)
 
+        #
         # GE configuration methods
+        #
         self._selection_type = SelectionType(self._validate_config_argument(GE, SELECTION_TYPE, 0, config_parser))
         self._recombination_type = \
             RecombinationType(self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
         self._replacement_type = ReplacementType(self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
+        self._fitness_function_type = \
+            FitnessType(self._validate_config_argument(GE, FITNESS_FUNCTION_TYPE, 1, config_parser))
 
-        # Dynamic Grammar Generation configuration options
+        #
+        # BNF Grammar Generation configuration options
+        #
         self._features_per_token = self._validate_config_argument(DGG, FEATURES_X_TOKEN, 1, config_parser)
         self._use_boolean_features = self._validate_config_argument(DGG, USE_BOOLEAN_FEATURES, False, config_parser)
         self._use_custom_attributes = self._validate_config_argument(DGG, USE_CUSTOM_ATTRIBUTES, False, config_parser)
@@ -74,14 +77,14 @@ class Config(metaclass=SingletonMetaNaive):
         self._use_extended_pattern_syntax = \
             self._validate_config_argument(DGG, USE_EXTENDED_PATTERN_SYNTAX, False, config_parser)
 
-        # Problem specific configuration options
-        self._fitness_function_type = \
-            FitnessType(self._validate_config_argument(GE, FITNESS_FUNCTION_TYPE, 1, config_parser))
-
-        # Configuration validation (only when reading from config.ini)
+        #
+        # Configuration validation
+        #
         self._check_xps_op_restriction()
 
-        # Other
+        #
+        # IO
+        #
         self._report_path = \
             self._validate_config_argument('OS', REPORT_PATH, '/tmp/patternOmatic_report.txt', config_parser)
 
@@ -367,6 +370,6 @@ class Config(metaclass=SingletonMetaNaive):
 
         """
         if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
-            LOG.warning(f'Extended Pattern Syntax is not compatible with the usage of grammar operators '
+            LOG.warning(f'Extended Pattern Syntax is not compatible with the usage of Grammar Operators. '
                         f'Extended Pattern Syntax has been disabled!')
             self._use_extended_pattern_syntax = False
