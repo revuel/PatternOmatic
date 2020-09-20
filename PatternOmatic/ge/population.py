@@ -12,7 +12,7 @@ from PatternOmatic.settings.log import LOG
 
 class Selection(object):
     """ Dispatches the proper selection type for population instances """
-    __slots__ = ['_select']
+    __slots__ = '_select'
 
     def __init__(self, selection_type: SelectionType):
         self.__dispatch_selection(selection_type)
@@ -94,7 +94,7 @@ class Selection(object):
 
 class Recombination(object):
     """ Dispatches the proper recombination type for population instances """
-    __slots__ = ['_recombine', 'config', 'grammar', 'samples', 'stats']
+    __slots__ = ('_recombine', 'config', 'grammar', 'samples', 'stats')
 
     def __init__(self, grammar: Dict, samples: List[Doc], stats: Stats):
         self._recombine = None
@@ -155,7 +155,7 @@ class Recombination(object):
 
 class Replacement(object):
     """ Dispatches the proper recombination type for population instances """
-    __slots__ = ['_replace']
+    __slots__ = '_replace'
 
     def __init__(self, replacement_type):
         self.__dispatch_replacement_type(replacement_type)
@@ -243,8 +243,8 @@ class Replacement(object):
 
 class Population(object):
     """ Population implementation of an AI Grammatical Evolution algorithm in OOP fashion """
-    __slots__ = ['config', 'samples', 'grammar', 'stats', 'generation', 'offspring', 'best_individual',
-                 'selection', 'recombination', 'replacement']
+    __slots__ = ('config', 'samples', 'grammar', 'stats', 'generation', 'offspring', 'best_individual',
+                 'selection', 'recombination', 'replacement')
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats):
         """
