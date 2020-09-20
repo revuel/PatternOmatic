@@ -16,7 +16,7 @@ from PatternOmatic.settings.literals import FitnessType, S, T, XPS, TOKEN_WILDCA
 
 class Individual(object):
     """ Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion """
-    __slots__ = ['config', 'samples', 'grammar', 'stats', 'bin_genotype', 'int_genotype', 'fenotype', 'fitness_value']
+    __slots__ = ('config', 'samples', 'grammar', 'stats', 'bin_genotype', 'int_genotype', 'fenotype', 'fitness_value')
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats, dna: str = None):
         """
