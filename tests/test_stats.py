@@ -22,22 +22,22 @@ class TestStats(TestCase):
     def test_add_sr(self):
         """ SR accumulator works """
         self.stats.add_sr(True)
-        super().assertListEqual(self.stats._success_rate_accumulator, [True])
+        super().assertListEqual(self.stats.success_rate_accumulator, [True])
 
     def test_add_mbf(self):
         """ MBF acuumulator works """
         self.stats.add_mbf(0.5)
-        super().assertListEqual(self.stats._mbf_accumulator, [0.5])
+        super().assertListEqual(self.stats.mbf_accumulator, [0.5])
 
     def test_add_aes(self):
         """ AES accumulator works """
         self.stats.add_aes(10)
-        super().assertListEqual(self.stats._aes_accumulator, [10])
+        super().assertListEqual(self.stats.aes_accumulator, [10])
 
     def test_add_time(self):
         """ Time accumulator works """
         self.stats.add_time(0.2222)
-        super().assertListEqual(self.stats._time_accumulator, [0.2222])
+        super().assertListEqual(self.stats.time_accumulator, [0.2222])
 
     @skip('Not implemented yet')
     def test_add_most_fitted(self):
@@ -47,15 +47,15 @@ class TestStats(TestCase):
         """ Time counter works """
         self.stats.sum_aes(2)
         self.stats.sum_aes(2)
-        super().assertEqual(self.stats._aes_counter, 4)
+        super().assertEqual(self.stats.aes_counter, 4)
 
     def test_reset(self):
         """ Reset stats method works """
-        self.stats._aes_counter = 100
-        self.stats._solution_found = True
+        self.stats.aes_counter = 100
+        self.stats.solution_found = True
         self.stats.reset()
-        super().assertEqual(self.stats._aes_counter, 0)
-        super().assertEqual(self.stats._solution_found, False)
+        super().assertEqual(self.stats.aes_counter, 0)
+        super().assertEqual(self.stats.solution_found, False)
 
     @skip('Not implemented yet')
     def test_calculate_metrics(self):
@@ -73,7 +73,7 @@ class TestStats(TestCase):
         mock_individual_list.append(i2)
         mock_individual_list.append(i3)
 
-        self.stats._most_fitted_accumulator = mock_individual_list
+        self.stats.most_fitted_accumulator = mock_individual_list
 
         super().assertEqual(self.stats.get_most_fitted(), i2)
 

@@ -5,27 +5,41 @@ from PatternOmatic.settings.log import LOG
 
 class Stats(object):
     """ Class responsible of handling performance metrics """
+    __slots__ = [
+        'success_rate_accumulator',
+        'mbf_accumulator',
+        'aes_accumulator',
+        'time_accumulator',
+        'most_fitted_accumulator',
+        'solution_found',
+        'success_rate',
+        'mbf',
+        'aes',
+        'mean_time',
+        'aes_counter'
+    ]
+
     def __init__(self):
         """ Stats instances constructor """
-        self._success_rate_accumulator = list()
-        self._mbf_accumulator = list()
-        self._aes_accumulator = list()
-        self._time_accumulator = list()
-        self._most_fitted_accumulator = list()
-        self._solution_found = False
-        self._success_rate = None
-        self._mbf = None
-        self._aes = None
-        self._mean_time = None
+        self.success_rate_accumulator = list()
+        self.mbf_accumulator = list()
+        self.aes_accumulator = list()
+        self.time_accumulator = list()
+        self.most_fitted_accumulator = list()
+        self.solution_found = False
+        self.success_rate = None
+        self.mbf = None
+        self.aes = None
+        self.mean_time = None
 
-        self._aes_counter = 0
+        self.aes_counter = 0
 
     def __iter__(self):
         """ Iterable instance """
-        yield 'SR', self._success_rate
-        yield 'MBF', self._mbf
-        yield 'AES', self._aes
-        yield 'Mean Time', self._mean_time
+        yield 'SR', self.success_rate
+        yield 'MBF', self.mbf
+        yield 'AES', self.aes
+        yield 'Mean Time', self.mean_time
         yield 'Best Individual', dict(self.get_most_fitted())
 
     #
@@ -38,7 +52,7 @@ class Stats(object):
             sr: Boolean value that indicates if the RUN succeeded (True) or not (False)
 
         """
-        self._success_rate_accumulator.append(sr)
+        self.success_rate_accumulator.append(sr)
 
     def add_mbf(self, bf: float) -> None:
         """
@@ -47,7 +61,7 @@ class Stats(object):
             bf: Best fitness fount over a RUN
 
         """
-        self._mbf_accumulator.append(bf)
+        self.mbf_accumulator.append(bf)
 
     def add_aes(self, es: int) -> None:
         """
@@ -56,7 +70,7 @@ class Stats(object):
             es: Number of evaluations to solution over a RUN
 
         """
-        self._aes_accumulator.append(es)
+        self.aes_accumulator.append(es)
 
     def add_time(self, time: float) -> None:
         """
@@ -65,7 +79,7 @@ class Stats(object):
             time: Time lapsed of a RUN
 
         """
-        self._time_accumulator.append(time)
+        self.time_accumulator.append(time)
 
     def add_most_fitted(self, indi: any) -> None:
         """
@@ -76,7 +90,7 @@ class Stats(object):
         Returns:
 
         """
-        self._most_fitted_accumulator.append(indi)
+        self.most_fitted_accumulator.append(indi)
 
     def sum_aes(self, es: int) -> None:
         """
@@ -87,67 +101,23 @@ class Stats(object):
         Returns:
 
         """
-        self._aes_counter += es
+        self.aes_counter += es
 
     #
     # Metrics
     #
     def reset(self):
         """ Resets variables that depend on the run """
-        self._aes_counter = 0
-        self._solution_found = False
+        self.aes_counter = 0
+        self.solution_found = False
 
     def calculate_metrics(self):
         """ Calculates the common GE evaluation metrics """
-        self.add_aes(self._aes_counter)
-        self._success_rate = Stats.avg(self._success_rate_accumulator)
-        self._mbf = Stats.avg(self._mbf_accumulator)
-        self._aes = Stats.avg(self._aes_accumulator)
-        self._mean_time = Stats.avg(self._time_accumulator)
-
-    @property
-    def success_rate(self) -> float:
-        """
-        Average of the RUNS that succeeded
-        Returns: SR value for this Execution
-
-        """
-        return self._success_rate
-
-    @property
-    def mbf(self) -> float:
-        """
-        Mean Best Fitness
-        Returns: MBF of this Execution
-
-        """
-        return self._mbf
-
-    @property
-    def aes(self) -> float:
-        """
-        Average Evaluations to Solution
-        Returns: AES of this Execution
-
-        """
-        return self._aes
-
-    @property
-    def mean_time(self) -> float:
-        """
-        Time lapsed for this Execution
-        Returns: Mean time of this Execution
-
-        """
-        return self._mean_time
-
-    @property
-    def solution_found(self) -> bool:
-        return self._solution_found
-
-    @solution_found.setter
-    def solution_found(self, value: bool):
-        self._solution_found = value
+        self.add_aes(self.aes_counter)
+        self.success_rate = Stats.avg(self.success_rate_accumulator)
+        self.mbf = Stats.avg(self.mbf_accumulator)
+        self.aes = Stats.avg(self.aes_accumulator)
+        self.mean_time = Stats.avg(self.time_accumulator)
 
     #
     # Auxiliary methods
@@ -158,7 +128,7 @@ class Stats(object):
         Returns: Individual with Best Fitness found for this Execution
 
         """
-        return max(self._most_fitted_accumulator, key=operator.attrgetter('fitness_value'))
+        return max(self.most_fitted_accumulator, key=operator.attrgetter('fitness_value'))
 
     @staticmethod
     def avg(al: list) -> float:
@@ -182,10 +152,10 @@ class Stats(object):
         Returns: None
 
         """
-        if report_format is 'json':
+        if report_format == 'json':
             with open(report_path, mode='a+') as f:
                 f.writelines(str(dict(self)) + '\n')
-        elif report_format is 'csv':
+        elif report_format == 'csv':
             with open(report_path, mode='a+') as f:
                 f.writelines(self._to_csv() + '\n')
         else:
