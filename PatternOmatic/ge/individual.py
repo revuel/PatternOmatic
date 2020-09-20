@@ -14,6 +14,99 @@ from PatternOmatic.settings.literals import FitnessType, S, T, XPS, TOKEN_WILDCA
     SLD, SRD, GTH, LTH, GEQ, LEQ, EQQ, XPS_AS
 
 
+class Fitness(object):
+    """ Dispatches the proper fitness type for individual instances """
+    __slots__ = ('_fitness', 'config', 'samples', 'fenotype')
+
+    def __init__(self, config, samples, fenotype):
+        self.config = config
+        self.samples = samples
+        self.fenotype = fenotype
+        self._dispatch_fitness(self.config.fitness_function_type)
+
+    def __call__(self, *args, **kwargs) -> float:
+        return self._fitness()
+
+    def _dispatch_fitness(self, fitness_function_type: FitnessType) -> None:
+        """
+        Sets the type of the fitness function for an Individual instance
+        Args:
+            fitness_function_type: The fitness function to be used
+
+        Returns: None
+
+        """
+        if fitness_function_type == FitnessType.BASIC:
+            self._fitness = self._fitness_basic
+        elif fitness_function_type == FitnessType.FULL_MATCH:
+            self._fitness = self._fitness_fullmatch
+        else:
+            self._fitness = self._fitness_basic
+            raise ValueError('Invalid fitness function type: ', fitness_function_type)
+
+    def _fitness_basic(self) -> float:
+        """
+        Sets the fitness value for an individual. If makes a partial match over a sample, a score is added
+        for that sample even if the matches are only a portion of the sample's length
+        Returns: Float (fitness value)
+
+        """
+        max_score_per_sample = 1 / len(self.samples)
+        matchy = Matcher(self.samples[0].vocab)
+        matchy.add("basic", None, self.fenotype)
+        contact = 0.0
+
+        for sample in self.samples:
+            matches = matchy(sample)
+            if len(matches) > 0:
+                contact += max_score_per_sample
+
+        return self._wildcard_penalty(contact)
+
+    def _fitness_fullmatch(self) -> float:
+        """
+        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals the full
+        length of the sample
+        Returns: Float
+
+        """
+        max_score_per_sample = 1 / len(self.samples)
+
+        current_vocab = self.samples[0].vocab
+
+        matchy = Matcher(current_vocab)
+        matchy.add('full_match', None, self.fenotype)
+        contact = 0.0
+
+        for sample in self.samples:
+            matches = matchy(sample)
+            if len(matches) > 0:
+                for match in matches:
+                    if match[2] == len(sample) and match[1] == 0:
+                        contact += max_score_per_sample
+
+        return self._wildcard_penalty(contact)
+
+    def _wildcard_penalty(self, contact: float) -> float:
+        """
+        Applies a penalty for the usage of token wildcard if usage of token wildcard is enabled
+        Args:
+            contact: Temporary fitness value for the current individual
+
+        Returns: Final fitness value for the current individual
+
+        """
+        if self.config.use_token_wildcard:
+            num_tokens = len(self.fenotype)
+            for item in self.fenotype:
+                if item == {}:
+                    LOG.debug('Applying token wildcard penalty!')
+                    penalty = 1/num_tokens
+                    contact = contact - penalty
+
+        return contact
+
+
 class Individual(object):
     """ Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion """
     __slots__ = ('config', 'samples', 'grammar', 'stats', 'bin_genotype', 'int_genotype', 'fenotype', 'fitness_value')
@@ -35,7 +128,7 @@ class Individual(object):
         self.bin_genotype = self._initialize() if dna is None else self.mutate(dna, self.config.mutation_probability)
         self.int_genotype = self._transcription()
         self.fenotype = self._translation()
-        self.fitness_value = self.fitness()
+        self.fitness_value = Fitness(self.config, self.samples, self.fenotype).__call__()
 
         # Stats concerns
         self._is_solution()
@@ -46,7 +139,9 @@ class Individual(object):
         yield 'Fenotype', self.fenotype
         yield 'Fitness', self.fitness_value
 
-    # Specific GE methods
+    #
+    # Problem specific GE methods
+    #
     def _initialize(self) -> str:
         """
         Sets up randomly the binary string representation of an individual
@@ -134,7 +229,9 @@ class Individual(object):
 
         return symbolic_string
 
-# Generic GA methods
+    #
+    # Generic GA methods
+    #
     @classmethod
     def mutate(cls, dna, mutation_probability) -> str:
         """
@@ -158,62 +255,6 @@ class Individual(object):
                 mutated_dna += gen
         return mutated_dna
 
-    def fitness(self) -> float:
-        """
-        A pseudo-factory to different fitness functions
-        Returns: Float
-
-        """
-        if self.config.fitness_function_type == FitnessType.BASIC:
-            return self._fitness_basic()
-        elif self.config.fitness_function_type == FitnessType.FULL_MATCH:
-            return self._fitness_fullmatch()
-        else:
-            raise ValueError('Invalid fitness function type: ', self.config.fitness_function_type)
-
-    def _fitness_basic(self) -> float:
-        """
-        Sets the fitness value for an individual. If makes a partial match over a sample, a score is added
-        for that sample even if the matches are only a portion of the sample's length
-        Returns: Float (fitness value)
-
-        """
-        max_score_per_sample = 1 / len(self.samples)
-        matchy = Matcher(self.samples[0].vocab)
-        matchy.add("basic", None, self.fenotype)
-        contact = 0.0
-
-        for sample in self.samples:
-            matches = matchy(sample)
-            if len(matches) > 0:
-                contact += max_score_per_sample
-
-        return self._wildcard_penalty(contact)
-
-    def _fitness_fullmatch(self) -> float:
-        """
-        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals the full
-        length of the sample
-        Returns: Float
-
-        """
-        max_score_per_sample = 1 / len(self.samples)
-
-        current_vocab = self.samples[0].vocab
-
-        matchy = Matcher(current_vocab)
-        matchy.add('full_match', None, self.fenotype)
-        contact = 0.0
-
-        for sample in self.samples:
-            matches = matchy(sample)
-            if len(matches) > 0:
-                for match in matches:
-                    if match[2] == len(sample) and match[1] == 0:
-                        contact += max_score_per_sample
-
-        return self._wildcard_penalty(contact)
-
     #
     # Stats concerns
     #
@@ -227,25 +268,3 @@ class Individual(object):
             if self.fitness_value >= self.config.success_threshold:
                 LOG.debug('Solution found for this run!')
                 self.stats.solution_found = True
-
-    #
-    # Token Wildcard Penalty
-    #
-    def _wildcard_penalty(self, contact: float) -> float:
-        """
-        Applies a penalty for the usage of token wildcard if usage of token wildcard is enabled
-        Args:
-            contact: Temporary fitness value for the current individual
-
-        Returns: Final fitness value for the current individual
-
-        """
-        if self.config.use_token_wildcard:
-            num_tokens = len(self.fenotype)
-            for item in self.fenotype:
-                if item == {}:
-                    LOG.debug('Applying token wildcard penalty!')
-                    penalty = 1/num_tokens
-                    contact = contact - penalty
-
-        return contact
