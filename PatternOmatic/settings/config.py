@@ -18,6 +18,7 @@ class SingletonMetaNaive(type):
         return cls._instance
 
     def clear_instance(self):
+        """ For testing purposes, destroy Singleton instance """
         LOG.debug('Removing config object!')
         self._instance = None
         del self._instance

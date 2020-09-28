@@ -10,7 +10,12 @@ class IndividualMock(object):
         self._fitness_value = fitness_value
 
     @property
+    def __dict__(self):
+        return {'FAKE_INDIVIDUAL': self.__class__.__name__, 'FAKE_FITNESS':  self._fitness_value}
+
+    @property
     def fitness_value(self):
+        """ Fake fitness """
         return self._fitness_value
 
 
@@ -74,6 +79,8 @@ class TestStats(TestCase):
         mock_individual_list.append(i3)
 
         self.stats.most_fitted_accumulator = mock_individual_list
+
+        self.stats.__dict__
 
         super().assertEqual(self.stats.get_most_fitted(), i2)
 

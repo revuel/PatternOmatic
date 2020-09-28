@@ -35,7 +35,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None) -> None:
         stats.add_time(end - start)
         stats.calculate_metrics()
 
-    LOG.info(f'Execution report {dict(stats)}')
+    LOG.info(f'Execution report {stats}')
     stats.persist(config.report_path)
 
 

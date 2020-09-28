@@ -34,13 +34,24 @@ class Stats(object):
 
         self.aes_counter = 0
 
-    def __iter__(self):
-        """ Iterable instance """
-        yield 'SR', self.success_rate
-        yield 'MBF', self.mbf
-        yield 'AES', self.aes
-        yield 'Mean Time', self.mean_time
-        yield 'Best Individual', dict(self.get_most_fitted())
+    @property
+    def __dict__(self):
+        """ Dictionary representation for a slotted class (that has no dict at all) """
+        # Above works just for POPOs
+        stats_dict = \
+            {s: getattr(self, s, None) for s in self.__slots__ if s in ('success_rate', 'mbf', 'aes', 'mean_time')}
+
+        most_fitted = self.get_most_fitted()
+
+        most_fitted_dict = most_fitted.__dict__ if most_fitted is not None else None
+
+        stats_dict.update(most_fitted_dict)
+
+        return stats_dict
+
+    def __repr__(self):
+        """ String representation of a slotted class using hijacked dict """
+        return f'{self.__class__.__name__}({self.__dict__})'
 
     #
     # Accumulators & Counters
@@ -81,22 +92,22 @@ class Stats(object):
         """
         self.time_accumulator.append(time)
 
-    def add_most_fitted(self, indi: any) -> None:
+    def add_most_fitted(self, individual: any) -> None:
         """
         Adds a new individual to the accumulator
         Args:
-            indi: Individual with best fitness found over a RUN
+            individual: Individual with best fitness found over a RUN
 
         Returns:
 
         """
-        self.most_fitted_accumulator.append(indi)
+        self.most_fitted_accumulator.append(individual)
 
     def sum_aes(self, es: int) -> None:
         """
         Sums a new Evaluations to Solution value to the counter
         Args:
-            es: Evalutations to Solution of a given Run
+            es: Number of evaluations to Solution of a given Run
 
         Returns:
 
@@ -154,7 +165,7 @@ class Stats(object):
         """
         if report_format == 'json':
             with open(report_path, mode='a+') as f:
-                f.writelines(str(dict(self)) + '\n')
+                f.writelines(repr(self) + '\n')
         elif report_format == 'csv':
             with open(report_path, mode='a+') as f:
                 f.writelines(self._to_csv() + '\n')
@@ -170,7 +181,7 @@ class Stats(object):
 
         """
         csv = ''
-        for k, v in dict(self).items():
+        for k, v in self.__dict__.items():
             if not type(v) is dict:
                 csv = csv + str(v) + '\t'
             else:

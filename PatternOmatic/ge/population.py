@@ -311,7 +311,7 @@ class Population(object):
             self.generation, self.offspring = self.replacement(self.generation, self.offspring)
             self._best_challenge()
 
-        LOG.info(f'Best candidate found on this run: {dict(self.best_individual)}')
+        LOG.info(f'Best candidate found on this run: {self.best_individual}')
 
         # Stats concerns
         self.stats.add_most_fitted(self.best_individual)
