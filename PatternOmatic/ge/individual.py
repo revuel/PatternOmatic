@@ -39,7 +39,7 @@ class Fitness(object):
         if fitness_function_type == FitnessType.BASIC:
             self._fitness = self._fitness_basic
         elif fitness_function_type == FitnessType.FULL_MATCH:
-            self._fitness = self._fitness_fullmatch
+            self._fitness = self._fitness_full_match
         else:
             self._fitness = self._fitness_basic
             raise ValueError('Invalid fitness function type: ', fitness_function_type)
@@ -52,18 +52,18 @@ class Fitness(object):
 
         """
         max_score_per_sample = 1 / len(self.samples)
-        matchy = Matcher(self.samples[0].vocab)
-        matchy.add("basic", None, self.fenotype)
+        matcher = Matcher(self.samples[0].vocab)
+        matcher.add("basic", None, self.fenotype)
         contact = 0.0
 
         for sample in self.samples:
-            matches = matchy(sample)
+            matches = matcher(sample)
             if len(matches) > 0:
                 contact += max_score_per_sample
 
         return self._wildcard_penalty(contact)
 
-    def _fitness_fullmatch(self) -> float:
+    def _fitness_full_match(self) -> float:
         """
         Sets the fitness value for an individual. It only gives a partial score if any of the matches equals the full
         length of the sample
@@ -74,12 +74,12 @@ class Fitness(object):
 
         current_vocab = self.samples[0].vocab
 
-        matchy = Matcher(current_vocab)
-        matchy.add('full_match', None, self.fenotype)
+        matcher = Matcher(current_vocab)
+        matcher.add('full_match', None, self.fenotype)
         contact = 0.0
 
         for sample in self.samples:
-            matches = matchy(sample)
+            matches = matcher(sample)
             if len(matches) > 0:
                 for match in matches:
                     if match[2] == len(sample) and match[1] == 0:
@@ -102,7 +102,7 @@ class Fitness(object):
                 if item == {}:
                     LOG.debug('Applying token wildcard penalty!')
                     penalty = 1/num_tokens
-                    contact = contact - penalty
+                    contact -= penalty
 
         return contact
 
@@ -133,11 +133,15 @@ class Individual(object):
         # Stats concerns
         self._is_solution()
 
-    def __iter__(self):
-        """ Iterable instance """
-        yield 'Genotype', self.bin_genotype
-        yield 'Fenotype', self.fenotype
-        yield 'Fitness', self.fitness_value
+    @property
+    def __dict__(self):
+        """ Dictionary representation for a slotted class (that has no dict at all) """
+        # Above works just for POPOs
+        return {s: getattr(self, s, None) for s in self.__slots__ if s in ('bin_genotype', 'fenotype', 'fitness_value')}
+
+    def __repr__(self):
+        """ String representation of a slotted class using hijacked dict """
+        return f'{self.__class__.__name__}({self.__dict__})'
 
     #
     # Problem specific GE methods
@@ -210,8 +214,8 @@ class Individual(object):
             symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
 
         elif key in [IN, NOT_IN]:
-            dkey = key.replace(SLD, '').replace(SRD, '')
-            feature = "\"" + dkey + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+            key_r = key.replace(SLD, '').replace(SRD, '')
+            feature = "\"" + key_r + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
             symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
         elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
@@ -219,12 +223,12 @@ class Individual(object):
             symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
         else:
-            dkey = key.replace(SLD, '').replace(SRD, '')
+            key_r = key.replace(SLD, '').replace(SRD, '')
             fired_rule = str(self.grammar[key][fire])
             if fired_rule != XPS:
-                feature = "\"" + dkey + "\"" + ":" + "\"" + fired_rule + "\""
+                feature = "\"" + key_r + "\"" + ":" + "\"" + fired_rule + "\""
             else:
-                feature = "\"" + dkey + "\"" + ":" + fired_rule
+                feature = "\"" + key_r + "\"" + ":" + fired_rule
             symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
         return symbolic_string

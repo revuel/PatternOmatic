@@ -89,9 +89,6 @@ LTH = SLD + 'LTH' + SRD
 XPS_AS = {EQQ: "==", GEQ: ">=", LEQ: "<=", GTH: ">", LTH: "<"}
 # Grammar custom attributes extension symbol
 UNDERSCORE = SLD + 'UNDERSCORE' + SRD
-MATCHER_SUPPORTED_ATTRIBUTES = ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'ent_type_',
-                                'is_alpha', 'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct',
-                                'is_space', 'is_stop', 'like_num', 'like_url', 'like_email')
 EF = SLD + 'EF' + SRD
 ENT_ID = SLD + 'CUSTOM_ENT_ID_' + SRD
 ENT_IOB = SLD + 'CUSTOM_ENT_IOB_' + SRD
@@ -114,6 +111,29 @@ STRING = SLD + 'CUSTOM_STRING' + SRD
 SUFFIX = SLD + 'CUSTOM_SUFFIX_' + SRD
 TEXT_WITH_WS = SLD + 'CUSTOM_TEXT_WITH_WS' + SRD
 WHITESPACE = SLD + 'CUSTOM_WHITESPACE_' + SRD
+# Matcher's util
+MATCHER_SUPPORTED_ATTRIBUTES = (
+    'orth_',
+    'text',
+    'lower_',
+    'pos_',
+    'tag_',
+    'dep_',
+    'lemma_',
+    'shape_',
+    'ent_type_',
+    'is_alpha',
+    'is_ascii',
+    'is_digit',
+    'is_lower',
+    'is_upper',
+    'is_title',
+    'is_punct',
+    'is_space',
+    'is_stop',
+    'like_num',
+    'like_url',
+    'like_email')
 
 #
 # Config ini literals
