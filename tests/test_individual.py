@@ -68,7 +68,7 @@ class TestIndividual(unittest.TestCase):
 
         super().assertEqual(i.fitness_value, 0.25)
 
-    def test_fitness_fullmatch(self):
+    def test_fitness_full_match(self):
         """ Fitness "full match" sets fitness """
         self.config.mutation_probability = 0.0
         self.config.fitness_function_type = FitnessType.FULL_MATCH
@@ -76,10 +76,15 @@ class TestIndividual(unittest.TestCase):
 
         super().assertEqual(i.fitness_value, 0.25)
 
+    #
+    # Helpers
+    #
     def setUp(self) -> None:
+        """ Fresh Config instance """
         self.config = Config()
 
     def tearDown(self) -> None:
+        """ Destroy Config instance """
         Config.clear_instance()
 
 

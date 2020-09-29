@@ -48,9 +48,13 @@ class TestSettings(unittest.TestCase):
         super().assertNotEqual(config.fitness_function_type, RecombinationType.RANDOM_ONE_POINT_CROSSOVER)
         super().assertNotEqual(config.report_path, 0)
 
+    #
+    # Helpers
+    #
     def setUp(self) -> None:
+        """ Fresh Config instance """
         self.config = Config()
 
     def tearDown(self) -> None:
+        """ Destroy Config instance """
         Config.clear_instance()
-

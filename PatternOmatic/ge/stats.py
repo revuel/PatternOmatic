@@ -42,9 +42,7 @@ class Stats(object):
             {s: getattr(self, s, None) for s in self.__slots__ if s in ('success_rate', 'mbf', 'aes', 'mean_time')}
 
         most_fitted = self.get_most_fitted()
-
-        most_fitted_dict = most_fitted.__dict__ if most_fitted is not None else None
-
+        most_fitted_dict = most_fitted.__dict__ if most_fitted is not None else {'most_fitted': None}
         stats_dict.update(most_fitted_dict)
 
         return stats_dict
@@ -52,6 +50,10 @@ class Stats(object):
     def __repr__(self):
         """ String representation of a slotted class using hijacked dict """
         return f'{self.__class__.__name__}({self.__dict__})'
+
+    def __iter__(self):
+        """ Enable dict(self) """
+        yield from self.__dict__.items()
 
     #
     # Accumulators & Counters
@@ -139,7 +141,8 @@ class Stats(object):
         Returns: Individual with Best Fitness found for this Execution
 
         """
-        return max(self.most_fitted_accumulator, key=operator.attrgetter('fitness_value'))
+        return max(self.most_fitted_accumulator, key=operator.attrgetter('fitness_value')) \
+            if len(self.most_fitted_accumulator) > 0 else None
 
     @staticmethod
     def avg(al: list) -> float:

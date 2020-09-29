@@ -11,7 +11,7 @@ class IndividualMock(object):
 
     @property
     def __dict__(self):
-        return {'FAKE_INDIVIDUAL': self.__class__.__name__, 'FAKE_FITNESS':  self._fitness_value}
+        return {'most_fitted': {'FAKE_INDIVIDUAL': self.__class__.__name__, 'FAKE_FITNESS':  self._fitness_value}}
 
     @property
     def fitness_value(self):
@@ -27,44 +27,56 @@ class TestStats(TestCase):
     def test_add_sr(self):
         """ SR accumulator works """
         self.stats.add_sr(True)
-        super().assertListEqual(self.stats.success_rate_accumulator, [True])
+        super().assertListEqual([True], self.stats.success_rate_accumulator)
 
     def test_add_mbf(self):
-        """ MBF acuumulator works """
+        """ MBF accumulator works """
         self.stats.add_mbf(0.5)
-        super().assertListEqual(self.stats.mbf_accumulator, [0.5])
+        super().assertListEqual([0.5], self.stats.mbf_accumulator)
 
     def test_add_aes(self):
         """ AES accumulator works """
         self.stats.add_aes(10)
-        super().assertListEqual(self.stats.aes_accumulator, [10])
+        super().assertListEqual([10], self.stats.aes_accumulator)
 
     def test_add_time(self):
         """ Time accumulator works """
         self.stats.add_time(0.2222)
-        super().assertListEqual(self.stats.time_accumulator, [0.2222])
+        super().assertListEqual([0.2222], self.stats.time_accumulator)
 
-    @skip('Not implemented yet')
     def test_add_most_fitted(self):
-        self.fail()
+        """ Most fitted accumulator works """
+        expected = IndividualMock(0.5)
+        self.stats.add_most_fitted(expected)
+        super().assertListEqual([expected], self.stats.most_fitted_accumulator)
 
     def test_sum_aes(self):
         """ Time counter works """
         self.stats.sum_aes(2)
         self.stats.sum_aes(2)
-        super().assertEqual(self.stats.aes_counter, 4)
+        super().assertEqual(4, self.stats.aes_counter,)
 
     def test_reset(self):
         """ Reset stats method works """
         self.stats.aes_counter = 100
         self.stats.solution_found = True
         self.stats.reset()
-        super().assertEqual(self.stats.aes_counter, 0)
-        super().assertEqual(self.stats.solution_found, False)
+        super().assertEqual(0, self.stats.aes_counter)
+        super().assertEqual(False, self.stats.solution_found)
 
-    @skip('Not implemented yet')
     def test_calculate_metrics(self):
-        self.fail()
+        """ Calculate metrics works """
+        self.stats.success_rate_accumulator = [1, 1, 1]
+        self.stats.mbf_accumulator = [2, 2, 2]
+        self.stats.aes_counter = 100
+        self.stats.time_accumulator = [3, 3, 3]
+
+        self.stats.calculate_metrics()
+
+        super().assertEqual(1, self.stats.success_rate)
+        super().assertEqual(2, self.stats.mbf)
+        super().assertEqual(100, self.stats.aes)
+        super().assertEqual(3, self.stats.mean_time)
 
     def test_get_most_fitted(self):
         """ Most fitted individual is found on most fitted accumulator """
@@ -80,14 +92,12 @@ class TestStats(TestCase):
 
         self.stats.most_fitted_accumulator = mock_individual_list
 
-        self.stats.__dict__
-
         super().assertEqual(self.stats.get_most_fitted(), i2)
 
     def test_avg(self):
-        """ Average implemntation works """
+        """ Average implementation works """
         test_list_1 = [1, 2, 3]
-        super().assertEqual(self.stats.avg(test_list_1), 2)
+        super().assertEqual(2, self.stats.avg(test_list_1))
 
     @skip('Not implemented yet')
     def test_persist(self):
@@ -101,7 +111,5 @@ class TestStats(TestCase):
     # Helpers
     #
     def setUp(self) -> None:
+        """ Fresh Stats instance """
         self.stats = Stats()
-
-    def tearDown(self) -> None:
-        self.stats = None
