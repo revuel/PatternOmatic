@@ -12,6 +12,7 @@ clean:
 	rm -rf `pwd`/build
 	rm -rf `pwd`/dist
 	rm -rf `pwd`/PatternOmatic.egg-info
+	rm -rf `pwd`/fil-result
 
 reqs:
 	pip install -r requirements.txt
@@ -34,4 +35,4 @@ armor:
 	pyarmor build -B
 
 run:
-	python ./scripts/patternomatic.py -s hello Mr. Puffin -s Goodbye Mrs. Muffin
+	python ./scripts/patternomatic.py -s Hello Mr. Puffin -s Goodbye Mrs. Muffin
