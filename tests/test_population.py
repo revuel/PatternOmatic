@@ -109,10 +109,15 @@ class TestPopulation(unittest.TestCase):
         p.evolve()
         super().assertGreaterEqual(p.generation[0].fitness_value, 0.2)
 
+    #
+    # Helpers
+    #
     def setUp(self) -> None:
+        """ Fresh Config instance """
         self.config = Config()
 
     def tearDown(self) -> None:
+        """ Destroy Config instance, reset Underscore's token extensions """
         Config.clear_instance()
 
 

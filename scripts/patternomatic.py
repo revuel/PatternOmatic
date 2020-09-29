@@ -26,7 +26,7 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None) -> None:
     stats = Stats()
     bnf_g = dgg(text_samples)
 
-    LOG.debug('Starting Execution...')
+    LOG.info('Starting Execution...')
     for _ in range(0, config.max_runs):
         start = time.monotonic()
         p = Population(text_samples, bnf_g, stats)

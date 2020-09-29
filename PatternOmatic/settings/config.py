@@ -3,7 +3,12 @@ from __future__ import annotations
 import configparser
 from typing import Optional
 from PatternOmatic.settings.log import LOG
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import GE, MAX_RUNS, SUCCESS_THRESHOLD, POPULATION_SIZE, MAX_GENERATIONS, \
+    CODON_LENGTH, CODONS_X_INDIVIDUAL, MUTATION_PROBABILITY, OFFSPRING_FACTOR, MATING_PROBABILITY, K_VALUE, \
+    SELECTION_TYPE, REPLACEMENT_TYPE, RECOMBINATION_TYPE, RecombinationType, ReplacementType, SelectionType, \
+    FitnessType, FITNESS_FUNCTION_TYPE, \
+    DGG, FEATURES_X_TOKEN, USE_BOOLEAN_FEATURES, USE_CUSTOM_ATTRIBUTES, USE_UNIQUES, \
+    USE_GRAMMAR_OPERATORS, TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH
 
 
 class SingletonMetaNaive(type):
@@ -89,7 +94,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._validate_config_argument(GE, SELECTION_TYPE, 0, config_parser))
 
         self.recombination_type = RecombinationType(
-            self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
+            self._validate_config_argument(GE, RECOMBINATION_TYPE, 0, config_parser))
 
         self.replacement_type = ReplacementType(
             self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
@@ -155,7 +160,8 @@ class Config(metaclass=SingletonMetaNaive):
     #
     # Utilities
     #
-    def _validate_config_argument(self, section, option, default, config_parser):
+    @staticmethod
+    def _validate_config_argument(section, option, default, config_parser):
         """
 
         Args:
@@ -186,7 +192,8 @@ class Config(metaclass=SingletonMetaNaive):
         LOG.debug(f'[{section}][{option}] {value}')
         return value
 
-    def _preserve_property_type(self, _property, value):
+    @staticmethod
+    def _preserve_property_type(_property, value):
         return isinstance(value, type(_property))
 
     #

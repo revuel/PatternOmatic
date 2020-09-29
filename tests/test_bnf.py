@@ -59,7 +59,7 @@ class TestDG(unittest.TestCase):
         super().assertListEqual(grammar[OP], [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE])
 
     def test_basic_grammar_with_booleans_and_extended_pattern_syntax_dg(self):
-        """ Tests that basic grammar with boolean features and extended pattern syntaxt is correctly generated """
+        """ Tests that basic grammar with boolean features and extended pattern syntax is correctly generated """
         self.config.use_boolean_features = True
         self.config.use_extended_pattern_syntax = True
 
@@ -91,10 +91,15 @@ class TestDG(unittest.TestCase):
 
         super().assertIn(TOKEN_WILDCARD, grammar[T])
 
+    #
+    # Helpers
+    #
     def setUp(self) -> None:
+        """ Fresh Config instance """
         self.config = Config()
 
     def tearDown(self) -> None:
+        """ Destroy Config instance, reset Underscore's token extensions """
         Config.clear_instance()
         Underscore.token_extensions = {}
 
