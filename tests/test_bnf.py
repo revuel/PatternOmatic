@@ -3,7 +3,7 @@ import unittest
 import spacy
 from spacy.tokens.doc import Underscore
 
-from PatternOmatic.nlp.bnf import dynamic_generator
+from PatternOmatic.nlp.bnf import dynamic_generator, _get_features_per_token, _symbol_stacker
 from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
     XPS, IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, EF, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, \
     SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
@@ -90,6 +90,33 @@ class TestDG(unittest.TestCase):
         grammar = dynamic_generator(self.samples)
 
         super().assertIn(TOKEN_WILDCARD, grammar[T])
+
+    def test_get_features_per_token(self):
+        """ Tests that the number of features per token is properly set given different configurations """
+        features_dict = {ORTH: None, TEXT: None, LOWER: None, POS: None, TAG: None, LEMMA: None}
+        len_features_dict = len(features_dict.keys())
+
+        # When features_per_token is equal or lower to 0, the maximum number of features per token is set
+        self.config.features_per_token = 0
+        super().assertEqual(len_features_dict, _get_features_per_token(features_dict))
+        self.config.features_per_token = -100
+        super().assertEqual(len_features_dict, _get_features_per_token(features_dict))
+
+        # When features_per_token is greater than the actual features, the maximum number of features per token is set
+        self.config.features_per_token = 100
+        super().assertEqual(len_features_dict, _get_features_per_token(features_dict))
+
+        # When features_per_token is inside the range (0, actual features), the config parameter is respected
+        self.config.features_per_token = 3
+        super().assertEqual(3, _get_features_per_token(features_dict))
+
+    def test_symbol_stacker(self):
+        """ Tests that symbols are stacked properly """
+        expected = [DEP, DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP]
+        super().assertListEqual(expected, _symbol_stacker(DEP, 3))
+
+        expected = [DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP + ',' + DEP]
+        super().assertListEqual(expected, _symbol_stacker(DEP, 4, 2))
 
     #
     # Helpers
