@@ -144,7 +144,7 @@ class TestPopulation(unittest.TestCase):
         self.config = Config()
 
     def tearDown(self) -> None:
-        """ Destroy Config instance, reset Underscore's token extensions """
+        """ Destroy Config instance """
         Config.clear_instance()
 
 

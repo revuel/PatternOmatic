@@ -321,7 +321,7 @@ def _get_features_per_token(features_dict: dict) -> int:
     """
     config = Config()
 
-    if config.features_per_token == 0:
+    if config.features_per_token <= 0:
         max_length_features = len(features_dict.keys())
     else:
         if len(features_dict.keys()) < config.features_per_token + 1:
