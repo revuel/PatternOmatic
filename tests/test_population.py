@@ -109,6 +109,33 @@ class TestPopulation(unittest.TestCase):
         p.evolve()
         super().assertGreaterEqual(p.generation[0].fitness_value, 0.2)
 
+    def test_best_challenge_changes_best_individual(self):
+        """ Covers best challenge cases """
+        p = Population(self.samples, self.grammar, self.stats)
+        i1 = Individual(self.samples, self.grammar, self.stats, dna='00000000000000000000000000000000')
+        i2 = Individual(self.samples, self.grammar, self.stats, dna='01110101100101100110010110010101')
+
+        # When there's no best individual yet, population's best individual is updated
+        p.best_individual = None
+        p.generation = [i2]
+        p._best_challenge()
+
+        super().assertEqual(i2, p.generation[0])
+
+        # When a better individual is the most fitted in a new generation, population's best individual is updated
+        p.best_individual = i1
+        p.generation = [i2]
+        p._best_challenge()
+
+        super().assertEqual(i2, p.generation[0])
+
+        # When a worse individual is the most fitted in a new generation, population's best individual remains the same
+        p.best_individual = i2
+        p.generation = [i1]
+        p._best_challenge()
+
+        super().assertEqual(i2, p.best_individual)
+
     #
     # Helpers
     #
