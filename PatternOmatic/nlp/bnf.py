@@ -290,22 +290,18 @@ def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
 
     """
     symbol_times_list = list()
-
     last = ''
-    for _ in range(min_length):
+
+    for _ in range(max_length):
         if last == '':
             last = symbol
         else:
             last = last + "," + symbol
 
-    symbol_times_list.append(last)
-
-    for _ in range(min_length, max_length):
-        if last == '':
-            last = symbol
-        else:
-            last = last + "," + symbol
         symbol_times_list.append(last)
+
+    if 1 < min_length < max_length:
+        symbol_times_list = symbol_times_list[min_length-1:]
 
     return symbol_times_list
 

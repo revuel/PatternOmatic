@@ -15,8 +15,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     scripts=['scripts/patternomatic.py'],
     install_requires=[
-        'spacy==2.2.3',
-        'en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz#egg=en_core_web_sm'
+        'spacy==2.3.0',
+        'en_core_web_sm @ https://github.com/explosion/spacy-models/'
+        'releases/download/en_core_web_sm-2.3.0/en_core_web_sm-2.3.0.tar.gz#egg=en_core_web_sm'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
