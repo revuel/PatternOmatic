@@ -29,7 +29,7 @@ class TestDG(unittest.TestCase):
         super().assertIn(T, grammar.keys())
         super().assertIn(F, grammar.keys())
         super().assertEqual(len(grammar[SHAPE]), 7)
-        super().assertEqual(len(grammar[F]), 10)
+        super().assertEqual(len(grammar[F]), 9)
 
     def test_basic_grammar_without_uniques_dg(self):
         """ Tests that basic grammar is correctly generated when use uniques is false """
@@ -112,11 +112,18 @@ class TestDG(unittest.TestCase):
 
     def test_symbol_stacker(self):
         """ Tests that symbols are stacked properly """
-        expected = [DEP, DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP]
-        super().assertListEqual(expected, _symbol_stacker(DEP, 3))
+        expected_1 = [DEP, DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP]
+        super().assertListEqual(expected_1, _symbol_stacker(DEP, 3))
 
-        expected = [DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP + ',' + DEP]
-        super().assertListEqual(expected, _symbol_stacker(DEP, 4, 2))
+        expected_2 = [DEP + ',' + DEP,
+                      DEP + ',' + DEP + ',' + DEP,
+                      DEP + ',' + DEP + ',' + DEP + ',' + DEP]
+
+        super().assertListEqual(expected_2, _symbol_stacker(DEP, 4, 2))
+
+        expected_2.insert(0, DEP)
+
+        super().assertListEqual(expected_2, _symbol_stacker(DEP, 4, 5))
 
     #
     # Helpers
