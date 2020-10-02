@@ -39,10 +39,10 @@ class Selection(object):
 
         """
         if isinstance(selection_type, SelectionType):
-            if selection_type == SelectionType.BINARY_TOURNAMENT:
-                self._select = self._binary_tournament
-            elif selection_type == SelectionType.K_TOURNAMENT:
+            if selection_type == SelectionType.K_TOURNAMENT:
                 self._select = self._k_tournament
+            else:
+                self._select = self._binary_tournament
         else:
             self._select = self._binary_tournament
 
@@ -175,12 +175,12 @@ class Replacement(object):
 
         """
         if isinstance(replacement_type, ReplacementType):
-            if replacement_type == ReplacementType.MU_PLUS_LAMBDA:
-                self._replace = self._mu_plus_lambda
-            elif replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
+            if replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
                 self._replace = self._mu_lambda_elite
             elif replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
                 self._replace = self._mu_lambda_no_elite
+            else:
+                self._replace = self._mu_plus_lambda
         else:
             self._replace = self._mu_plus_lambda
 
