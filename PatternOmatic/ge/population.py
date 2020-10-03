@@ -157,7 +157,7 @@ class Replacement(object):
     """ Dispatches the proper recombination type for population instances """
     __slots__ = '_replace'
 
-    def __init__(self, replacement_type):
+    def __init__(self, replacement_type: ReplacementType):
         self.__dispatch_replacement_type(replacement_type)
 
     def __call__(self, generation: List[Individual], offspring: List[Individual]) \

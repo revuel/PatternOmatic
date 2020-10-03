@@ -8,7 +8,7 @@ from PatternOmatic.settings.literals import GE, MAX_RUNS, SUCCESS_THRESHOLD, POP
     SELECTION_TYPE, REPLACEMENT_TYPE, RECOMBINATION_TYPE, RecombinationType, ReplacementType, SelectionType, \
     FitnessType, FITNESS_FUNCTION_TYPE, \
     DGG, FEATURES_X_TOKEN, USE_BOOLEAN_FEATURES, USE_CUSTOM_ATTRIBUTES, USE_UNIQUES, \
-    USE_GRAMMAR_OPERATORS, TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH
+    USE_GRAMMAR_OPERATORS, TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH, IO, ReportFormat, REPORT_FORMAT
 
 
 class SingletonMetaNaive(type):
@@ -54,7 +54,8 @@ class Config(metaclass=SingletonMetaNaive):
         'use_grammar_operators',
         'use_token_wildcard',
         'use_extended_pattern_syntax',
-        'report_path'
+        'report_path',
+        'report_format'
     )
 
     def __init__(self, config_file_path: str = None):
@@ -123,7 +124,9 @@ class Config(metaclass=SingletonMetaNaive):
         # IO
         #
         self.report_path = \
-            self._validate_config_argument('OS', REPORT_PATH, '/tmp/patternOmatic_report.txt', config_parser)
+            self._validate_config_argument(IO, REPORT_PATH, '/tmp/patternomatic_report.txt', config_parser)
+
+        self.report_format = ReportFormat(self._validate_config_argument(IO, REPORT_FORMAT, 0, config_parser))
 
         LOG.debug(f'Configuration instance: {self}')
 

@@ -1,11 +1,15 @@
-""" GE Various metrics are saved here """
+""" GE Various metrics are managed in this module """
 import operator
-from PatternOmatic.settings.log import LOG
+from time import time
+
+from PatternOmatic.settings.literals import ReportFormat
+from PatternOmatic.settings.config import Config
 
 
 class Stats(object):
     """ Class responsible of handling performance metrics """
     __slots__ = [
+        'config',
         'success_rate_accumulator',
         'mbf_accumulator',
         'aes_accumulator',
@@ -21,6 +25,7 @@ class Stats(object):
 
     def __init__(self):
         """ Stats instances constructor """
+        self.config = Config()
         self.success_rate_accumulator = list()
         self.mbf_accumulator = list()
         self.aes_accumulator = list()
@@ -42,7 +47,7 @@ class Stats(object):
             {s: getattr(self, s, None) for s in self.__slots__ if s in ('success_rate', 'mbf', 'aes', 'mean_time')}
 
         most_fitted = self.get_most_fitted()
-        most_fitted_dict = most_fitted.__dict__ if most_fitted is not None else {'most_fitted': None}
+        most_fitted_dict = {'most_fitted': most_fitted.__dict__} if most_fitted is not None else {'most_fitted': None}
         stats_dict.update(most_fitted_dict)
 
         return stats_dict
@@ -156,25 +161,17 @@ class Stats(object):
         """
         return sum(al) / len(al) if len(al) > 0 else 0.0
 
-    def persist(self, report_path: str, report_format: str = 'csv') -> None:
+    def persist(self) -> None:
         """
-        Makes or append execution result to file
-        Args:
-            report_path: Full Os path and filename for the report
-            report_format: Append stats as json or csv without headers
-
+        Makes or append execution result to file. If no valid format is specified CSV will be used as default
         Returns: None
 
         """
-        if report_format == 'json':
-            with open(report_path, mode='a+') as f:
-                f.writelines(repr(self) + '\n')
-        elif report_format == 'csv':
-            with open(report_path, mode='a+') as f:
-                f.writelines(self._to_csv() + '\n')
+        if self.config.report_format == ReportFormat.JSON:
+            with open(self.config.report_path, mode='a+') as f:
+                f.writelines(f'{dict(self)}' + '\n')
         else:
-            LOG.warning(f'Unexpected format {format}, falling back to default format (csv)')
-            with open(report_path, mode='a+') as f:
+            with open(self.config.report_path, mode='a+') as f:
                 f.writelines(self._to_csv() + '\n')
 
     def _to_csv(self):
@@ -183,11 +180,12 @@ class Stats(object):
         Returns: String, csv instance representation
 
         """
-        csv = ''
+        csv = f'{time()}' + '\t'
+
         for k, v in self.__dict__.items():
             if not type(v) is dict:
                 csv = csv + str(v) + '\t'
             else:
-                # Fenotype json representation requires adjustment
-                csv = csv + str(v['Fitness']) + '\t' + str(v['Fenotype']).replace(', ', '|')
+                for _, vi in v.items():
+                    csv = csv + str(vi) + '\t'
         return csv

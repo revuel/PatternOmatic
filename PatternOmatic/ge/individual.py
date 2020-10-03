@@ -53,7 +53,7 @@ class Fitness(object):
         """
         max_score_per_sample = 1 / len(self.samples)
         matcher = Matcher(self.samples[0].vocab)
-        matcher.add("basic", None, self.fenotype)
+        matcher.add(repr(FitnessType.BASIC), None, self.fenotype)
         contact = 0.0
 
         for sample in self.samples:
@@ -75,7 +75,7 @@ class Fitness(object):
         current_vocab = self.samples[0].vocab
 
         matcher = Matcher(current_vocab)
-        matcher.add('full_match', None, self.fenotype)
+        matcher.add(repr(FitnessType.FULL_MATCH), None, self.fenotype)
         contact = 0.0
 
         for sample in self.samples:
