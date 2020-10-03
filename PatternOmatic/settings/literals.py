@@ -11,11 +11,19 @@ class SelectionType(Enum):
     BINARY_TOURNAMENT = 0
     K_TOURNAMENT = 1
 
+    def __repr__(self):
+        """ Human readable """
+        return self.name
+
 
 @unique
 class RecombinationType(Enum):
     """ Evolutionary recombination types enum """
     RANDOM_ONE_POINT_CROSSOVER = 0
+
+    def __repr__(self):
+        """ Human readable """
+        return self.name
 
 
 @unique
@@ -25,6 +33,10 @@ class ReplacementType(Enum):
     MU_LAMBDA_WITH_ELITISM = 1
     MU_LAMBDA_WITHOUT_ELITISM = 2
 
+    def __repr__(self):
+        """ Human readable """
+        return self.name
+
 
 # Fitness types
 @unique
@@ -32,6 +44,10 @@ class FitnessType(Enum):
     """ Fitness function type """
     BASIC = 0
     FULL_MATCH = 1
+
+    def __repr__(self):
+        """ Human readable """
+        return self.name
 
 
 #
@@ -161,4 +177,17 @@ USE_GRAMMAR_OPERATORS = 'USE_GRAMMAR_OPERATORS'
 USE_TOKEN_WILDCARD = 'USE_TOKEN_WILDCARD'
 USE_EXTENDED_PATTERN_SYNTAX = 'USE_EXTENDED_PATTERN_SYNTAX'
 USE_CUSTOM_ATTRIBUTES = 'USE_CUSTOM_ATTRIBUTES'
+IO = 'IO'
 REPORT_PATH = 'REPORT_PATH'
+REPORT_FORMAT = 'REPORT_FORMAT'
+
+
+@unique
+class ReportFormat(Enum):
+    """ Report format type """
+    JSON = 0
+    CSV = 1
+
+    def __repr__(self):
+        """ Human readable """
+        return self.name
