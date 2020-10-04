@@ -4,7 +4,7 @@ import spacy
 
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.nlp.bnf import dynamic_generator as dgg
-from PatternOmatic.ge.individual import Individual
+from PatternOmatic.ge.individual import Individual, Fitness
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import FitnessType
 
@@ -75,6 +75,20 @@ class TestIndividual(unittest.TestCase):
         i = Individual(self.samples, self.grammar, self.stats, '01101010100001101000110111000100')
 
         super().assertEqual(i.fitness_value, 0.25)
+
+    def test_token_wildcard_penalty(self):
+        """ Checks that token wildcard penalty is properly set """
+        # When using token wildcard, penalty is applied
+        f = object.__new__(Fitness)
+        f.fenotype = [{}, {}, {}, 'Whatever']
+        self.config.use_token_wildcard = True
+        f.config = self.config
+        super().assertEqual(0.25, f._wildcard_penalty(1.0))
+
+        # When not using token wildcard, penalty is not applied
+        self.config.use_token_wildcard = False
+        f.fenotype = 1.0
+        super().assertEqual(1.0, f._wildcard_penalty(1.0))
 
     #
     # Helpers
