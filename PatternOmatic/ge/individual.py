@@ -172,7 +172,7 @@ class Individual(object):
             ci = next(circular)
 
             for key in self.grammar.keys():
-                symbolic_string = self.__translation(ci, key, symbolic_string)
+                symbolic_string = self._translate(ci, key, symbolic_string)
 
             # Check if anything changed from last iteration
             if old_symbolic_string == symbolic_string:
@@ -184,7 +184,7 @@ class Individual(object):
 
         return json.loads(translated_individual)
 
-    def __translation(self, ci: iter, key, symbolic_string: str):
+    def _translate(self, ci: iter, key, symbolic_string: str):
         """
         Helper method to reduce cognitive overload of the public method with the same name (_translation)
         Args:
