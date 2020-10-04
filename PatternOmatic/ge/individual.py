@@ -36,13 +36,10 @@ class Fitness(object):
         Returns: None
 
         """
-        if fitness_function_type == FitnessType.BASIC:
-            self._fitness = self._fitness_basic
-        elif fitness_function_type == FitnessType.FULL_MATCH:
+        if fitness_function_type == FitnessType.FULL_MATCH:
             self._fitness = self._fitness_full_match
         else:
             self._fitness = self._fitness_basic
-            raise ValueError('Invalid fitness function type: ', fitness_function_type)
 
     def _fitness_basic(self) -> float:
         """

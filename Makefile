@@ -21,12 +21,12 @@ test:
 	python -m unittest
 
 cvrg:
-	coverage run --branch --source=. -m unittest && \
+	coverage run --branch --source=PatternOmatic,scripts,tests --omit=*__init__* -m unittest && \
 	coverage report --ignore-errors --omit=venv/**,tests/**,*__init__* && \
 	coverage xml
 
 sscas:
-	sonar-scanner -Dsonar.projectKey=pOm
+	sonar-scanner -Dsonar.projectKey=pOm -Dsonar.exclusions=tests/**
 
 build:
 	python setup.py sdist bdist_wheel
