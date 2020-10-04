@@ -26,9 +26,9 @@ class TestIndividual(unittest.TestCase):
     stats = Stats()
 
     def test_init(self):
-        """ Test that Individual instantiation works"""
+        """ Test that Individual instantiation works """
         i = Individual(self.samples, self.grammar, self.stats)
-        super().assertNotEqual(i, None)
+        super().assertIs(type(i), Individual)
 
     def test_init_with_dna(self):
         """ Test that Individual instantiation works when providing dna"""
@@ -136,7 +136,10 @@ class TestIndividual(unittest.TestCase):
         i.grammar = {XPS: [IN]}
         super().assertEqual('{<IN>}', i._translate(0, XPS, '<XPS>'))
 
-        # # Extended Pattern Syntax conversion (terminal logical)
+        i.grammar = {ORTH: [XPS]}
+        super().assertEqual('"ORTH":<XPS>', i._translate(0, ORTH, '<ORTH>'))
+
+        # Extended Pattern Syntax conversion (terminal logical)
         i.grammar = {NOT_IN: [['Test']]}
         super().assertEqual('{"ORTH": {"NOT_IN":["Test"]}}', i._translate(0, NOT_IN, '{"ORTH": {<NOT_IN>}}'))
 
