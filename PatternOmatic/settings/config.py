@@ -55,7 +55,8 @@ class Config(metaclass=SingletonMetaNaive):
         'use_token_wildcard',
         'use_extended_pattern_syntax',
         'report_path',
-        'report_format'
+        'report_format',
+        'file_path'
     )
 
     def __init__(self, config_file_path: str = None):
@@ -68,10 +69,14 @@ class Config(metaclass=SingletonMetaNaive):
 
         if config_file_path is None:
             LOG.warning(f'Configuration file not provided. Falling back to default values')
+            self.file_path = None
         else:
             file_list = config_parser.read(config_file_path)
             if len(file_list) == 0:
                 LOG.warning(f'File {config_file_path} not found. Falling back to default values')
+                self.file_path = None
+            else:
+                self.file_path = config_file_path
 
         #
         # GE configuration parameters

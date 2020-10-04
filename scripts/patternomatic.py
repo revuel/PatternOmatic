@@ -38,6 +38,10 @@ def find_pattern(text_samples: [Doc], config_file_path: str = None) -> None:
     LOG.info(f'Execution report {stats}')
     stats.persist()
 
+    LOG.info(f'Best individuals for this execution:')
+    for individual in stats.most_fitted_accumulator:
+        LOG.info(f'{individual}')
+
 
 if __name__ == '__main__':
     # Execute only if run as a script

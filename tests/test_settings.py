@@ -1,10 +1,12 @@
 """ Unit testing file for settings module """
+import configparser
+import os
 import unittest
 
 from PatternOmatic.settings.config import Config, RecombinationType
 
 
-class TestSettings(unittest.TestCase):
+class TestConfig(unittest.TestCase):
     """ Test class for settings """
 
     config = None
@@ -20,6 +22,23 @@ class TestSettings(unittest.TestCase):
         another_config = Config()
 
         super().assertNotEqual(self.config, another_config)
+
+    def test_config_read_from_path(self):
+        """ Tests providing or not providing a configuration file works as expected"""
+        # No config file provided
+        super().assertEqual(None, self.config.file_path)
+
+        # Correct config file provided
+
+        file_path = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir), 'config.ini')
+        Config.clear_instance()
+        self.config = Config(file_path)
+        super().assertEqual(file_path, self.config.file_path)
+
+        # Bad path provided
+        Config.clear_instance()
+        self.config = Config('')
+        super().assertEqual(None, self.config.file_path)
 
     def test_xps_gop_can_not_be_enabled_together(self):
         """ Tests Spacy's Grammar Operators and Extended Patter Syntax can not be enabled both """
@@ -47,6 +66,42 @@ class TestSettings(unittest.TestCase):
         super().assertNotEqual(config.use_extended_pattern_syntax, None)
         super().assertNotEqual(config.fitness_function_type, RecombinationType.RANDOM_ONE_POINT_CROSSOVER)
         super().assertNotEqual(config.report_path, 0)
+
+    def test_validate_config_argument(self):
+        """ Checks that config arguments are properly fetched according to its type """
+        config_parser = configparser.ConfigParser()
+
+        test_section = 'test_section'
+        test_option_int = 'test_option_int'
+        test_option_float = 'test_option_float'
+        test_option_boolean = 'test_option_boolean'
+        test_option_string = 'test_option_string'
+
+        config_parser.add_section(test_section)
+
+        config_parser[test_section][test_option_int] = '0'
+        config_parser[test_section][test_option_float] = '0.0'
+        config_parser[test_section][test_option_boolean] = 'False'
+        config_parser[test_section][test_option_string] = ''
+
+        # With valid types
+        super().assertEqual(
+            0, self.config._validate_config_argument(test_section, test_option_int, 1, config_parser))
+        super().assertEqual(
+            .0, self.config._validate_config_argument(test_section, test_option_float, .1, config_parser))
+        super().assertEqual(
+            False, self.config._validate_config_argument(test_section, test_option_boolean, True, config_parser))
+        super().assertEqual(
+            '', self.config._validate_config_argument(test_section, test_option_string, 'Whatever', config_parser))
+
+        # With wrong type
+        config_parser[test_section][test_option_int] = 'False'
+        super().assertEqual(
+            1, self.config._validate_config_argument(test_section, test_option_int, 1, config_parser))
+
+        # With not even a possible type used by the config parser
+        super().assertEqual(
+            {}, self.config._validate_config_argument(test_section, test_option_int, {}, config_parser))
 
     #
     # Helpers
