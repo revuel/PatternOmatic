@@ -300,7 +300,7 @@ def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
 
         symbol_times_list.append(last)
 
-    if 1 < min_length < max_length:
+    if 1 < min_length <= max_length:
         symbol_times_list = symbol_times_list[min_length-1:]
 
     return symbol_times_list

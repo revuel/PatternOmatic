@@ -122,6 +122,8 @@ class TestDG(unittest.TestCase):
 
         super().assertListEqual(expected_2, bnf._symbol_stacker(DEP, 4, 5))
 
+        super().assertListEqual([expected_1[2]], bnf._symbol_stacker(DEP, 3, 3))
+
     #
     # Helpers
     #
