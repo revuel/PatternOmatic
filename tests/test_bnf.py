@@ -3,13 +3,10 @@ import unittest
 import spacy
 from spacy.tokens.doc import Underscore
 
-from PatternOmatic.nlp.bnf import dynamic_generator, _get_features_per_token, _symbol_stacker
-from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
-    XPS, IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, EF, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, \
-    SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
-    IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, IS_SENT_START, LIKE_NUM, LIKE_EMAIL, \
-    LANG, NORM, PREFIX, SENTIMENT, STRING, SUFFIX, TEXT_WITH_WS, WHITESPACE, LIKE_URL, MATCHER_SUPPORTED_ATTRIBUTES, \
-    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR, PROB
+import PatternOmatic.nlp.bnf as bnf
+from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, XPS, IN,\
+    NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, SHAPE, \
+    IS_ASCII, IS_UPPER, HAS_VECTOR
 from PatternOmatic.settings.config import Config
 
 
@@ -22,7 +19,7 @@ class TestDG(unittest.TestCase):
 
     def test_basic_grammar_dg(self):
         """ Tests that basic grammar is correctly generated """
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertIn(P, grammar.keys())
         super().assertIn(S, grammar.keys())
@@ -34,14 +31,14 @@ class TestDG(unittest.TestCase):
     def test_basic_grammar_without_uniques_dg(self):
         """ Tests that basic grammar is correctly generated when use uniques is false """
         self.config.use_uniques = False
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertEqual(len(grammar[SHAPE]), 11)
 
     def test_basic_grammar_with_booleans_dg(self):
         """ Tests that basic grammar with booleans is correctly generated """
         self.config.use_boolean_features = True
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -51,7 +48,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_grammar_operators = True
 
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -63,7 +60,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_extended_pattern_syntax = True
 
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -75,7 +72,7 @@ class TestDG(unittest.TestCase):
         self.config.use_boolean_features = True
         self.config.use_custom_attributes = True
 
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertIn(IS_ASCII, grammar.keys())
         super().assertIn(IS_UPPER, grammar.keys())
@@ -87,7 +84,7 @@ class TestDG(unittest.TestCase):
         """ Tests grammar is generated with token wildcard """
         self.config.use_token_wildcard = True
 
-        grammar = dynamic_generator(self.samples)
+        grammar = bnf.dynamic_generator(self.samples)
 
         super().assertIn(TOKEN_WILDCARD, grammar[T])
 
@@ -98,32 +95,32 @@ class TestDG(unittest.TestCase):
 
         # When features_per_token is equal or lower to 0, the maximum number of features per token is set
         self.config.features_per_token = 0
-        super().assertEqual(len_features_dict, _get_features_per_token(features_dict))
+        super().assertEqual(len_features_dict, bnf._get_features_per_token(features_dict))
         self.config.features_per_token = -100
-        super().assertEqual(len_features_dict, _get_features_per_token(features_dict))
+        super().assertEqual(len_features_dict, bnf._get_features_per_token(features_dict))
 
         # When features_per_token is greater than the actual features, the maximum number of features per token is set
         self.config.features_per_token = 100
-        super().assertEqual(len_features_dict, _get_features_per_token(features_dict))
+        super().assertEqual(len_features_dict, bnf._get_features_per_token(features_dict))
 
         # When features_per_token is inside the range (0, actual features), the config parameter is respected
         self.config.features_per_token = 3
-        super().assertEqual(3, _get_features_per_token(features_dict))
+        super().assertEqual(3, bnf._get_features_per_token(features_dict))
 
     def test_symbol_stacker(self):
         """ Tests that symbols are stacked properly """
         expected_1 = [DEP, DEP + ',' + DEP, DEP + ',' + DEP + ',' + DEP]
-        super().assertListEqual(expected_1, _symbol_stacker(DEP, 3))
+        super().assertListEqual(expected_1, bnf._symbol_stacker(DEP, 3))
 
         expected_2 = [DEP + ',' + DEP,
                       DEP + ',' + DEP + ',' + DEP,
                       DEP + ',' + DEP + ',' + DEP + ',' + DEP]
 
-        super().assertListEqual(expected_2, _symbol_stacker(DEP, 4, 2))
+        super().assertListEqual(expected_2, bnf._symbol_stacker(DEP, 4, 2))
 
         expected_2.insert(0, DEP)
 
-        super().assertListEqual(expected_2, _symbol_stacker(DEP, 4, 5))
+        super().assertListEqual(expected_2, bnf._symbol_stacker(DEP, 4, 5))
 
     #
     # Helpers

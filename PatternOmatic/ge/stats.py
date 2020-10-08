@@ -90,14 +90,14 @@ class Stats(object):
         """
         self.aes_accumulator.append(es)
 
-    def add_time(self, time: float) -> None:
+    def add_time(self, time_interval: float) -> None:
         """
         Adds a new Time lapsed value to the accumulator
         Args:
-            time: Time lapsed of a RUN
+            time_interval: Time lapsed of a RUN
 
         """
-        self.time_accumulator.append(time)
+        self.time_accumulator.append(time_interval)
 
     def add_most_fitted(self, individual: any) -> None:
         """
