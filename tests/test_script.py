@@ -18,8 +18,7 @@ class TestPatternomaticScript(TestCase):
                nlp(u'Your home is comfortable'),
                nlp(u'Their attitude is great')]
 
-    config_file_path = os.path.join(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir), 'config.ini')
+    config_file_path = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir), 'config.ini')
 
     full_args = ['-s', 'Hello', '-s', 'Goodbye', '-c', config_file_path, '-l', 'en_core_web_sm']
 
@@ -46,11 +45,11 @@ class TestPatternomaticScript(TestCase):
 
         # Wrong lang
         with super().assertLogs(LOG) as cm:
-            not_found = 'not_found'
+            bad_model = 'bad_model'
             args = self.full_args.copy()[:-1]
-            args.append(not_found)
+            args.append(bad_model)
             pom.main(args)
-            super().assertEqual(f'WARNING:PatternOmatic:Model {not_found} not found, falling back to '
+            super().assertEqual(f'WARNING:PatternOmatic:Model {bad_model} not found, falling back to '
                                 f'patternOmatic\'s default language model: en_core_web_sm', cm.output[1])
 
         # Fatal error
