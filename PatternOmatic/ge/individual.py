@@ -79,8 +79,7 @@ class Fitness(object):
             matches = matcher(sample)
             if len(matches) > 0:
                 for match in matches:
-                    contact += max_score_per_sample if match[2] == len(sample) and match[1] == 0 else contact
-
+                    contact += max_score_per_sample if match[2] == len(sample) and match[1] == 0 else + 0
         return self._wildcard_penalty(contact)
 
     def _wildcard_penalty(self, contact: float) -> float:
