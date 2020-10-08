@@ -3,7 +3,7 @@
 #
 export PYTHONPATH=.
 
-all: reqs cvrg build sscas
+all: reqs cvrg clean build sscas
 
 venv:
 	source venv/bin/activate
