@@ -145,7 +145,6 @@ class Config(metaclass=SingletonMetaNaive):
         Returns: None
 
         """
-        # LOG.debug(f'Setting attribute "{key}" of {self} instance with {value} value')
         if hasattr(self, key):
             if self._preserve_property_type(getattr(self, key), value):
                 super(Config, self).__setattr__(key, value)

@@ -41,7 +41,7 @@ def get_logger(logger_name):
 
     """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.addHandler(_get_console_handler())
     logger.addHandler(_get_file_handler())
     logger.propagate = False

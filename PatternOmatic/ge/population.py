@@ -26,7 +26,7 @@ class Selection(object):
         Returns: A list of Individual instances
 
         """
-        LOG.debug(f'Selecting individuals...')
+        LOG.info(f'Selecting individuals...')
         return self._select(generation)
 
     def __dispatch_selection(self, selection_type: SelectionType) -> None:
@@ -105,7 +105,7 @@ class Recombination(object):
         self.__dispatch_recombination_type()
 
     def __call__(self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
-        LOG.debug(f'Combining individuals...')
+        LOG.info(f'Combining individuals...')
         return self._recombine(mating_pool, generation)
 
     def __dispatch_recombination_type(self) -> None:
