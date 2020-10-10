@@ -178,8 +178,6 @@ class Individual(object):
 
         translated_individual = '[' + symbolic_string + ']'
 
-        # # LOG.debug(f'Individual\'s fenotype: {str(translated_individual)}')
-
         return json.loads(translated_individual)
 
     def _translate(self, ci: iter, key, symbolic_string: str):

@@ -1,7 +1,7 @@
 #
 # PatternOmatic Makefile
 #
-export PYTHONPATH=. && source venv/bin/activate
+export PYTHONPATH=.
 
 all: reqs cvrg clean build sscas
 
