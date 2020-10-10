@@ -1,3 +1,4 @@
+""" Setup tools (build distribution) """
 import setuptools
 
 with open("README.md", "r") as fh:
