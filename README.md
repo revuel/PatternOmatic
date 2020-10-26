@@ -1,9 +1,16 @@
 # PatternOmatic 0.2.*
-Finds patterns describing a set of a given Spacy Docs
+Finds patterns matching a given Spacy Docs set
+
+**\#AI · \#EvolutionaryComputation · \#NLP**
+
+[![PatternOmatic logo](https://svgshare.com/i/Qwd.svg)](https://github.com/revuel/PatternOmatic)
+
+[![Built with spaCy](https://img.shields.io/badge/made%20with%20❤%20and-spaCy-09a3d5.svg)](https://spacy.io)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Requirements
-- Python 3.7
-- Spacy 2.3
+- [Python 3.7.3](https://www.python.org/downloads/release/python-373/)
+- [Spacy 2.3.*](https://spacy.io/usage/v2-3)
 
 ## Basic usage
 
@@ -51,19 +58,19 @@ from PatternOmatic.settings.log import LOG
 
 
 if __name__ == '__main__':
-    # 1) Specify a valid Spacy language model (en_core_web_sm is already usable)
+    # 1) Specify a valid Spacy Language Model (en_core_web_sm already included)
     nlp = spacy.load('en_core_web_sm')
 
-    # 2) Build up some sample doc samples
+    # 2) Build up some doc samples
     samples = [nlp(u'I am a cat!'),
                nlp(u'You are a dog!'),
                nlp(u'She is a rabbit!')]
 
-    # 3) Set up configuration (optional)
+    # 3) Set up configuration
     config = Config()
-    config.max_runs = 4
-    config.max_generations = 50
-    config.fitness_function_type = FitnessType.FULL_MATCH
+    config.max_runs = 4  # Optional
+    config.max_generations = 50  # Optional
+    config.fitness_function_type = FitnessType.FULL_MATCH  # Optional
 
     # 4) Generate BNF
     bnf_grammar = dynamic_generator(samples)
@@ -84,10 +91,13 @@ if __name__ == '__main__':
     LOG.info(f'Best patterns found:')
     for i in s.most_fitted_accumulator:
         LOG.info(f'{i.fenotype}, {i.fitness_value}')
-    LOG.info(f'Report {dict(s)}')
+    LOG.info(f'Report: {dict(s)}')
 
 ```
 
 ---
 
-Author: [Miguel Revuelta](mailto:revuel22@hotmail.com "Contact author")
+Author: [Miguel Revuelta](mailto:revuel22@hotmail.com "Contact author"), a humble AI enthusiastic
+
+
+![<img src="patternomatic_logo.svg" width="100"/>](./patternomatic_logo.svg)
