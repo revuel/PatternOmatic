@@ -40,7 +40,7 @@ def find_patterns(
     LOG.info(f'Building Doc instances...')
     samples = [nlp(sample) for sample in samples]
 
-    if isinstance(configuration, Config.__class__):
+    if isinstance(configuration, Config):
         LOG.info(f'Using already existing Config instance: {configuration}')
         config = configuration
     else:

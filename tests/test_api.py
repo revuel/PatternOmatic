@@ -26,7 +26,7 @@ class Test(TestCase):
         """ Checks that providing a Config instance makes find_patterns work with that instance """
         config = Config()
         config.max_runs = 10
-        patterns = find_patterns(self.my_samples)
+        patterns = find_patterns(self.my_samples, configuration=config)
         super().assertEqual(10, len(patterns))
 
     def test_find_patterns_when_bad_language_provided(self):
