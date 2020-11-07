@@ -133,7 +133,7 @@ class Config(metaclass=SingletonMetaNaive):
 
         self.report_format = ReportFormat(self._validate_config_argument(IO, REPORT_FORMAT, 0, config_parser))
 
-        LOG.debug(f'Configuration instance: {self}')
+        LOG.info(f'Configuration instance: {self}')
 
     def __setattr__(self, key, value) -> None:
         """
