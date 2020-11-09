@@ -1,9 +1,8 @@
 """ API module """
 import time
-from typing import List, Union
+from typing import List, Union, Dict
 from spacy import load as spacy_load
 
-from PatternOmatic.ge.individual import Individual
 from PatternOmatic.ge.population import Population
 from PatternOmatic.ge.stats import Stats
 from PatternOmatic.settings.config import Config
@@ -13,17 +12,14 @@ from PatternOmatic.nlp.bnf import dynamic_generator as dgg
 
 def find_patterns(
         samples: List[str],
-        configuration: Union[str, Config] = None,
-        spacy_language_model_name: str = None) -> List[Individual]:
+        configuration: Union[str, None] = None,
+        spacy_language_model_name: str = None) -> List[List[Dict[str, str]]]:
     """
-    Given some samples, this function finds an optimized pattern to be used by the Spacy's Rule Based Matcher
+    Given some samples, this function finds optimized patterns to be used by the Spacy's Rule Based Matcher.
     Args:
-        samples: List of Docs (as samples)
-        configuration: Configuration to be used, valid inputs:
-            - Configuration file path
-            - PatternOmatic Config instance
-            - None
-        spacy_language_model_name: Optional valid Spacy Language Model (Fallbacks to Spacy's en_core_web_sm)
+        samples: List of strings from where to find common linguistic patterns
+        configuration: (str) Optional configuration file path to load configuration (Fallbacks to default configuration)
+        spacy_language_model_name: (str) Optional valid Spacy Language Model (Fallbacks to Spacy's en_core_web_sm)
 
     Returns: None
 
@@ -40,12 +36,12 @@ def find_patterns(
     LOG.info(f'Building Doc instances...')
     samples = [nlp(sample) for sample in samples]
 
-    if isinstance(configuration, Config):
-        LOG.info(f'Using already existing Config instance: {configuration}')
-        config = configuration
-    else:
+    if isinstance(configuration, str):
         LOG.info(f'Setting up configuration from the following path: {configuration}...')
         config = Config(config_file_path=configuration)
+    else:
+        LOG.info(f'Using already existing Config instance...')
+        config = Config()
 
     stats = Stats()
 
@@ -68,4 +64,4 @@ def find_patterns(
     for individual in stats.most_fitted_accumulator:
         LOG.info(f'{individual}')
 
-    return stats.most_fitted_accumulator
+    return [i.fenotype for i in stats.most_fitted_accumulator]
