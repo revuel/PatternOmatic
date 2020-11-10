@@ -1,0 +1,20 @@
+# ······················································································································
+# PatternOmatic's CI & CD pipeline. Mainly Makefile based
+# ······················································································································
+language: python
+
+addons:
+  sonarcloud:
+    organization: "revuel"
+
+python:
+  - "3.7"
+
+if: tag IS blank
+
+script:
+- make libs
+- make coverage
+- make sonarcloud
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then make build; fi
+- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then make publish; fi
