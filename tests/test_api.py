@@ -12,7 +12,7 @@ class Test(TestCase):
 
     def test_find_patterns_when_only_samples_provided(self):
         """ Tests that providing just samples makes the find_pattern keeps working """
-        patterns = find_patterns(self.my_samples)
+        patterns, _ = find_patterns(self.my_samples)
         super().assertEqual(4, len(patterns))
 
     def test_find_patterns_when_valid_configuration_file_provided(self):
@@ -27,7 +27,7 @@ class Test(TestCase):
         """ Checks when setting up a Config instance before find_patterns invocation works """
         config = Config()
         config.max_runs = 10
-        patterns = find_patterns(self.my_samples)
+        patterns, _ = find_patterns(self.my_samples)
         super().assertEqual(10, len(patterns))
 
     def test_find_patterns_when_bad_language_provided(self):
