@@ -1,6 +1,6 @@
 """ API module """
 import time
-from typing import List, Union, Dict
+from typing import List, Union, Tuple, Any
 from spacy import load as spacy_load
 
 from PatternOmatic.ge.population import Population
@@ -13,7 +13,7 @@ from PatternOmatic.nlp.bnf import dynamic_generator as dgg
 def find_patterns(
         samples: List[str],
         configuration: Union[str, None] = None,
-        spacy_language_model_name: str = None) -> List[List[Dict[str, str]]]:
+        spacy_language_model_name: str = None) -> List[Tuple[Any, ...]]:
     """
     Given some samples, this function finds optimized patterns to be used by the Spacy's Rule Based Matcher.
     Args:
@@ -21,7 +21,7 @@ def find_patterns(
         configuration: (str) Optional configuration file path to load configuration (Fallbacks to default configuration)
         spacy_language_model_name: (str) Optional valid Spacy Language Model (Fallbacks to Spacy's en_core_web_sm)
 
-    Returns: None
+    Returns: List of patterns found and list of each pattern matching score against the samples
 
     """
     LOG.info(f'Loading language model {spacy_language_model_name}...')
@@ -64,4 +64,4 @@ def find_patterns(
     for individual in stats.most_fitted_accumulator:
         LOG.info(f'{individual}')
 
-    return [i.fenotype for i in stats.most_fitted_accumulator]
+    return list(zip(*[[i.fenotype, i.fitness_value] for i in stats.most_fitted_accumulator]))
