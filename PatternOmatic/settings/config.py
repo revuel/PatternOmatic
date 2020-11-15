@@ -1,21 +1,33 @@
-""" Configuration Management class """
+""" Configuration Management module
+
+This file is part of PatternOmatic.
+
+Copyright © 2020  Miguel Revuelta Espinosa
+
+PatternOmatic is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+PatternOmatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+
+"""
 from __future__ import annotations
 import configparser
 from typing import Optional
 from PatternOmatic.settings.log import LOG
-from PatternOmatic.settings.literals import *
-
-
-def str2bool(vargin: str) -> bool:
-    """
-    Auxiliary method to parse boolean configuration file options
-    Args:
-        vargin: argument to evaluate
-
-    Returns: True if vargin in string set, False otherwise
-
-    """
-    return vargin.lower() in ('Yes', 'yes', 'True', 'true', '1')
+from PatternOmatic.settings.literals import GE, MAX_RUNS, SUCCESS_THRESHOLD, POPULATION_SIZE, MAX_GENERATIONS, \
+    CODON_LENGTH, CODONS_X_INDIVIDUAL, MUTATION_PROBABILITY, OFFSPRING_FACTOR, MATING_PROBABILITY, K_VALUE, \
+    SELECTION_TYPE, REPLACEMENT_TYPE, RECOMBINATION_TYPE, RecombinationType, ReplacementType, SelectionType, \
+    FitnessType, FITNESS_FUNCTION_TYPE, \
+    DGG, FEATURES_X_TOKEN, USE_BOOLEAN_FEATURES, USE_CUSTOM_ATTRIBUTES, USE_UNIQUES, \
+    USE_GRAMMAR_OPERATORS, TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH, IO, ReportFormat, REPORT_FORMAT
 
 
 class SingletonMetaNaive(type):
@@ -30,352 +42,203 @@ class SingletonMetaNaive(type):
         return cls._instance
 
     def clear_instance(self):
+        """ For testing purposes, destroy Singleton instance """
         LOG.debug('Removing config object!')
+        self._instance = None
         del self._instance
 
 
 class Config(metaclass=SingletonMetaNaive):
-    """ Singleton Configuration Class for PatternOmatic package """
+    """ Singleton Configuration package's Class"""
+    __slots__ = (
+        'max_runs',
+        'success_threshold',
+        'population_size',
+        'max_generations',
+        'codon_length',
+        'num_codons_per_individual',
+        'dna_length',
+        'mutation_probability',
+        'offspring_max_size_factor',
+        'mating_probability',
+        'k_value',
+        'selection_type',
+        'recombination_type',
+        'replacement_type',
+        'fitness_function_type',
+        'features_per_token',
+        'use_boolean_features',
+        'use_custom_attributes',
+        'use_uniques',
+        'use_grammar_operators',
+        'use_token_wildcard',
+        'use_extended_pattern_syntax',
+        'report_path',
+        'report_format',
+        'file_path'
+    )
+
     def __init__(self, config_file_path: str = None):
         """
         Config object constructor
         Args:
             config_file_path: Path for a configuration file
         """
-        if config_file_path:
-            self._load_from_file(config_file_path)
+        config_parser = configparser.ConfigParser()
+
+        if config_file_path is None:
+            LOG.warning(f'Configuration file not provided. Falling back to default values')
+            self.file_path = None
         else:
-            self._load_default()
+            file_list = config_parser.read(config_file_path)
+            if len(file_list) == 0:
+                LOG.warning(f'File {config_file_path} not found. Falling back to default values')
+                self.file_path = None
+            else:
+                self.file_path = config_file_path
 
-        LOG.debug(f'Configuration parameters: {dict(self)}')
-
-    def __iter__(self):
-        yield 'Number of runs', self.max_runs
-        yield 'Success Threshold', self.success_threshold
-        yield 'Population size', self.population_size
-        yield 'Maximum number of generations', self.max_generations
-        yield 'Codon length', self.codon_length
-        yield 'Number of codons per Individual', self.num_codons_per_individual
-        yield 'DNA length', self.dna_length
-        yield 'Mutation probability', self.mutation_probability
-        yield 'Offspring maximum size factor', self.offspring_max_size_factor
-        yield 'Mating probability', self.mating_probability
-        yield 'K tournament size value', self.k_value
-        yield 'Selection algorithm', self.selection_type
-        yield 'Recombination algorithm', self.recombination_type
-        yield 'Replacement algorithm', self.replacement_type
-        yield 'Maximum number of features per token', self.features_per_token
-        yield 'Using boolean features?', self.use_boolean_features
-        yield 'Using custom attributes?', self.use_custom_attributes
-        yield 'Using unique feature terminal?', self.use_uniques
-        yield 'Using grammar operators?', self.use_grammar_operators
-        yield 'Using token wildcards?', self.use_token_wildcard
-        yield 'Using extended pattern syntax?', self.use_extended_pattern_syntax
-        yield 'Fitness function type', self.fitness_function_type
-        yield 'Report path', self.report_path
-
-    @property
-    def max_runs(self) -> int:
-        return self._max_runs
-
-    @max_runs.setter
-    def max_runs(self, value: int) -> None:
-        self._max_runs = value
-
-    @property
-    def success_threshold(self) -> float:
-        return self._success_threshold
-
-    @success_threshold.setter
-    def success_threshold(self, value: float) -> None:
-        self._success_threshold = value
-
-    @property
-    def population_size(self) -> int:
-        return self._population_size
-
-    @population_size.setter
-    def population_size(self, value: int) -> None:
-        self._population_size = value
-
-    @property
-    def max_generations(self) -> int:
-        return self._max_generations
-
-    @max_generations.setter
-    def max_generations(self, value: int) -> None:
-        self._max_generations = value
-
-    @property
-    def codon_length(self) -> int:
-        return self._codon_length
-
-    @codon_length.setter
-    def codon_length(self, value: int) -> None:
-        self._codon_length = value
-
-    @property
-    def num_codons_per_individual(self) -> int:
-        return self._num_codons_per_individual
-
-    @num_codons_per_individual.setter
-    def num_codons_per_individual(self, value: int) -> None:
-        self.num_codons_per_individual = value
-
-    @property
-    def dna_length(self) -> int:
-        return self._dna_length
-
-    @property
-    def mutation_probability(self) -> float:
-        return self._mutation_probability
-
-    @mutation_probability.setter
-    def mutation_probability(self, value: float) -> None:
-        self._mutation_probability = value
-
-    @property
-    def offspring_max_size_factor(self) -> float:
-        return self._offspring_max_size_factor
-
-    @property
-    def mating_probability(self) -> float:
-        return self._mating_probability
-
-    @mating_probability.setter
-    def mating_probability(self, value: float) -> None:
-        self._mating_probability = value
-
-    @property
-    def k_value(self) -> int:
-        return self._k_value
-
-    @k_value.setter
-    def k_value(self, value: int):
-        self._k_value = value
-
-    @property
-    def selection_type(self) -> str:
-        return self._selection_type
-
-    @selection_type.setter
-    def selection_type(self, value) -> None:
-        self._selection_type = value
-
-    @property
-    def recombination_type(self) -> str:
-        return self._recombination_type
-
-    @recombination_type.setter
-    def recombination_type(self, value) -> None:
-        self._recombination_type = value
-
-    @property
-    def replacement_type(self) -> str:
-        return self._replacement_type
-
-    @replacement_type.setter
-    def replacement_type(self, value) -> None:
-        self._replacement_type = value
-
-    @property
-    def features_per_token(self) -> int:
-        return self._features_per_token
-
-    @features_per_token.setter
-    def features_per_token(self, value: int) -> None:
-        self._features_per_token = value
-
-    @property
-    def use_boolean_features(self) -> bool:
-        return self._use_boolean_features
-
-    @use_boolean_features.setter
-    def use_boolean_features(self, value: int) -> None:
-        self._use_boolean_features = value
-
-    @property
-    def use_custom_attributes(self) -> bool:
-        return self._use_custom_attributes
-
-    @use_custom_attributes.setter
-    def use_custom_attributes(self, value: int) -> None:
-        self._use_custom_attributes = value
-
-    @property
-    def use_uniques(self) -> bool:
-        return self._use_uniques
-
-    @use_uniques.setter
-    def use_uniques(self, value: int) -> None:
-        self._use_uniques = value
-
-    @property
-    def use_grammar_operators(self) -> bool:
-        return self._use_grammar_operators
-
-    @use_grammar_operators.setter
-    def use_grammar_operators(self, value: int) -> None:
-        self._use_grammar_operators = value
-
-    @property
-    def use_token_wildcard(self) -> bool:
-        return self._use_token_wildcard
-
-    @use_token_wildcard.setter
-    def use_token_wildcard(self, value: bool) -> None:
-        self._use_token_wildcard = value
-
-    @property
-    def use_extended_pattern_syntax(self) -> bool:
-        return self._use_extended_pattern_syntax
-
-    @use_extended_pattern_syntax.setter
-    def use_extended_pattern_syntax(self, value) -> None:
-        self._use_extended_pattern_syntax = value
-
-    @property
-    def fitness_function_type(self):
-        return self._fitness_function_type
-
-    @fitness_function_type.setter
-    def fitness_function_type(self, value: int) -> None:
-        self._fitness_function_type = value
-
-    @property
-    def report_path(self):
-        return self._report_path
-
-    @report_path.setter
-    def report_path(self, value: str) -> None:
-        self._report_path = value
-
-    #
-    # Restrictions
-    #
-    def _check_xps_op_restriction(self):
-        if self._use_extended_pattern_syntax == self._use_grammar_operators is True:
-            LOG.warning('Extended Pattern Syntax is not compatible with the usage of grammar operators')
-            LOG.warning('Extended Pattern Syntax has been disabled!')
-            self._use_extended_pattern_syntax = False
-
-    #
-    # Auxiliary methods
-    #
-    def show(self):
-        """ Prints current configuration in JSON format """
-        return print(dict(self))
-
-    def _load_default(self):
-        """
-
-        Returns:
-
-        """
+        #
         # GE configuration parameters
-        self._max_runs = 1
-        self._success_threshold = 0.8
-        self._population_size = 10
-        self._max_generations = 3
-        self._codon_length = 8
-        self._num_codons_per_individual = 4
-        self._dna_length = self._codon_length * self._num_codons_per_individual
-        self._mutation_probability = 0.5
-        self._offspring_max_size_factor = 3.5
-        self._mating_probability = 0.9
-        self._k_value = 3
+        #
+        self.max_runs = self._validate_config_argument(GE, MAX_RUNS, 4, config_parser)
+        self.success_threshold = self._validate_config_argument(GE, SUCCESS_THRESHOLD, 0.8, config_parser)
+        self.population_size = self._validate_config_argument(GE, POPULATION_SIZE, 10, config_parser)
+        self.max_generations = self._validate_config_argument(GE, MAX_GENERATIONS, 3, config_parser)
+        self.codon_length = self._validate_config_argument(GE, CODON_LENGTH, 8, config_parser)
+        self.num_codons_per_individual = self._validate_config_argument(GE, CODONS_X_INDIVIDUAL, 4, config_parser)
+        self.dna_length = self.codon_length * self.num_codons_per_individual
+        self.mutation_probability = self._validate_config_argument(GE, MUTATION_PROBABILITY, 0.5, config_parser)
+        self.offspring_max_size_factor = self._validate_config_argument(GE, OFFSPRING_FACTOR, 3.5, config_parser)
+        self.mating_probability = self._validate_config_argument(GE, MATING_PROBABILITY, 0.9, config_parser)
+        self.k_value = self._validate_config_argument(GE, K_VALUE, 3, config_parser)
 
+        #
         # GE configuration methods
-        self._selection_type = BINARY_TOURNAMENT
-        self._recombination_type = RANDOM_ONE_POINT_CROSSOVER
-        self._replacement_type = MU_PLUS_LAMBDA
+        #
+        self.selection_type = SelectionType(
+            self._validate_config_argument(GE, SELECTION_TYPE, 0, config_parser))
 
-        # Dynamic Grammar Generation configuration options
-        self._features_per_token = 1
-        self._use_boolean_features = False
-        self._use_custom_attributes = False
-        self._use_uniques = True
-        self._use_grammar_operators = False
-        self._use_token_wildcard = False
-        self._use_extended_pattern_syntax = False
+        self.recombination_type = RecombinationType(
+            self._validate_config_argument(GE, RECOMBINATION_TYPE, 0, config_parser))
 
-        # Problem specific configuration options
-        self._fitness_function_type = FITNESS_FULLMATCH
+        self.replacement_type = ReplacementType(
+            self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
 
-        # Other
-        self.report_path = '/tmp/patternOmatic_report.txt'
+        self.fitness_function_type = FitnessType(
+            self._validate_config_argument(GE, FITNESS_FUNCTION_TYPE, 1, config_parser))
 
-    def _load_from_file(self, config_file_path: str):
+        #
+        # BNF Grammar Generation configuration options
+        #
+        self.features_per_token = self._validate_config_argument(DGG, FEATURES_X_TOKEN, 1, config_parser)
+        self.use_boolean_features = self._validate_config_argument(DGG, USE_BOOLEAN_FEATURES, False, config_parser)
+        self.use_custom_attributes = self._validate_config_argument(DGG, USE_CUSTOM_ATTRIBUTES, False, config_parser)
+        self.use_uniques = self._validate_config_argument(DGG, USE_UNIQUES, True, config_parser)
+        self.use_grammar_operators = self._validate_config_argument(DGG, USE_GRAMMAR_OPERATORS, False, config_parser)
+        self.use_token_wildcard = self._validate_config_argument(DGG, TOKEN_WILDCARD, False, config_parser)
+        self.use_extended_pattern_syntax = \
+            self._validate_config_argument(DGG, USE_EXTENDED_PATTERN_SYNTAX, False, config_parser)
+
+        #
+        # Configuration validation
+        #
+        self._check_xps_op_restriction()
+
+        #
+        # IO
+        #
+        self.report_path = \
+            self._validate_config_argument(IO, REPORT_PATH, '/tmp/patternomatic_report.txt', config_parser)
+
+        self.report_format = ReportFormat(self._validate_config_argument(IO, REPORT_FORMAT, 0, config_parser))
+
+        LOG.info(f'Configuration instance: {self}')
+
+    def __setattr__(self, key, value) -> None:
+        """
+        Overrides method to be used with slots
+        Args:
+            key: An object slotted property
+            value: An intended value for the object key
+
+        Returns: None
+
+        """
+        if hasattr(self, key):
+            if self._preserve_property_type(getattr(self, key), value):
+                super(Config, self).__setattr__(key, value)
+                LOG.info(f'Updating configuration parameter {key.upper()} with value {value}')
+                if key == USE_EXTENDED_PATTERN_SYNTAX.lower() or key == USE_GRAMMAR_OPERATORS.lower():
+                    self._check_xps_op_restriction()
+            else:
+                LOG.warning(f'Invalid data type {type(value)} for property {key}. Skipping update')
+        else:
+            super(Config, self).__setattr__(key, value)
+
+    @property
+    def __dict__(self):
+        """ Hijacks dictionary for this config slotted class """
+        return {s: getattr(self, s, None) for s in self.__slots__}
+
+    def __repr__(self):
+        """ Representation of config instance """
+        return f'{self.__class__.__name__}({self.__dict__})'
+
+    #
+    # Utilities
+    #
+    @staticmethod
+    def _validate_config_argument(section, option, default, config_parser):
         """
 
         Args:
-            config_file_path:
+            section:
+            option:
+            default:
+            config_parser:
 
         Returns:
 
         """
         try:
-            config_parser = configparser.ConfigParser()
-            file_list = config_parser.read(config_file_path)
+            if isinstance(default, bool):
+                value = config_parser.getboolean(section, option, fallback=default)
+            elif isinstance(default, int):
+                value = config_parser.getint(section, option, fallback=default)
+            elif isinstance(default, float):
+                value = config_parser.getfloat(section, option, fallback=default)
+            elif isinstance(default, str):
+                value = config_parser.get(section, option, fallback=default)
+            else:
+                value = default
+        except ValueError:
+            LOG.warning(f'[{section}][{option}] configuration parameter wrongly set. '
+                        f'Falling back to its default value: {default}')
+            value = default
 
-            if len(file_list) == 0:
-                raise FileNotFoundError
+        LOG.debug(f'[{section}][{option}] {value}')
+        return value
 
-            # GE configuration parameters
-            self._max_runs = int(config_parser[GE][MAX_RUNS])
-            self._success_threshold = float(config_parser[GE][SUCCESS_THRESHOLD])
-            self._population_size = int(config_parser[GE][POPULATION_SIZE])
-            self._max_generations = int(config_parser[GE][MAX_GENERATIONS])
-            self._codon_length = int(config_parser[GE][CODON_LENGTH])
-            self._num_codons_per_individual = int(config_parser[GE][CODONS_X_INDIVIDUAL])
-            self._dna_length = self._codon_length * self._num_codons_per_individual
-            self._mutation_probability = float(config_parser[GE][MUTATION_PROBABILITY])
-            self._offspring_max_size_factor = float(config_parser[GE][OFFSPRING_FACTOR])
-            self._mating_probability = float(config_parser[GE][MATING_PROBABILITY])
-            self._k_value = int(config_parser[GE][K_VALUE])
+    @staticmethod
+    def _preserve_property_type(_property, value):
+        return isinstance(value, type(_property))
 
-            # GE configuration methods
-            self._selection_type = globals()[config_parser[GE][SELECTION_TYPE]]
-            self._recombination_type = globals()[config_parser[GE][RECOMBINATION_TYPE]]
-            self._replacement_type = globals()[config_parser[GE][REPLACEMENT_TYPE]]
-
-            # Dynamic Grammar Generation configuration options
-            self._features_per_token = int(config_parser[DGG][FEATURES_X_TOKEN])
-            self._use_boolean_features = str2bool(config_parser[DGG][USE_BOOLEAN_FEATURES])
-            self._use_custom_attributes = str2bool(config_parser[DGG][USE_CUSTOM_ATTRIBUTES])
-            self._use_uniques = str2bool(config_parser[DGG][USE_UNIQUES])
-            self._use_grammar_operators = str2bool(config_parser[DGG][USE_GRAMMAR_OPERATORS])
-            self._use_token_wildcard = str2bool(config_parser[DGG][USE_TOKEN_WILDCARD])
-            self._use_extended_pattern_syntax = str2bool(config_parser[DGG][USE_EXTENDED_PATTERN_SYNTAX])
-
-            # Problem specific configuration options
-            self._fitness_function_type = globals()[config_parser[DGG][FITNESS_FUNCTION_TYPE]]
-
-            # Configuration validation (only when reading from config.ini)
-            self._check_xps_op_restriction()
-
-            # Other
-            self.report_path = config_parser['OS'][REPORT_PATH]
-
-        except FileNotFoundError:
-            LOG.warning('Unable to locate configuration file, using default configuration parameters')
-            self._load_default()
-        except KeyError as ke:
-            LOG.warning(f'Malformed config file ({repr(ke)})! Using default configuration parameters')
-            self._load_default()
-        except ValueError as ve:
-            LOG.warning(f'Malformed config file ({repr(ve)})! Using default configuration parameters')
-            self._load_default()
-
-        LOG.info(f'Configuration parameters: {dict(self)}')
-
-    def reload(self, config_file_path: str):
+    #
+    # Problem specific restrictions
+    #
+    def _check_xps_op_restriction(self) -> None:
         """
-        Loads of reloads Config's attributes from the given input str argument presenting configuration's file path
-        Args:
-            config_file_path: Configuration .ini file path and name to be used
+        Spacy's Grammar Operators and Quantifiers and the Spacy's Extended Pattern Syntax can not be used together  at
+        the same time in a pattern for the Spacy's Rule Based Matcher.
 
-        Returns:
+        This method checks the provided configuration and disables the Spacy's Extended Pattern Syntax if both
+        mechanisms are found enabled at the provided configuration.
+
+        Returns: None
 
         """
-        return self._load_from_file(config_file_path)
+        if hasattr(self, USE_EXTENDED_PATTERN_SYNTAX.lower()) and hasattr(self, USE_GRAMMAR_OPERATORS.lower()) and \
+                self.use_extended_pattern_syntax is True and self.use_grammar_operators is True:
+            LOG.warning(f'Extended Pattern Syntax is not compatible with the usage of Grammar Operators. '
+                        f'Extended Pattern Syntax has been disabled!')
+            self.use_extended_pattern_syntax = False

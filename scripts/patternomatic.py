@@ -1,49 +1,46 @@
 #!/usr/bin/python
-""" PatternOmatic command line """
+""" Command Line Interface module
+
+This file is part of PatternOmatic.
+
+Copyright © 2020  Miguel Revuelta Espinosa
+
+PatternOmatic is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+PatternOmatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+
+"""
 import sys
-import time
-import argparse
-import spacy
-from spacy.tokens.doc import Doc
-from PatternOmatic.ge.stats import Stats
-from PatternOmatic.nlp.engine import dynagg as dgg
-from PatternOmatic.ge.population import Population
-from PatternOmatic.settings.config import Config
+from typing import List
+from argparse import ArgumentParser
+from PatternOmatic.api import find_patterns
 from PatternOmatic.settings.log import LOG
 
 
-def find_pattern(text_samples: [Doc], config_file_path: str = None) -> None:
+def main(args: List) -> None:
     """
-    Given some samples, this function finds an optimized pattern to be used by the Spacy's Rule Based Matcher
+    PatternOmatic's script main function wrapper
     Args:
-        text_samples: List of Docs (as samples)
-        config_file_path: Optional path for configuration file
+        args: Command Line Input Arguments
 
     Returns: None
 
     """
-    config = Config(config_file_path=config_file_path)
-    stats = Stats()
-    bnf_g = dgg(text_samples)
-
-    LOG.debug('Starting Execution...')
-    for _ in range(0, config.max_runs):
-        start = time.monotonic()
-        p = Population(text_samples, bnf_g, stats)
-        p.evolve()
-        end = time.monotonic()
-        stats.add_time(end - start)
-        stats.calculate_metrics()
-
-    LOG.info(f'Execution report {dict(stats)}')
-    stats.persist(config.report_path)
-
-
-if __name__ == '__main__':
-    # Execute only if run as a script
     LOG.info('Parsing command line arguments...')
     try:
-        cli = argparse.ArgumentParser(description='Finds the Spacy\'s Matcher pattern for the given samples')
+        cli = ArgumentParser(
+            description='Finds the Spacy\'s Matcher pattern for the given samples',
+            epilog='...using actual Artificial Intelligence'
+        )
 
         # Samples
         cli.add_argument(
@@ -77,26 +74,29 @@ if __name__ == '__main__':
         )
 
         # Parse command line input arguments/options
-        parsed_args = cli.parse_args(sys.argv[1:])
+        parsed_args = cli.parse_args(args)
 
-        # Set up language model
-        try:
-            nlp = spacy.load(parsed_args.language)
-        except OSError:
-            LOG.warning(f'Model {parsed_args.language} not found, falling back to patternOmatic\'s default '
-                        f'langugage model: en_core_web_sm')
-
-            nlp = spacy.load('en_core_web_sm')
-
-        # Convert to Doc sample arguments
+        # Join sample arguments
         for index, item in enumerate(parsed_args.sample):
-            parsed_args.sample[index] = nlp(u' '.join(item))
+            parsed_args.sample[index] = ' '.join(item)
 
         #
-        # Find pattern
+        # Find patterns
         #
-        find_pattern(parsed_args.sample, config_file_path=parsed_args.config)
+        patterns_found, _ = find_patterns(
+            parsed_args.sample,
+            configuration=parsed_args.config,
+            spacy_language_model_name=parsed_args.language)
+
+        LOG.info(f'Patterns found: {patterns_found}')
 
     except Exception as ex:
         LOG.critical(f'Fatal error: {repr(ex)}')
-        raise Exception(ex)
+        raise ex
+
+
+#
+# OS INPUT
+#
+if __name__ == '__main__': \
+    main(sys.argv[1:])
