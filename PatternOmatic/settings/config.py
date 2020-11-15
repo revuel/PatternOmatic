@@ -1,9 +1,33 @@
-""" Configuration Management module """
+""" Configuration Management module
+
+This file is part of PatternOmatic.
+
+Copyright © 2020  Miguel Revuelta Espinosa
+
+PatternOmatic is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+PatternOmatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+
+"""
 from __future__ import annotations
 import configparser
 from typing import Optional
 from PatternOmatic.settings.log import LOG
-from PatternOmatic.settings.literals import *
+from PatternOmatic.settings.literals import GE, MAX_RUNS, SUCCESS_THRESHOLD, POPULATION_SIZE, MAX_GENERATIONS, \
+    CODON_LENGTH, CODONS_X_INDIVIDUAL, MUTATION_PROBABILITY, OFFSPRING_FACTOR, MATING_PROBABILITY, K_VALUE, \
+    SELECTION_TYPE, REPLACEMENT_TYPE, RECOMBINATION_TYPE, RecombinationType, ReplacementType, SelectionType, \
+    FitnessType, FITNESS_FUNCTION_TYPE, \
+    DGG, FEATURES_X_TOKEN, USE_BOOLEAN_FEATURES, USE_CUSTOM_ATTRIBUTES, USE_UNIQUES, \
+    USE_GRAMMAR_OPERATORS, TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH, IO, ReportFormat, REPORT_FORMAT
 
 
 class SingletonMetaNaive(type):
@@ -18,6 +42,7 @@ class SingletonMetaNaive(type):
         return cls._instance
 
     def clear_instance(self):
+        """ For testing purposes, destroy Singleton instance """
         LOG.debug('Removing config object!')
         self._instance = None
         del self._instance
@@ -48,7 +73,9 @@ class Config(metaclass=SingletonMetaNaive):
         'use_grammar_operators',
         'use_token_wildcard',
         'use_extended_pattern_syntax',
-        'report_path'
+        'report_path',
+        'report_format',
+        'file_path'
     )
 
     def __init__(self, config_file_path: str = None):
@@ -61,10 +88,14 @@ class Config(metaclass=SingletonMetaNaive):
 
         if config_file_path is None:
             LOG.warning(f'Configuration file not provided. Falling back to default values')
+            self.file_path = None
         else:
             file_list = config_parser.read(config_file_path)
             if len(file_list) == 0:
                 LOG.warning(f'File {config_file_path} not found. Falling back to default values')
+                self.file_path = None
+            else:
+                self.file_path = config_file_path
 
         #
         # GE configuration parameters
@@ -88,7 +119,7 @@ class Config(metaclass=SingletonMetaNaive):
             self._validate_config_argument(GE, SELECTION_TYPE, 0, config_parser))
 
         self.recombination_type = RecombinationType(
-            self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
+            self._validate_config_argument(GE, RECOMBINATION_TYPE, 0, config_parser))
 
         self.replacement_type = ReplacementType(
             self._validate_config_argument(GE, REPLACEMENT_TYPE, 0, config_parser))
@@ -117,9 +148,11 @@ class Config(metaclass=SingletonMetaNaive):
         # IO
         #
         self.report_path = \
-            self._validate_config_argument('OS', REPORT_PATH, '/tmp/patternOmatic_report.txt', config_parser)
+            self._validate_config_argument(IO, REPORT_PATH, '/tmp/patternomatic_report.txt', config_parser)
 
-        LOG.debug(f'Configuration instance: {self}')
+        self.report_format = ReportFormat(self._validate_config_argument(IO, REPORT_FORMAT, 0, config_parser))
+
+        LOG.info(f'Configuration instance: {self}')
 
     def __setattr__(self, key, value) -> None:
         """
@@ -131,10 +164,10 @@ class Config(metaclass=SingletonMetaNaive):
         Returns: None
 
         """
-        # LOG.debug(f'Setting attribute "{key}" of {self} instance with {value} value')
         if hasattr(self, key):
             if self._preserve_property_type(getattr(self, key), value):
                 super(Config, self).__setattr__(key, value)
+                LOG.info(f'Updating configuration parameter {key.upper()} with value {value}')
                 if key == USE_EXTENDED_PATTERN_SYNTAX.lower() or key == USE_GRAMMAR_OPERATORS.lower():
                     self._check_xps_op_restriction()
             else:
@@ -154,7 +187,8 @@ class Config(metaclass=SingletonMetaNaive):
     #
     # Utilities
     #
-    def _validate_config_argument(self, section, option, default, config_parser):
+    @staticmethod
+    def _validate_config_argument(section, option, default, config_parser):
         """
 
         Args:
@@ -185,7 +219,8 @@ class Config(metaclass=SingletonMetaNaive):
         LOG.debug(f'[{section}][{option}] {value}')
         return value
 
-    def _preserve_property_type(self, _property, value):
+    @staticmethod
+    def _preserve_property_type(_property, value):
         return isinstance(value, type(_property))
 
     #

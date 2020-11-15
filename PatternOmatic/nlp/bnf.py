@@ -1,13 +1,32 @@
-""" Backus Naur Form Grammar Generator through Spacy NLP Engine """
+""" Backus Naur Form Grammar Generator module
+
+This file is part of PatternOmatic.
+
+Copyright © 2020  Miguel Revuelta Espinosa
+
+PatternOmatic is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+PatternOmatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+
+"""
 from inspect import getmembers
 from spacy.tokens import Doc, Token
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
     XPS, IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, EF, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, \
     SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
-    IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, IS_SENT_START, LIKE_NUM, LIKE_EMAIL, \
+    IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, LIKE_NUM, LIKE_EMAIL, \
     LANG, NORM, PREFIX, SENTIMENT, STRING, SUFFIX, TEXT_WITH_WS, WHITESPACE, LIKE_URL, MATCHER_SUPPORTED_ATTRIBUTES, \
-    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR, PROB
+    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR
 from PatternOmatic.settings.log import LOG
 
 
@@ -239,11 +258,13 @@ def _extended_features_seen(tokens: [Token]) -> dict:
                 IS_OOV: bool_list,
                 IS_QUOTE: bool_list,
                 IS_RIGHT_PUNCT: bool_list,
-                # IS_SENT_START: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_IS_SENT_START') for token in tokens]))),
+                # IS_SENT_START:
+                #     sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_IS_SENT_START') for token in tokens]))),
                 LANG: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_LANG_') for token in tokens]))),
                 NORM: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_NORM_') for token in tokens]))),
                 PREFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PREFIX_') for token in tokens]))),
-                # PROB: sorted(list(set([abs(getattr(getattr(token, '_'), 'CUSTOM_PROB')) for token in tokens]))),
+                # PROB:
+                #     sorted(list(set([abs(getattr(getattr(token, '_'), 'CUSTOM_PROB')) for token in tokens]))),
                 SENTIMENT: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SENTIMENT') for token in tokens]))),
                 STRING: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_STRING') for token in tokens]))),
                 SUFFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SUFFIX_') for token in tokens]))),
@@ -288,22 +309,18 @@ def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
 
     """
     symbol_times_list = list()
-
     last = ''
-    for _ in range(min_length):
+
+    for _ in range(max_length):
         if last == '':
             last = symbol
         else:
             last = last + "," + symbol
 
-    symbol_times_list.append(last)
-
-    for _ in range(min_length, max_length):
-        if last == '':
-            last = symbol
-        else:
-            last = last + "," + symbol
         symbol_times_list.append(last)
+
+    if 1 < min_length <= max_length:
+        symbol_times_list = symbol_times_list[min_length-1:]
 
     return symbol_times_list
 
@@ -319,7 +336,7 @@ def _get_features_per_token(features_dict: dict) -> int:
     """
     config = Config()
 
-    if config.features_per_token == 0:
+    if config.features_per_token <= 0:
         max_length_features = len(features_dict.keys())
     else:
         if len(features_dict.keys()) < config.features_per_token + 1:

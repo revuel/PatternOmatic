@@ -1,4 +1,23 @@
-""" Population classes """
+""" Evolutionary Population related classes module
+
+This file is part of PatternOmatic.
+
+Copyright © 2020  Miguel Revuelta Espinosa
+
+PatternOmatic is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+PatternOmatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+
+"""
 import random
 from typing import List, Tuple, Dict
 from spacy.tokens import Doc
@@ -39,10 +58,10 @@ class Selection(object):
 
         """
         if isinstance(selection_type, SelectionType):
-            if selection_type == SelectionType.BINARY_TOURNAMENT:
-                self._select = self._binary_tournament
-            elif selection_type == SelectionType.K_TOURNAMENT:
+            if selection_type == SelectionType.K_TOURNAMENT:
                 self._select = self._k_tournament
+            else:
+                self._select = self._binary_tournament
         else:
             self._select = self._binary_tournament
 
@@ -157,12 +176,12 @@ class Replacement(object):
     """ Dispatches the proper recombination type for population instances """
     __slots__ = '_replace'
 
-    def __init__(self, replacement_type):
+    def __init__(self, replacement_type: ReplacementType):
         self.__dispatch_replacement_type(replacement_type)
 
     def __call__(self, generation: List[Individual], offspring: List[Individual]) \
             -> Tuple[List[Individual], List[Individual]]:
-        LOG.info(f'Replacing individuals...')
+        LOG.debug(f'Replacing individuals...')
         return self._replace(generation, offspring)
 
     def __dispatch_replacement_type(self, replacement_type: ReplacementType) -> None:
@@ -175,12 +194,12 @@ class Replacement(object):
 
         """
         if isinstance(replacement_type, ReplacementType):
-            if replacement_type == ReplacementType.MU_PLUS_LAMBDA:
-                self._replace = self._mu_plus_lambda
-            elif replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
+            if replacement_type == ReplacementType.MU_LAMBDA_WITH_ELITISM:
                 self._replace = self._mu_lambda_elite
             elif replacement_type == ReplacementType.MU_LAMBDA_WITHOUT_ELITISM:
                 self._replace = self._mu_lambda_no_elite
+            else:
+                self._replace = self._mu_plus_lambda
         else:
             self._replace = self._mu_plus_lambda
 
@@ -301,7 +320,7 @@ class Population(object):
             5) Calculate statistics for this Run
         """
 
-        LOG.info('Evolution taking place!')
+        LOG.info('Evolution taking place, please wait...')
 
         self.stats.reset()
 
@@ -311,7 +330,7 @@ class Population(object):
             self.generation, self.offspring = self.replacement(self.generation, self.offspring)
             self._best_challenge()
 
-        LOG.info(f'Best candidate found on this run: {dict(self.best_individual)}')
+        LOG.info(f'Best candidate found on this run: {self.best_individual}')
 
         # Stats concerns
         self.stats.add_most_fitted(self.best_individual)

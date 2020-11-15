@@ -1,4 +1,23 @@
-""" Literals/constants module """
+""" Literals/constants module
+
+This file is part of PatternOmatic.
+
+Copyright © 2020  Miguel Revuelta Espinosa
+
+PatternOmatic is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+PatternOmatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+
+"""
 from enum import Enum, unique
 
 
@@ -11,11 +30,19 @@ class SelectionType(Enum):
     BINARY_TOURNAMENT = 0
     K_TOURNAMENT = 1
 
+    def __repr__(self):
+        """ Human readable """
+        return self.name
+
 
 @unique
 class RecombinationType(Enum):
     """ Evolutionary recombination types enum """
     RANDOM_ONE_POINT_CROSSOVER = 0
+
+    def __repr__(self):
+        """ Human readable """
+        return self.name
 
 
 @unique
@@ -25,6 +52,10 @@ class ReplacementType(Enum):
     MU_LAMBDA_WITH_ELITISM = 1
     MU_LAMBDA_WITHOUT_ELITISM = 2
 
+    def __repr__(self):
+        """ Human readable """
+        return self.name
+
 
 # Fitness types
 @unique
@@ -32,6 +63,10 @@ class FitnessType(Enum):
     """ Fitness function type """
     BASIC = 0
     FULL_MATCH = 1
+
+    def __repr__(self):
+        """ Human readable """
+        return self.name
 
 
 #
@@ -89,9 +124,6 @@ LTH = SLD + 'LTH' + SRD
 XPS_AS = {EQQ: "==", GEQ: ">=", LEQ: "<=", GTH: ">", LTH: "<"}
 # Grammar custom attributes extension symbol
 UNDERSCORE = SLD + 'UNDERSCORE' + SRD
-MATCHER_SUPPORTED_ATTRIBUTES = ('orth_', 'text', 'lower_', 'pos_', 'tag_', 'dep_', 'lemma_', 'shape_', 'ent_type_',
-                                'is_alpha', 'is_ascii', 'is_digit', 'is_lower', 'is_upper', 'is_title', 'is_punct',
-                                'is_space', 'is_stop', 'like_num', 'like_url', 'like_email')
 EF = SLD + 'EF' + SRD
 ENT_ID = SLD + 'CUSTOM_ENT_ID_' + SRD
 ENT_IOB = SLD + 'CUSTOM_ENT_IOB_' + SRD
@@ -114,6 +146,29 @@ STRING = SLD + 'CUSTOM_STRING' + SRD
 SUFFIX = SLD + 'CUSTOM_SUFFIX_' + SRD
 TEXT_WITH_WS = SLD + 'CUSTOM_TEXT_WITH_WS' + SRD
 WHITESPACE = SLD + 'CUSTOM_WHITESPACE_' + SRD
+# Matcher's util
+MATCHER_SUPPORTED_ATTRIBUTES = (
+    'orth_',
+    'text',
+    'lower_',
+    'pos_',
+    'tag_',
+    'dep_',
+    'lemma_',
+    'shape_',
+    'ent_type_',
+    'is_alpha',
+    'is_ascii',
+    'is_digit',
+    'is_lower',
+    'is_upper',
+    'is_title',
+    'is_punct',
+    'is_space',
+    'is_stop',
+    'like_num',
+    'like_url',
+    'like_email')
 
 #
 # Config ini literals
@@ -141,4 +196,17 @@ USE_GRAMMAR_OPERATORS = 'USE_GRAMMAR_OPERATORS'
 USE_TOKEN_WILDCARD = 'USE_TOKEN_WILDCARD'
 USE_EXTENDED_PATTERN_SYNTAX = 'USE_EXTENDED_PATTERN_SYNTAX'
 USE_CUSTOM_ATTRIBUTES = 'USE_CUSTOM_ATTRIBUTES'
+IO = 'IO'
 REPORT_PATH = 'REPORT_PATH'
+REPORT_FORMAT = 'REPORT_FORMAT'
+
+
+@unique
+class ReportFormat(Enum):
+    """ Report format type """
+    JSON = 0
+    CSV = 1
+
+    def __repr__(self):
+        """ Human readable """
+        return self.name
