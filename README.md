@@ -5,14 +5,14 @@
 **\#AI · \#EvolutionaryComputation · \#NLP**
 
 [![Built with spaCy](https://img.shields.io/badge/made%20with%20❤%20and-spaCy-09a3d5.svg)](https://spacy.io)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Build Status](https://travis-ci.org/revuel/pip-example-pkg-revuel.svg?branch=master)](https://travis-ci.org/revuel/pip-example-pkg-revuel) 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=revuel_pip-example-pkg-revuel&metric=coverage)](https://sonarcloud.io/dashboard?id=revuel_pip-example-pkg-revuel)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=revuel_pip-example-pkg-revuel&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=revuel_pip-example-pkg-revuel)
 [![PyPI](https://img.shields.io/pypi/v/pip-example-pkg-revuel?color=purple&label=latest)](https://pypi.org/project/pip-example-pkg-revuel/)
 [![PyPI version](https://badge.fury.io/py/pip-example-pkg-revuel.svg)](https://badge.fury.io/py/pip-example-pkg-revuel)
 
-_Finds patterns matching a given Spacy Doc set_
+_Finds Spacy's linguistic patterns matching a given set of string samples_
 
 ## Requirements
 - [Python 3.7.3](https://www.python.org/downloads/release/python-373/)
@@ -21,17 +21,19 @@ _Finds patterns matching a given Spacy Doc set_
 ## Basic usage
 
 ### From sources
-*Clone SCM official repository*
+*[Clone SCM official repository](https://github.com/revuel/PatternOmatic)*
 
 `git clone git@github.com:revuel/PatternOmatic.git`
 
 *Play with Makefile*
 
-- `make venv` to activate project's [Virtual Environment](https://docs.python.org/3.7/library/venv.html)
+- `make venv` to activate project's [Virtual Environment*](https://docs.python.org/3.7/library/venv.html)
 - `make libs` to install dependencies
 - `make test` to run Unit Tests
 - `make coverage` to run Code Coverage
 - `make run` to run PatternOmatic's script with example parameters
+
+<sub>* you must have one first</sub>
 
 ### From package
 *Install package*
@@ -44,15 +46,18 @@ _Finds patterns matching a given Spacy Doc set_
 # Show help 
 patternomatic.py -h
 
-# Usage example
+# Usage example 1: Basic
 patternomatic.py -s Hello world -s Goodbye world
+
+# Usage example 2: Using a different language
+python -m spacy download es_core_news_sm
+patternomatic.py -s Me llamo Miguel -s Se llama PatternOmatic -l es_core_news_sm
 ```
 
 *Play with the library*
 ```
 """ PatternOmatic library client example. Find linguistic patterns to be used by the Spacy R.B. Matcher """
-from PatternOmatic.api import find_patterns
-from PatternOmatic.settings.config import Config
+from PatternOmatic.api import find_patterns, Config
 
 if __name__ == '__main__':
 
@@ -60,23 +65,25 @@ if __name__ == '__main__':
 
     # Optionally, let it evolve a little bit more!
     config = Config()
-    config.max_generations = 100
+    config.max_generations = 150
+    config.max_runs = 3
 
-    patterns_found = find_patterns(my_samples)
+    patterns_found, _ = find_patterns(my_samples)
 
-    print(f'Patterns found: {str(patterns_found)}')
+    print(f'Patterns found: {patterns_found}')
+
 ```
 ---
 
 ## Features
 
-### General purpose
+### Generic
 
 &#9989; No OS dependencies, no storage or database required!
 
-&#9989; Lightweight package with just a few pip dependencies
-- Spacy
-- Spacy's en_core_web_sm Language Model
+&#9989; Lightweight package with just a little direct pip dependencies
+- [Spacy](https://pypi.org/project/spacy/2.3.2/)
+- [Spacy's en_core_web_sm Language Model](https://github.com/explosion/spacy-models/releases/tag/en_core_web_sm-2.3.0)
 
 &#9989; Easy and highly configurable to boost clever searches
 
@@ -88,7 +95,7 @@ if __name__ == '__main__':
 
 &#9989; Default configuration is run if no configuration file provided
 
-&#9989; Given a wrong argument a falling back actions is executed
+&#9989; Provides rollback actions against several possible misconfiguration scenarios
 
 ### Evolutionary
 
@@ -106,7 +113,7 @@ if __name__ == '__main__':
 
 &#9989; Supports "µ ∪ λ" without elitism Evolutionary Replacement Type
 
-&#9989; Evolutionary common performance metrics included:
+&#9989; Typical evolutionary performance metrics included:
 - Success Rate (SR)
 - Mean Best Fitness (MBF)
 - Average Evaluations to Solution (AES)
@@ -145,10 +152,9 @@ if __name__ == '__main__':
 
 &#9989; [Supports Token Wildcard](https://spacy.io/usage/rule-based-matching#adding-patterns-wildcard)
 
-&#9989; Supports defining the maximum number of features per token to be searched
+&#9989; Supports defining the number of attributes per token within searched patterns
 
-&#9989; Supports usage of no repeated features
-
+&#9989; Supports usage of non repeated token attribute values
 
 ---
 
