@@ -148,6 +148,7 @@ class Config(metaclass=SingletonMetaNaive):
         if hasattr(self, key):
             if self._preserve_property_type(getattr(self, key), value):
                 super(Config, self).__setattr__(key, value)
+                LOG.info(f'Updating configuration parameter {key.upper()} with value {value}')
                 if key == USE_EXTENDED_PATTERN_SYNTAX.lower() or key == USE_GRAMMAR_OPERATORS.lower():
                     self._check_xps_op_restriction()
             else:

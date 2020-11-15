@@ -13,7 +13,7 @@ from PatternOmatic.nlp.bnf import dynamic_generator as dgg
 def find_patterns(
         samples: List[str],
         configuration: Union[str, None] = None,
-        spacy_language_model_name: str = None) -> List[Tuple[Any, ...]]:
+        spacy_language_model_name: Union[str, None] = None) -> List[Tuple[Any, ...]]:
     """
     Given some samples, this function finds optimized patterns to be used by the Spacy's Rule Based Matcher.
     Args:
@@ -40,8 +40,8 @@ def find_patterns(
         LOG.info(f'Setting up configuration from the following path: {configuration}...')
         config = Config(config_file_path=configuration)
     else:
-        LOG.info(f'Using already existing Config instance...')
         config = Config()
+        LOG.info(f'Existing Config instance found: {config}')
 
     stats = Stats()
 

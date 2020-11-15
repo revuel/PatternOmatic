@@ -57,16 +57,19 @@ def main(args: List) -> None:
         # Parse command line input arguments/options
         parsed_args = cli.parse_args(args)
 
-        # Convert to Doc sample arguments
+        # Join sample arguments
         for index, item in enumerate(parsed_args.sample):
             parsed_args.sample[index] = ' '.join(item)
 
         #
-        # Find pattern
+        # Find patterns
         #
-        find_patterns(parsed_args.sample,
-                      configuration=parsed_args.config,
-                      spacy_language_model_name=parsed_args.language)
+        patterns_found, _ = find_patterns(
+            parsed_args.sample,
+            configuration=parsed_args.config,
+            spacy_language_model_name=parsed_args.language)
+
+        LOG.info(f'Patterns found: {patterns_found}')
 
     except Exception as ex:
         LOG.critical(f'Fatal error: {repr(ex)}')

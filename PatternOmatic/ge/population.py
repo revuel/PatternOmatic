@@ -26,7 +26,7 @@ class Selection(object):
         Returns: A list of Individual instances
 
         """
-        LOG.info(f'Selecting individuals...')
+        LOG.debug(f'Selecting individuals...')
         return self._select(generation)
 
     def __dispatch_selection(self, selection_type: SelectionType) -> None:
@@ -105,7 +105,7 @@ class Recombination(object):
         self.__dispatch_recombination_type()
 
     def __call__(self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
-        LOG.info(f'Combining individuals...')
+        LOG.debug(f'Combining individuals...')
         return self._recombine(mating_pool, generation)
 
     def __dispatch_recombination_type(self) -> None:
@@ -162,7 +162,7 @@ class Replacement(object):
 
     def __call__(self, generation: List[Individual], offspring: List[Individual]) \
             -> Tuple[List[Individual], List[Individual]]:
-        LOG.info(f'Replacing individuals...')
+        LOG.debug(f'Replacing individuals...')
         return self._replace(generation, offspring)
 
     def __dispatch_replacement_type(self, replacement_type: ReplacementType) -> None:
@@ -301,7 +301,7 @@ class Population(object):
             5) Calculate statistics for this Run
         """
 
-        LOG.info('Evolution taking place!')
+        LOG.info('Evolution taking place, please wait...')
 
         self.stats.reset()
 
