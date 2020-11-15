@@ -18,7 +18,7 @@ def find_patterns(
     Given some samples, this function finds optimized patterns to be used by the Spacy's Rule Based Matcher.
     Args:
         samples: List of strings from where to find common linguistic patterns
-        configuration: (str) Optional configuration file path to load configuration (Fallbacks to default configuration)
+        configuration: (str) Optional configuration file path to to be loaded (Fallbacks to default configuration)
         spacy_language_model_name: (str) Optional valid Spacy Language Model (Fallbacks to Spacy's en_core_web_sm)
 
     Returns: List of patterns found and list of each pattern matching score against the samples
