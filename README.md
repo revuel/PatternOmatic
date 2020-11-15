@@ -7,12 +7,15 @@
 [![Built with spaCy](https://img.shields.io/badge/made%20with%20❤%20and-spaCy-09a3d5.svg)](https://spacy.io)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Build Status](https://travis-ci.org/revuel/pip-example-pkg-revuel.svg?branch=master)](https://travis-ci.org/revuel/pip-example-pkg-revuel) 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=revuel_pip-example-pkg-revuel&metric=coverage)](https://sonarcloud.io/dashboard?id=revuel_pip-example-pkg-revuel)
+[![Sonar Coverage](https://img.shields.io/sonar/coverage/revuel_pip-example-pkg-revuel?server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/dashboard?id=revuel_pip-example-pkg-revuel)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=revuel_pip-example-pkg-revuel&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=revuel_pip-example-pkg-revuel)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=revuel_pip-example-pkg-revuel&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=revuel_pip-example-pkg-revuel)
-[![PyPI](https://img.shields.io/pypi/v/pip-example-pkg-revuel?color=purple&label=latest)](https://pypi.org/project/pip-example-pkg-revuel/)
-[![PyPI version](https://badge.fury.io/py/pip-example-pkg-revuel.svg)](https://badge.fury.io/py/pip-example-pkg-revuel)
+[![GitHub repo size](https://img.shields.io/github/repo-size/revuel/pip-example-pkg-revuel?color=teal)](#)
+[![Libraries.io SourceRank](https://img.shields.io/librariesio/sourcerank/pypi/pip-example-pkg-revuel)](https://libraries.io/pypi/pip-example-pkg-revuel/sourcerank)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pip-example-pkg-revuel?color=FFDF00&label=downloads)](https://pypistats.org/packages/pip-example-pkg-revuel)
+[![PyPI version](https://badge.fury.io/py/pip-example-pkg-revuel.svg?color=red)](https://badge.fury.io/py/pip-example-pkg-revuel)
 
-_Finds Spacy's linguistic patterns matching a given set of string samples_
+_Discover Spacy's linguistic patterns matching a given set of string samples_
 
 ## Requirements
 - [Python 3.7.3](https://www.python.org/downloads/release/python-373/)
@@ -61,7 +64,7 @@ from PatternOmatic.api import find_patterns, Config
 
 if __name__ == '__main__':
 
-    my_samples = ['I am a cat!', 'You are a dog!', 'She is a rabbit!']
+    my_samples = ['I am a cat!', 'You are a dog!', 'She is an owl!']
 
     # Optionally, let it evolve a little bit more!
     config = Config()
@@ -124,7 +127,7 @@ if __name__ == '__main__':
 
 &#9989; [Supports all Spacy's Rule Based Matcher standard Token attributes](https://spacy.io/usage/rule-based-matching#adding-patterns-attributes)
 
-&#9989; [Supports the following Spacy's Rule Based Matcher non standard Token attributes](https://spacy.io/api/token#attributes) [(via undersocre)](https://spacy.io/usage/processing-pipelines#custom-components-attributes)
+&#9989; [Supports the following Spacy's Rule Based Matcher non standard Token attributes](https://spacy.io/api/token#attributes) [(via underscore)](https://spacy.io/usage/processing-pipelines#custom-components-attributes)
 - ent_id
 - ent_iob
 - ent_kb_id
@@ -158,4 +161,4 @@ if __name__ == '__main__':
 
 ---
 
-Author: [Miguel Revuelta (revuel)](mailto:revuel22@hotmail.com "Contact author"), a humble AI enthusiastic
+Author: [Miguel Revuelta Espinosa _(revuel)_](mailto:revuel22@hotmail.com "Contact author"), a humble AI enthusiastic
