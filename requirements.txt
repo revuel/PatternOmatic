@@ -2,5 +2,6 @@ setuptools==40.8.0
 pip==20.2.3
 coverage==5.0.3
 wheel==0.33.6
+twine==3.2.0
 spacy==2.3.*
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.0/en_core_web_sm-2.3.0.tar.gz#egg=en_core_web_sm
