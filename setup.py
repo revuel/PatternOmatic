@@ -25,7 +25,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="PatternOmatic",
-    version="0.2.0",
+    version="0.2.1",
     author="Miguel Revuelta Espinosa",
     author_email="revuel22@hotmail.com",
     description="AI/NLP (Spacy) Rule Based Matcher pattern finder",
