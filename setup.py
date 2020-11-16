@@ -25,7 +25,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="PatternOmatic",
-    version="0.2.1",
+    version="0.2.2",
     author="Miguel Revuelta Espinosa",
     author_email="revuel22@hotmail.com",
     description="AI/NLP (Spacy) Rule Based Matcher pattern finder",
@@ -35,11 +35,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     scripts=['scripts/patternomatic.py'],
     install_requires=[
-        'spacy==2.3.0',
-        'en-core-web-sm==2.3.0'
+        'spacy==2.3.0'
     ],
-    dependency_links=['https://github.com/explosion/spacy-models/'
-                      'releases/download/en_core_web_sm-2.3.0/en_core_web_sm-2.3.0.tar.gz#egg=en_core_web_sm'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",

@@ -19,7 +19,8 @@ along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import os
-from unittest import TestCase
+import spacy
+from unittest import TestCase, mock
 from PatternOmatic.api import find_patterns
 from PatternOmatic.settings.config import Config
 from PatternOmatic.settings.log import LOG
@@ -56,6 +57,19 @@ class Test(TestCase):
             _ = find_patterns(self.my_samples, spacy_language_model_name=bad_model)
             super().assertEqual(f'WARNING:PatternOmatic:Model {bad_model} not found, falling back to '
                                 f'patternOmatic\'s default language model: en_core_web_sm', cm.output[1])
+
+    def test_installs_en_core_web_sm_if_not_found(self):
+        """ Due to questionable PyPI security policies, check en_core_web_sm installation is fired if not present """
+        nlp = spacy.load('en_core_web_sm')
+
+        with mock.patch('PatternOmatic.api.pkg_resources.working_set') as patch_working_set:
+            with mock.patch('PatternOmatic.api.spacy_download') as patch_spacy_download:
+                with mock.patch('PatternOmatic.api.spacy_load') as patch_spacy_load:
+                    patch_working_set.return_value = []
+                    patch_spacy_download.return_value = 'I\'ve been fired'
+                    patch_spacy_load.return_value = nlp
+                    find_patterns(['Hi'])
+                    super().assertTrue(patch_spacy_download.called)
 
     def tearDown(self) -> None:
         """ Destroy Config instance """
