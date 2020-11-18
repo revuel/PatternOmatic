@@ -27,7 +27,7 @@ from PatternOmatic.settings.literals import GE, MAX_RUNS, SUCCESS_THRESHOLD, POP
     SELECTION_TYPE, REPLACEMENT_TYPE, RECOMBINATION_TYPE, RecombinationType, ReplacementType, SelectionType, \
     FitnessType, FITNESS_FUNCTION_TYPE, \
     DGG, FEATURES_X_TOKEN, USE_BOOLEAN_FEATURES, USE_CUSTOM_ATTRIBUTES, USE_UNIQUES, \
-    USE_GRAMMAR_OPERATORS, TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH, IO, ReportFormat, REPORT_FORMAT
+    USE_GRAMMAR_OPERATORS, USE_TOKEN_WILDCARD, USE_EXTENDED_PATTERN_SYNTAX, REPORT_PATH, IO, ReportFormat, REPORT_FORMAT
 
 
 class SingletonMetaNaive(type):
@@ -135,7 +135,7 @@ class Config(metaclass=SingletonMetaNaive):
         self.use_custom_attributes = self._validate_config_argument(DGG, USE_CUSTOM_ATTRIBUTES, False, config_parser)
         self.use_uniques = self._validate_config_argument(DGG, USE_UNIQUES, True, config_parser)
         self.use_grammar_operators = self._validate_config_argument(DGG, USE_GRAMMAR_OPERATORS, False, config_parser)
-        self.use_token_wildcard = self._validate_config_argument(DGG, TOKEN_WILDCARD, False, config_parser)
+        self.use_token_wildcard = self._validate_config_argument(DGG, USE_TOKEN_WILDCARD, False, config_parser)
         self.use_extended_pattern_syntax = \
             self._validate_config_argument(DGG, USE_EXTENDED_PATTERN_SYNTAX, False, config_parser)
 
