@@ -20,12 +20,13 @@ along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
 import sys
+import tempfile
 from logging.handlers import TimedRotatingFileHandler
 
 FORMATTER = \
     logging.Formatter('[%(levelname)s] %(asctime)s %(filename)s:%(funcName)s:%(lineno)d : %(message)s')
 
-LOG_FILE = '/tmp/patternomatic.log'
+LOG_FILE = tempfile.gettempdir() + '/patternomatic.log'
 
 
 def _get_console_handler():
