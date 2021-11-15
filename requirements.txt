@@ -1,5 +1,5 @@
 setuptools==40.8.0
-pip==20.2.3
+pip==21.1
 coverage==5.0.3
 wheel==0.33.6
 importlib-metadata==2.0.0
