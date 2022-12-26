@@ -1,7 +1,7 @@
 setuptools==40.8.0
 pip==20.2.3
 coverage==5.0.3
-wheel==0.33.6
+wheel==0.38.1
 importlib-metadata==2.0.0
 twine==3.2.0
 spacy==2.3.*
