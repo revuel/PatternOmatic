@@ -1,4 +1,4 @@
-setuptools==40.8.0
+setuptools==65.5.1
 pip==20.2.3
 coverage==5.0.3
 wheel==0.33.6
