@@ -19,21 +19,81 @@ along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 from inspect import getmembers
+from typing import List, Tuple
+
 from spacy.tokens import Doc, Token
+
 from patternomatic.settings.config import Config
-from patternomatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
-    XPS, IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, EF, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, \
-    SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
-    IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, LIKE_NUM, LIKE_EMAIL, \
-    LANG, NORM, PREFIX, SENTIMENT, STRING, SUFFIX, TEXT_WITH_WS, WHITESPACE, LIKE_URL, MATCHER_SUPPORTED_ATTRIBUTES, \
-    ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR
+from patternomatic.settings.literals import (
+    DEP,
+    EF,
+    ENT_ID,
+    ENT_IOB,
+    ENT_KB_ID,
+    ENT_TYPE,
+    EQQ,
+    GEQ,
+    GTH,
+    HAS_VECTOR,
+    IN,
+    IS_ALPHA,
+    IS_ASCII,
+    IS_BRACKET,
+    IS_CURRENCY,
+    IS_DIGIT,
+    IS_LEFT_PUNCT,
+    IS_LOWER,
+    IS_OOV,
+    IS_PUNCT,
+    IS_QUOTE,
+    IS_RIGHT_PUNCT,
+    IS_SPACE,
+    IS_STOP,
+    IS_TITLE,
+    IS_UPPER,
+    LANG,
+    LEMMA,
+    LENGTH,
+    LEQ,
+    LIKE_EMAIL,
+    LIKE_NUM,
+    LIKE_URL,
+    LOWER,
+    LTH,
+    MATCHER_SUPPORTED_ATTRIBUTES,
+    NEGATION,
+    NORM,
+    NOT_IN,
+    ONE_OR_MORE,
+    OP,
+    ORTH,
+    POS,
+    PREFIX,
+    SENTIMENT,
+    SHAPE,
+    STRING,
+    SUFFIX,
+    TAG,
+    TEXT,
+    TEXT_WITH_WS,
+    TOKEN_WILDCARD,
+    UNDERSCORE,
+    WHITESPACE,
+    XPS,
+    ZERO_OR_MORE,
+    ZERO_OR_ONE,
+    F,
+    P,
+    S,
+    T,
+)
 from patternomatic.settings.log import LOG
 
 
 #
 # Dynamic Grammar (Backus Naur Form) Generator
 #
-def dynamic_generator(samples: [Doc]) -> dict:
+def dynamic_generator(samples: List[Doc]) -> dict:
     """
     Dynamically generates a grammar in Backus Naur Form (BNF) notation representing the available Spacy NLP
     Linguistic Feature values of the given sample list of Doc instances
@@ -45,13 +105,18 @@ def dynamic_generator(samples: [Doc]) -> dict:
     """
     config = Config()
 
-    LOG.info(f'Generating BNF based on the following samples: {str(samples)}')
+    LOG.info(f"Generating BNF based on the following samples: {str(samples)}")
 
     # BNF root
     pattern_grammar = {S: [P]}
 
     # Watch out features of seen samples and max number of tokens per sample
-    max_length_token, min_length_token, features_dict, extended_features = _features_seen(samples)
+    (
+        max_length_token,
+        min_length_token,
+        features_dict,
+        extended_features,
+    ) = _features_seen(samples)
 
     # Update times token per pattern [Min length of tokens, Max length of tokens] interval
     pattern_grammar[P] = _symbol_stacker(T, max_length_token, min_length_token)
@@ -64,10 +129,18 @@ def dynamic_generator(samples: [Doc]) -> dict:
 
     # Update available features (just the features list)
     list_of_features = list(features_dict.keys())
-    if config.use_grammar_operators is True and config.use_extended_pattern_syntax is False:
+    if (
+        config.use_grammar_operators is True
+        and config.use_extended_pattern_syntax is False
+    ):
         pattern_grammar = _add_grammar_operators(pattern_grammar, list_of_features)
-    elif config.use_extended_pattern_syntax is True and config.use_grammar_operators is False:
-        pattern_grammar = _add_extended_pattern_syntax(pattern_grammar, list_of_features, features_dict)
+    elif (
+        config.use_extended_pattern_syntax is True
+        and config.use_grammar_operators is False
+    ):
+        pattern_grammar = _add_extended_pattern_syntax(
+            pattern_grammar, list_of_features, features_dict
+        )
     else:
         pattern_grammar[F] = list_of_features
 
@@ -80,7 +153,7 @@ def dynamic_generator(samples: [Doc]) -> dict:
     if config.use_custom_attributes is True:
         pattern_grammar = _add_custom_attributes(pattern_grammar, extended_features)
 
-    LOG.info(f'Dynamically generated BNF: {str(pattern_grammar)}')
+    LOG.info(f"Dynamically generated BNF: {str(pattern_grammar)}")
 
     return pattern_grammar
 
@@ -88,13 +161,16 @@ def dynamic_generator(samples: [Doc]) -> dict:
 #
 # BNF Utilities
 #
-def _features_seen(samples: [Doc]) -> (int, int, dict, dict):
+def _features_seen(samples: List[Doc]) -> Tuple[int, int, dict, dict]:
     """
-    Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective seen values for the sample
+    Builds up a dictionary containing Spacy Linguistic Feature Keys and their respective
+    seen values for the sample.
+    
     Args:
         samples: List of Spacy Doc objects
 
-    Returns: Integer, the max length of a doc within the sample and a dict of features
+    Returns:
+        Integer, the max length of a doc within the sample and a dict of features
 
     """
     config = Config()
@@ -123,7 +199,9 @@ def _features_seen(samples: [Doc]) -> (int, int, dict, dict):
     # Set token extensions
     if config.use_custom_attributes is True:
         _set_token_extension_attributes(samples[0][0])
-        extended_features = _extended_features_seen([token for sample in samples for token in sample])
+        extended_features = _extended_features_seen(
+            [token for sample in samples for token in sample]
+        )
     else:
         extended_features = {UNDERSCORE: {}}
 
@@ -150,44 +228,50 @@ def _features_seen(samples: [Doc]) -> (int, int, dict, dict):
             min_doc_length = sample_length
 
     if config.use_uniques is True:
-        features = {ORTH: sorted(list(set(orth_list))),
-                    TEXT: sorted(list(set(text_list))),
-                    LOWER: sorted(list(set(lower_list))),
-                    LENGTH: sorted(list(set(length_list))),
-                    POS: sorted(list(set(pos_list))),
-                    TAG: sorted(list(set(tag_list))),
-                    DEP: sorted(list(set(dep_list))),
-                    LEMMA: sorted(list(set(lemma_list))),
-                    SHAPE: sorted(list(set(shape_list))),
-                    ENT_TYPE: sorted(list(set(ent_type_list)))}
+        features = {
+            ORTH: sorted(list(set(orth_list))),
+            TEXT: sorted(list(set(text_list))),
+            LOWER: sorted(list(set(lower_list))),
+            LENGTH: sorted(list(set(length_list))),
+            POS: sorted(list(set(pos_list))),
+            TAG: sorted(list(set(tag_list))),
+            DEP: sorted(list(set(dep_list))),
+            LEMMA: sorted(list(set(lemma_list))),
+            SHAPE: sorted(list(set(shape_list))),
+            ENT_TYPE: sorted(list(set(ent_type_list))),
+        }
     else:
-        features = {ORTH: orth_list,
-                    TEXT: text_list,
-                    LOWER: lower_list,
-                    LENGTH: length_list,
-                    POS: pos_list,
-                    TAG: tag_list,
-                    DEP: dep_list,
-                    LEMMA: lemma_list,
-                    SHAPE: shape_list,
-                    ENT_TYPE: ent_type_list}
+        features = {
+            ORTH: orth_list,
+            TEXT: text_list,
+            LOWER: lower_list,
+            LENGTH: length_list,
+            POS: pos_list,
+            TAG: tag_list,
+            DEP: dep_list,
+            LEMMA: lemma_list,
+            SHAPE: shape_list,
+            ENT_TYPE: ent_type_list,
+        }
 
     # Add boolean features
     if config.use_boolean_features is True:
-        features.update({
-            IS_ALPHA: bool_list,
-            IS_ASCII: bool_list,
-            IS_DIGIT: bool_list,
-            IS_LOWER: bool_list,
-            IS_UPPER: bool_list,
-            IS_TITLE: bool_list,
-            IS_PUNCT: bool_list,
-            IS_SPACE: bool_list,
-            IS_STOP: bool_list,
-            LIKE_NUM: bool_list,
-            LIKE_URL: bool_list,
-            LIKE_EMAIL: bool_list
-        })
+        features.update(
+            {
+                IS_ALPHA: bool_list,
+                IS_ASCII: bool_list,
+                IS_DIGIT: bool_list,
+                IS_LOWER: bool_list,
+                IS_UPPER: bool_list,
+                IS_TITLE: bool_list,
+                IS_PUNCT: bool_list,
+                IS_SPACE: bool_list,
+                IS_STOP: bool_list,
+                LIKE_NUM: bool_list,
+                LIKE_URL: bool_list,
+                LIKE_EMAIL: bool_list,
+            }
+        )
 
     # Drop all observations equal to empty string
     features = _feature_pruner(features)
@@ -205,14 +289,15 @@ def _set_token_extension_attributes(token: Token) -> None:
     """
     # Retrieve cleaned up Token Attributes
     token_attributes = _clean_token_attributes(
-        {k: v for k, v in getmembers(token) if type(v) in (str, bool, float)})
+        {k: v for k, v in getmembers(token) if type(v) in (str, bool, float)}
+    )
 
     # Set token custom attributes
     lambda_list = []
     i = 0
     for k, v in token_attributes.items():
         lambda_list.append(lambda token_=token, k_=k: getattr(token_, k_))
-        token.set_extension(str('custom_'+k).upper(), getter=lambda_list[i])
+        token.set_extension(str("custom_" + k).upper(), getter=lambda_list[i])
         i += 1
 
 
@@ -225,7 +310,7 @@ def _clean_token_attributes(token_attributes: dict) -> dict:
     Returns: Token attributes dict without Spacy Matcher's supported attribute keys
 
     """
-    token_attributes.pop('__doc__')
+    token_attributes.pop("__doc__")
     for item in MATCHER_SUPPORTED_ATTRIBUTES:
         token_attributes.pop(item)
 
@@ -245,34 +330,131 @@ def _extended_features_seen(tokens: [Token]) -> dict:
     """
     bool_list = [True, False]
 
-    extended_features = \
-        {
-            UNDERSCORE: {
-                ENT_ID: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_ID_') for token in tokens]))),
-                ENT_IOB: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_IOB_') for token in tokens]))),
-                ENT_KB_ID: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_ENT_KB_ID_') for token in tokens]))),
-                HAS_VECTOR: bool_list,
-                IS_BRACKET: bool_list,
-                IS_CURRENCY: bool_list,
-                IS_LEFT_PUNCT: bool_list,
-                IS_OOV: bool_list,
-                IS_QUOTE: bool_list,
-                IS_RIGHT_PUNCT: bool_list,
-                # IS_SENT_START:
-                #     sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_IS_SENT_START') for token in tokens]))),
-                LANG: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_LANG_') for token in tokens]))),
-                NORM: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_NORM_') for token in tokens]))),
-                PREFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_PREFIX_') for token in tokens]))),
-                # PROB:
-                #     sorted(list(set([abs(getattr(getattr(token, '_'), 'CUSTOM_PROB')) for token in tokens]))),
-                SENTIMENT: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SENTIMENT') for token in tokens]))),
-                STRING: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_STRING') for token in tokens]))),
-                SUFFIX: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_SUFFIX_') for token in tokens]))),
-                TEXT_WITH_WS: sorted(list(set(
-                    [getattr(getattr(token, '_'), 'CUSTOM_TEXT_WITH_WS') for token in tokens]))),
-                WHITESPACE: sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_WHITESPACE_') for token in tokens])))
-            }
+    extended_features = {
+        UNDERSCORE: {
+            ENT_ID: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_ENT_ID_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            ENT_IOB: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_ENT_IOB_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            ENT_KB_ID: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_ENT_KB_ID_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            HAS_VECTOR: bool_list,
+            IS_BRACKET: bool_list,
+            IS_CURRENCY: bool_list,
+            IS_LEFT_PUNCT: bool_list,
+            IS_OOV: bool_list,
+            IS_QUOTE: bool_list,
+            IS_RIGHT_PUNCT: bool_list,
+            # IS_SENT_START:
+            #     sorted(list(set([getattr(getattr(token, '_'), 'CUSTOM_IS_SENT_START') for token in tokens]))),
+            LANG: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_LANG_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            NORM: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_NORM_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            PREFIX: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_PREFIX_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            # PROB:
+            #     sorted(list(set([abs(getattr(getattr(token, '_'), 'CUSTOM_PROB')) for token in tokens]))),
+            SENTIMENT: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_SENTIMENT")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            STRING: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_STRING")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            SUFFIX: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_SUFFIX_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            TEXT_WITH_WS: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_TEXT_WITH_WS")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
+            WHITESPACE: sorted(
+                list(
+                    set(
+                        [
+                            getattr(getattr(token, "_"), "CUSTOM_WHITESPACE_")
+                            for token in tokens
+                        ]
+                    )
+                )
+            ),
         }
+    }
 
     return extended_features
 
@@ -289,7 +471,7 @@ def _feature_pruner(features: dict) -> dict:
     # Drop all observations equal to empty string
     to_del_list = list()
     for k in features.keys():
-        if len(features[k]) == 1 and features[k][0] == '':
+        if len(features[k]) == 1 and features[k][0] == "":
             to_del_list.append(k)
 
     for k_item in to_del_list:
@@ -309,10 +491,10 @@ def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
 
     """
     symbol_times_list = list()
-    last = ''
+    last = ""
 
     for _ in range(max_length):
-        if last == '':
+        if last == "":
             last = symbol
         else:
             last = last + "," + symbol
@@ -320,7 +502,7 @@ def _symbol_stacker(symbol: str, max_length: int, min_length: int = 1) -> list:
         symbol_times_list.append(last)
 
     if 1 < min_length <= max_length:
-        symbol_times_list = symbol_times_list[min_length-1:]
+        symbol_times_list = symbol_times_list[min_length - 1 :]
 
     return symbol_times_list
 
@@ -360,13 +542,15 @@ def _add_grammar_operators(pattern_grammar: dict, list_of_features: list) -> dic
     list_of_features_op = list()
     for feature in list_of_features:
         list_of_features_op.append(feature)
-        list_of_features_op.append(feature + ',' + OP)
+        list_of_features_op.append(feature + "," + OP)
     pattern_grammar[F] = list_of_features_op
     pattern_grammar[OP] = [NEGATION, ZERO_OR_ONE, ONE_OR_MORE, ZERO_OR_MORE]
     return pattern_grammar
 
 
-def _add_extended_pattern_syntax(pattern_grammar: dict, list_of_features: list, features_dict: dict) -> dict:
+def _add_extended_pattern_syntax(
+    pattern_grammar: dict, list_of_features: list, features_dict: dict
+) -> dict:
     """
     Adds support to the extended pattern syntax at BNF dicts
     Args:
@@ -416,7 +600,11 @@ def _all_feature_terminal_list(features_dict: dict) -> list:
 
         all_terminal_list += current_terminal_holder
 
-    all_terminal_list = [ele for ind, ele in enumerate(all_terminal_list) if ele not in all_terminal_list[:ind]]
+    all_terminal_list = [
+        ele
+        for ind, ele in enumerate(all_terminal_list)
+        if ele not in all_terminal_list[:ind]
+    ]
     return all_terminal_list
 
 
@@ -425,12 +613,17 @@ def _add_custom_attributes(pattern_grammar: dict, extended_features: dict) -> di
     Adds support to a specific set of custom attributes at BNF dict
     Args:
         pattern_grammar: BNF dict
-        extended_features: dict of token features not supported by default by the Spacy's Matcher
+        extended_features: dict of token features not supported by default by the
+            Spacy's Matcher
 
-    Returns: Backus Naur Form grammar notation encoded in a dictionary with Spacy's custom attributes
+    Returns:
+        Backus Naur Form grammar notation encoded in a dictionary with Spacy's custom
+            attributes
 
     """
-    pattern_grammar[UNDERSCORE] = _symbol_stacker(EF, _get_features_per_token(extended_features[UNDERSCORE]))
+    pattern_grammar[UNDERSCORE] = _symbol_stacker(
+        EF, _get_features_per_token(extended_features[UNDERSCORE])
+    )
     pattern_grammar[EF] = list(extended_features[UNDERSCORE].keys())
     pattern_grammar.update(extended_features[UNDERSCORE].items())
     pattern_grammar[T].append(UNDERSCORE)

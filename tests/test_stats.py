@@ -28,34 +28,34 @@ from patternomatic.settings.literals import ReportFormat
 
 
 class TestStats(TestCase):
-    """ Tests for Stats class """
+    """Tests for Stats class"""
 
     stats = None
-    test_report_path_file = 'test_report_path_file.txt'
-    fitness_value_literal = 'fitness_value'
+    test_report_path_file = "test_report_path_file.txt"
+    fitness_value_literal = "fitness_value"
 
     def test_add_sr(self):
-        """ SR accumulator works """
+        """SR accumulator works"""
         self.stats.add_sr(True)
         super().assertListEqual([True], self.stats.success_rate_accumulator)
 
     def test_add_mbf(self):
-        """ MBF accumulator works """
+        """MBF accumulator works"""
         self.stats.add_mbf(0.5)
         super().assertListEqual([0.5], self.stats.mbf_accumulator)
 
     def test_add_aes(self):
-        """ AES accumulator works """
+        """AES accumulator works"""
         self.stats.add_aes(10)
         super().assertListEqual([10], self.stats.aes_accumulator)
 
     def test_add_time(self):
-        """ Time accumulator works """
+        """Time accumulator works"""
         self.stats.add_time(0.2222)
         super().assertListEqual([0.2222], self.stats.time_accumulator)
 
     def test_add_most_fitted(self):
-        """ Most fitted accumulator works """
+        """Most fitted accumulator works"""
         expected = object.__new__(Individual)
         expected.__setattr__(self.fitness_value_literal, 0.5)
 
@@ -63,13 +63,16 @@ class TestStats(TestCase):
         super().assertListEqual([expected], self.stats.most_fitted_accumulator)
 
     def test_sum_aes(self):
-        """ Time counter works """
+        """Time counter works"""
         self.stats.sum_aes(2)
         self.stats.sum_aes(2)
-        super().assertEqual(4, self.stats.aes_counter,)
+        super().assertEqual(
+            4,
+            self.stats.aes_counter,
+        )
 
     def test_reset(self):
-        """ Reset stats method works """
+        """Reset stats method works"""
         self.stats.aes_counter = 100
         self.stats.solution_found = True
         self.stats.reset()
@@ -77,7 +80,7 @@ class TestStats(TestCase):
         super().assertEqual(False, self.stats.solution_found)
 
     def test_calculate_metrics(self):
-        """ Calculate metrics works """
+        """Calculate metrics works"""
         self.stats.success_rate_accumulator = [1, 1, 1]
         self.stats.mbf_accumulator = [2, 2, 2]
         self.stats.aes_counter = 100
@@ -91,7 +94,7 @@ class TestStats(TestCase):
         super().assertEqual(3, self.stats.mean_time)
 
     def test_get_most_fitted(self):
-        """ Most fitted individual is found on most fitted accumulator """
+        """Most fitted individual is found on most fitted accumulator"""
         i1 = object.__new__(Individual)
         i1.__setattr__(self.fitness_value_literal, 0.01)
         i2 = object.__new__(Individual)
@@ -110,41 +113,41 @@ class TestStats(TestCase):
         super().assertEqual(self.stats.get_most_fitted(), i2)
 
     def test_avg(self):
-        """ Average implementation works """
+        """Average implementation works"""
         test_list_1 = [1, 2, 3]
         super().assertEqual(2, self.stats.avg(test_list_1))
 
     def test_dict_and_repr(self):
-        """ Checks that Stats instances are properly represented """
+        """Checks that Stats instances are properly represented"""
         stats_dict = {
-            'success_rate': 1.0,
-            'mbf': 0.5,
-            'aes': 100,
-            'mean_time': 4.5,
-            'most_fitted': None
+            "success_rate": 1.0,
+            "mbf": 0.5,
+            "aes": 100,
+            "mean_time": 4.5,
+            "most_fitted": None,
         }
 
         # Check that with no best individual representation is well formed
         stats = Stats()
-        stats.success_rate = stats_dict['success_rate']
-        stats.mbf = stats_dict['mbf']
-        stats.aes = stats_dict['aes']
-        stats.mean_time = stats_dict['mean_time']
+        stats.success_rate = stats_dict["success_rate"]
+        stats.mbf = stats_dict["mbf"]
+        stats.aes = stats_dict["aes"]
+        stats.mean_time = stats_dict["mean_time"]
 
         super().assertEqual(stats.__dict__, stats_dict)
         super().assertEqual(dict(stats), stats_dict)
-        super().assertEqual(f'Stats({repr(stats_dict)})', repr(stats))
+        super().assertEqual(f"Stats({repr(stats_dict)})", repr(stats))
 
         # Check that with most fitted accumulator representation is well formed
         i = object.__new__(Individual)
         i.__setattr__(self.fitness_value_literal, 1.0)
 
         stats.most_fitted_accumulator = [i]
-        stats_dict['most_fitted'] = i.__dict__
+        stats_dict["most_fitted"] = i.__dict__
 
         super().assertDictEqual(stats_dict, stats.__dict__)
         super().assertEqual(stats_dict, dict(stats))
-        super().assertEqual(f'Stats({repr(stats_dict)})', repr(stats))
+        super().assertEqual(f"Stats({repr(stats_dict)})", repr(stats))
 
     def test_persist(self):
         config = Config()
@@ -161,33 +164,34 @@ class TestStats(TestCase):
         self.stats.most_fitted_accumulator = [i]
         self.stats.persist()
 
-        with open(self.test_report_path_file, 'r') as persisted_report:
+        with open(self.test_report_path_file, "r") as persisted_report:
             red_report = persisted_report.readlines()
 
-        super().assertEqual(str(dict(self.stats)) + '\n', red_report[0])
+        super().assertEqual(str(dict(self.stats)) + "\n", red_report[0])
 
         # When a best individual has not been found
         self.stats.most_fitted_accumulator = []
         self.stats.persist()
 
-        with open(self.test_report_path_file, 'r') as persisted_report:
+        with open(self.test_report_path_file, "r") as persisted_report:
             red_report = persisted_report.readlines()
 
-        super().assertEqual(str(dict(self.stats)) + '\n', red_report[1])
+        super().assertEqual(str(dict(self.stats)) + "\n", red_report[1])
 
     def test_to_csv(self):
-        """ Test stats instance dict to csv conversion """
-        with mock.patch('patternomatic.ge.stats.time') as mock_time:
-            mock_time.return_value = .123
+        """Test stats instance dict to csv conversion"""
+        with mock.patch("patternomatic.ge.stats.time") as mock_time:
+            mock_time.return_value = 0.123
             self.stats.aes = 10
             self.stats.mbf = 0.5
             self.stats.mean_time = 0.22
             self.stats.success_rate = 0.5
 
             # When a best individual has not been found
-            csv_stats = \
-                f'{.123}\t{self.stats.mbf}\t{self.stats.success_rate}\t{self.stats.aes}\t{self.stats.mean_time}\t' \
-                f'{None}\t'
+            csv_stats = (
+                f"{.123}\t{self.stats.mbf}\t{self.stats.success_rate}\t{self.stats.aes}\t{self.stats.mean_time}\t"
+                f"{None}\t"
+            )
 
             super().assertEqual(csv_stats, self.stats._to_csv())
 
@@ -196,7 +200,7 @@ class TestStats(TestCase):
             i.__setattr__(self.fitness_value_literal, 1.0)
             self.stats.most_fitted_accumulator = [i]
 
-            csv_stats += f'{None}\t{i.fitness_value}\t'
+            csv_stats += f"{None}\t{i.fitness_value}\t"
             super().assertEqual(csv_stats, self.stats._to_csv())
 
             # Also check csv is correctly persisted
@@ -205,22 +209,22 @@ class TestStats(TestCase):
             config.report_format = ReportFormat.CSV
             self.stats.persist()
 
-            with open(self.test_report_path_file, 'r') as persisted_report:
+            with open(self.test_report_path_file, "r") as persisted_report:
                 red_report = persisted_report.readlines()
 
-            super().assertEqual(csv_stats + '\n', red_report[0])
+            super().assertEqual(csv_stats + "\n", red_report[0])
 
     #
     # Helpers
     #
     def setUp(self) -> None:
-        """ Fresh Stats instance """
+        """Fresh Stats instance"""
         self.stats = Stats()
         if os.path.exists(self.test_report_path_file):
             os.remove(self.test_report_path_file)
 
     @classmethod
     def tearDownClass(cls) -> None:
-        """ Remove temporary report file  """
+        """Remove temporary report file"""
         if os.path.exists(cls.test_report_path_file):
             os.remove(cls.test_report_path_file)

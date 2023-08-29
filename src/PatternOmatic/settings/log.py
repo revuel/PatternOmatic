@@ -23,10 +23,11 @@ import sys
 import tempfile
 from logging.handlers import TimedRotatingFileHandler
 
-FORMATTER = \
-    logging.Formatter('[%(levelname)s] %(asctime)s %(filename)s:%(funcName)s:%(lineno)d : %(message)s')
+FORMATTER = logging.Formatter(
+    "[%(levelname)s] %(asctime)s %(filename)s:%(funcName)s:%(lineno)d : %(message)s"
+)
 
-LOG_FILE = tempfile.gettempdir() + '/patternomatic.log'
+LOG_FILE = tempfile.gettempdir() + "/patternomatic.log"
 
 
 def _get_console_handler():
@@ -46,7 +47,7 @@ def _get_file_handler():
     Returns:
 
     """
-    file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
+    file_handler = TimedRotatingFileHandler(LOG_FILE, when="midnight")
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
@@ -68,4 +69,4 @@ def get_logger(logger_name):
     return logger
 
 
-LOG = get_logger('patternomatic')
+LOG = get_logger("patternomatic")

@@ -19,19 +19,21 @@ along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import random
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
 from spacy.tokens import Doc
 
 from patternomatic.ge.individual import Individual
 from patternomatic.ge.stats import Stats
 from patternomatic.settings.config import Config
-from patternomatic.settings.literals import SelectionType, ReplacementType
+from patternomatic.settings.literals import ReplacementType, SelectionType
 from patternomatic.settings.log import LOG
 
 
 class Selection(object):
-    """ Dispatches the proper selection type for population instances """
-    __slots__ = '_select'
+    """Dispatches the proper selection type for population instances"""
+
+    __slots__ = "_select"
 
     def __init__(self, selection_type: SelectionType):
         self.__dispatch_selection(selection_type)
@@ -45,7 +47,7 @@ class Selection(object):
         Returns: A list of Individual instances
 
         """
-        LOG.debug(f'Selecting individuals...')
+        LOG.debug("Selecting individuals...")
         return self._select(generation)
 
     def __dispatch_selection(self, selection_type: SelectionType) -> None:
@@ -112,8 +114,9 @@ class Selection(object):
 
 
 class Recombination(object):
-    """ Dispatches the proper recombination type for population instances """
-    __slots__ = ('_recombine', 'config', 'grammar', 'samples', 'stats')
+    """Dispatches the proper recombination type for population instances"""
+
+    __slots__ = ("_recombine", "config", "grammar", "samples", "stats")
 
     def __init__(self, grammar: Dict, samples: List[Doc], stats: Stats):
         self._recombine = None
@@ -123,8 +126,10 @@ class Recombination(object):
         self.stats = stats
         self.__dispatch_recombination_type()
 
-    def __call__(self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
-        LOG.debug(f'Combining individuals...')
+    def __call__(
+        self, mating_pool: List[Individual], generation: List[Individual]
+    ) -> List[Individual]:
+        LOG.debug(f"Combining individuals...")
         return self._recombine(mating_pool, generation)
 
     def __dispatch_recombination_type(self) -> None:
@@ -137,7 +142,8 @@ class Recombination(object):
         self._recombine = self._random_one_point_crossover
 
     def _random_one_point_crossover(
-            self, mating_pool: List[Individual], generation: List[Individual]) -> List[Individual]:
+        self, mating_pool: List[Individual], generation: List[Individual]
+    ) -> List[Individual]:
         """
         For each pair of Individual instances, recombines them produce two offsprings. Puts them all into the offspring
         Args:
@@ -148,23 +154,36 @@ class Recombination(object):
 
         """
         offspring = []
-        offspring_max_size = round(len(generation) * self.config.offspring_max_size_factor)
+        offspring_max_size = round(
+            len(generation) * self.config.offspring_max_size_factor
+        )
 
         while len(offspring) <= offspring_max_size:
             parent_1 = random.choice(mating_pool)
             parent_2 = random.choice(mating_pool)
 
             if random.random() < self.config.mating_probability:
-                cut = random.randint(1, self.config.codon_length - 1) * self.config.num_codons_per_individual
+                cut = (
+                    random.randint(1, self.config.codon_length - 1)
+                    * self.config.num_codons_per_individual
+                )
 
                 # Create children
-                child_1 = Individual(self.samples, self.grammar, self.stats,
-                                     dna=parent_1.bin_genotype[:cut] + parent_2.bin_genotype[
-                                                                       -(self.config.dna_length - cut):])
+                child_1 = Individual(
+                    self.samples,
+                    self.grammar,
+                    self.stats,
+                    dna=parent_1.bin_genotype[:cut]
+                    + parent_2.bin_genotype[-(self.config.dna_length - cut) :],
+                )
 
-                child_2 = Individual(self.samples, self.grammar, self.stats,
-                                     dna=parent_2.bin_genotype[:cut] + parent_1.bin_genotype[
-                                                                 -(self.config.dna_length - cut):])
+                child_2 = Individual(
+                    self.samples,
+                    self.grammar,
+                    self.stats,
+                    dna=parent_2.bin_genotype[:cut]
+                    + parent_1.bin_genotype[-(self.config.dna_length - cut) :],
+                )
 
                 offspring.append(child_1)
                 offspring.append(child_2)
@@ -173,15 +192,17 @@ class Recombination(object):
 
 
 class Replacement(object):
-    """ Dispatches the proper recombination type for population instances """
-    __slots__ = '_replace'
+    """Dispatches the proper recombination type for population instances"""
+
+    __slots__ = "_replace"
 
     def __init__(self, replacement_type: ReplacementType):
         self.__dispatch_replacement_type(replacement_type)
 
-    def __call__(self, generation: List[Individual], offspring: List[Individual]) \
-            -> Tuple[List[Individual], List[Individual]]:
-        LOG.debug(f'Replacing individuals...')
+    def __call__(
+        self, generation: List[Individual], offspring: List[Individual]
+    ) -> Tuple[List[Individual], List[Individual]]:
+        LOG.debug(f"Replacing individuals...")
         return self._replace(generation, offspring)
 
     def __dispatch_replacement_type(self, replacement_type: ReplacementType) -> None:
@@ -204,8 +225,9 @@ class Replacement(object):
             self._replace = self._mu_plus_lambda
 
     @staticmethod
-    def _mu_plus_lambda(generation: List[Individual], offspring: List[Individual]) \
-            -> Tuple[List[Individual], List[Individual]]:
+    def _mu_plus_lambda(
+        generation: List[Individual], offspring: List[Individual]
+    ) -> Tuple[List[Individual], List[Individual]]:
         """
         Produces the next generation combining the current generation with the offspring
         Args:
@@ -217,14 +239,15 @@ class Replacement(object):
         """
         replacement_pool = generation + offspring
         replacement_pool.sort(key=lambda i: i.fitness_value, reverse=True)
-        generation = replacement_pool[:len(generation)]
+        generation = replacement_pool[: len(generation)]
         offspring = []
 
         return generation, offspring
 
     @staticmethod
-    def _mu_lambda_elite(generation: List[Individual], offspring: List[Individual]) \
-            -> Tuple[List[Individual], List[Individual]]:
+    def _mu_lambda_elite(
+        generation: List[Individual], offspring: List[Individual]
+    ) -> Tuple[List[Individual], List[Individual]]:
         """
         Produces the next generation using the offspring and the best Individual of the current generation
         Args:
@@ -236,14 +259,15 @@ class Replacement(object):
         """
         generation.sort(key=lambda i: i.fitness_value, reverse=True)
         offspring.sort(key=lambda i: i.fitness_value, reverse=True)
-        generation[1:len(generation)] = offspring[0:len(generation)]
+        generation[1 : len(generation)] = offspring[0 : len(generation)]
         offspring = []
 
         return generation, offspring
 
     @staticmethod
-    def _mu_lambda_no_elite(generation: List[Individual], offspring: List[Individual]) \
-            -> Tuple[List[Individual], List[Individual]]:
+    def _mu_lambda_no_elite(
+        generation: List[Individual], offspring: List[Individual]
+    ) -> Tuple[List[Individual], List[Individual]]:
         """
         Produces the next generation totally replacing the current generation with the offspring
         Args:
@@ -254,16 +278,27 @@ class Replacement(object):
 
         """
         offspring.sort(key=lambda i: i.fitness_value, reverse=True)
-        generation = offspring[0:len(generation)]
+        generation = offspring[0 : len(generation)]
         offspring = []
 
         return generation, offspring
 
 
 class Population(object):
-    """ Population implementation of an AI Grammatical Evolution algorithm in OOP fashion """
-    __slots__ = ('config', 'samples', 'grammar', 'stats', 'generation', 'offspring', 'best_individual',
-                 'selection', 'recombination', 'replacement')
+    """Population implementation of an AI Grammatical Evolution algorithm in OOP fashion"""
+
+    __slots__ = (
+        "config",
+        "samples",
+        "grammar",
+        "stats",
+        "generation",
+        "offspring",
+        "best_individual",
+        "selection",
+        "recombination",
+        "replacement",
+    )
 
     def __init__(self, samples: [Doc], grammar: dict, stats: Stats):
         """
@@ -294,7 +329,10 @@ class Population(object):
         Returns: A list of individual objects
 
         """
-        return [Individual(self.samples, self.grammar, self.stats) for _ in range(0, self.config.dna_length)]
+        return [
+            Individual(self.samples, self.grammar, self.stats)
+            for _ in range(0, self.config.dna_length)
+        ]
 
     def _best_challenge(self) -> None:
         """
@@ -320,17 +358,19 @@ class Population(object):
             5) Calculate statistics for this Run
         """
 
-        LOG.info('Evolution taking place, please wait...')
+        LOG.info("Evolution taking place, please wait...")
 
         self.stats.reset()
 
         for _ in range(self.config.max_generations):
             mating_pool = self.selection(self.generation)
             self.offspring = self.recombination(mating_pool, self.generation)
-            self.generation, self.offspring = self.replacement(self.generation, self.offspring)
+            self.generation, self.offspring = self.replacement(
+                self.generation, self.offspring
+            )
             self._best_challenge()
 
-        LOG.info(f'Best candidate found on this run: {self.best_individual}')
+        LOG.info(f"Best candidate found on this run: {self.best_individual}")
 
         # Stats concerns
         self.stats.add_most_fitted(self.best_individual)

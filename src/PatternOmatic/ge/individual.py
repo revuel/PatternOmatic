@@ -18,24 +18,45 @@ You should have received a copy of the GNU Lesser General Public License
 along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
-import re
 import json
-
-from random import random
+import re
 from itertools import cycle
-from spacy.tokens import Doc
+from random import random
+from typing import List
+
 from spacy.matcher import Matcher
+from spacy.tokens import Doc
 
 from patternomatic.ge.stats import Stats
 from patternomatic.settings.config import Config
+from patternomatic.settings.literals import (
+    EF,
+    EQQ,
+    GEQ,
+    GTH,
+    IN,
+    LEQ,
+    LTH,
+    NOT_IN,
+    SLD,
+    SRD,
+    TOKEN_WILDCARD,
+    UNDERSCORE,
+    XPS,
+    XPS_AS,
+    F,
+    FitnessType,
+    P,
+    S,
+    T,
+)
 from patternomatic.settings.log import LOG
-from patternomatic.settings.literals import FitnessType, S, T, XPS, TOKEN_WILDCARD, UNDERSCORE, P, F, EF, IN, NOT_IN, \
-    SLD, SRD, GTH, LTH, GEQ, LEQ, EQQ, XPS_AS
 
 
 class Fitness(object):
-    """ Dispatches the proper fitness type for individual instances """
-    __slots__ = ('_fitness', 'config', 'samples', 'fenotype')
+    """Dispatches the proper fitness type for individual instances"""
+
+    __slots__ = ("_fitness", "config", "samples", "fenotype")
 
     def __init__(self, config, samples, fenotype):
         self.config = config
@@ -62,10 +83,12 @@ class Fitness(object):
 
     def _fitness_basic(self) -> float:
         """
-        Sets the fitness value for an individual. If makes a partial match over a sample, a score is added
-        for that sample even if the matches are only a portion of the sample's length
-        Returns: Float (fitness value)
+        Sets the fitness value for an individual. If makes a partial match over a
+        sample, a score is added for that sample even if the matches are only a portion
+        of the sample's length
 
+        Returns:
+            Fitness value
         """
         max_score_per_sample = 1 / len(self.samples)
         matcher = Matcher(self.samples[0].vocab)
@@ -81,7 +104,8 @@ class Fitness(object):
 
     def _fitness_full_match(self) -> float:
         """
-        Sets the fitness value for an individual. It only gives a partial score if any of the matches equals the full
+        Sets the fitness value for an individual.
+        It only gives a partial score if any of the matches equals the full
         length of the sample
         Returns: Float
 
@@ -98,12 +122,18 @@ class Fitness(object):
             matches = matcher(sample)
             if len(matches) > 0:
                 for match in matches:
-                    contact += max_score_per_sample if match[2] == len(sample) and match[1] == 0 else + 0
+                    contact += (
+                        max_score_per_sample
+                        if match[2] == len(sample) and match[1] == 0
+                        else +0
+                    )
         return self._wildcard_penalty(contact)
 
     def _wildcard_penalty(self, contact: float) -> float:
         """
-        Applies a penalty for the usage of token wildcard if usage of token wildcard is enabled
+        Applies a penalty for the usage of token wildcard if usage of token wildcard is
+        enabled
+
         Args:
             contact: Temporary fitness value for the current individual
 
@@ -114,20 +144,36 @@ class Fitness(object):
             num_tokens = len(self.fenotype)
             for item in self.fenotype:
                 if item == {}:
-                    LOG.debug('Applying token wildcard penalty!')
-                    penalty = 1/num_tokens
+                    LOG.debug("Applying token wildcard penalty!")
+                    penalty = 1 / num_tokens
                     contact -= penalty
 
         return contact
 
 
 class Individual(object):
-    """ Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion """
-    __slots__ = ('config', 'samples', 'grammar', 'stats', 'bin_genotype', 'int_genotype', 'fenotype', 'fitness_value')
+    """
+    Individual implementation of an AI Grammatical Evolution algorithm in OOP fashion
+    """
 
-    def __init__(self, samples: [Doc], grammar: dict, stats: Stats, dna: str = None):
+    __slots__ = (
+        "config",
+        "samples",
+        "grammar",
+        "stats",
+        "bin_genotype",
+        "int_genotype",
+        "fenotype",
+        "fitness_value",
+    )
+
+    def __init__(
+        self, samples: List[Doc], grammar: dict, stats: Stats, dna: str = None
+    ):
         """
-        Individual constructor, if dna is not supplied, sets up randomly its binary genotype
+        Individual constructor, if dna is not supplied, sets up randomly its binary
+        genotype.
+
         Args:
             samples: list of Spacy doc objects
             grammar: Backus Naur Form grammar notation encoded in a dictionary
@@ -139,23 +185,33 @@ class Individual(object):
         self.samples = samples
         self.grammar = grammar
         self.stats = stats
-        self.bin_genotype = self._initialize() if dna is None else self.mutate(dna, self.config.mutation_probability)
+        self.bin_genotype = (
+            self._initialize()
+            if dna is None
+            else self.mutate(dna, self.config.mutation_probability)
+        )
         self.int_genotype = self._transcription()
         self.fenotype = self._translation()
-        self.fitness_value = Fitness(self.config, self.samples, self.fenotype).__call__()
+        self.fitness_value = Fitness(
+            self.config, self.samples, self.fenotype
+        ).__call__()
 
         # Stats concerns
         self._is_solution()
 
     @property
     def __dict__(self):
-        """ Dictionary representation for a slotted class (that has no dict at all) """
+        """Dictionary representation for a slotted class (that has no dict at all)"""
         # Above works just for POPOs
-        return {s: getattr(self, s, None) for s in self.__slots__ if s in ('bin_genotype', 'fenotype', 'fitness_value')}
+        return {
+            s: getattr(self, s, None)
+            for s in self.__slots__
+            if s in ("bin_genotype", "fenotype", "fitness_value")
+        }
 
     def __repr__(self):
-        """ String representation of a slotted class using hijacked dict """
-        return f'{self.__class__.__name__}({self.__dict__})'
+        """String representation of a slotted class using hijacked dict"""
+        return f"{self.__class__.__name__}({self.__dict__})"
 
     #
     # Problem specific GE methods
@@ -166,17 +222,25 @@ class Individual(object):
         Returns: String, binary fashion
 
         """
-        return ''.join([''.join('1') if random() > 0.5
-                        else ''.join('0') for _ in range(0, self.config.dna_length)]).strip()
+        return "".join(
+            [
+                "".join("1") if random() > 0.5 else "".join("0")
+                for _ in range(0, self.config.dna_length)
+            ]
+        ).strip()
 
-    def _transcription(self) -> [int]:
+    def _transcription(self) -> List[int]:
         """
-        Converts a binary string representation to an integer representation codon by codon
-        Returns: List of integers
+        Converts a binary string representation to an integer representation codon by
+        codon
 
+        Returns:
+            List of integers
         """
-        return [int(self.bin_genotype[i:(i+self.config.codon_length-1)], 2)
-                for i in range(0, len(self.bin_genotype), self.config.codon_length-1)]
+        return [
+            int(self.bin_genotype[i : (i + self.config.codon_length - 1)], 2)
+            for i in range(0, len(self.bin_genotype), self.config.codon_length - 1)
+        ]
 
     def _translation(self):
         done = False
@@ -195,19 +259,23 @@ class Individual(object):
             if old_symbolic_string == symbolic_string:
                 done = True
 
-        translated_individual = '[' + symbolic_string + ']'
+        translated_individual = "[" + symbolic_string + "]"
 
         return json.loads(translated_individual)
 
     def _translate(self, ci: iter, key, symbolic_string: str):
         """
-        Helper method to reduce cognitive overload of the public method with the same name (_translation)
+        Helper method to reduce cognitive overload of the public method with the same
+        name (_translation)
+
         Args:
             ci: Last circular iterator
             key: Last key in the grammar dict
-            symbolic_string: String representation of the individual's Spacy's Rule Based Matcher pattern
+            symbolic_string: String representation of the individual's Spacy's Rule
+                Based Matcher pattern
 
-        Returns: String representation of the individual's Spacy's Rule Based Matcher pattern
+        Returns:
+            String representation of the individual's Spacy's Rule Based Matcher pattern
 
         """
         fire = divmod(ci, len(self.grammar[key]))[1]
@@ -217,30 +285,45 @@ class Individual(object):
             if fired_rule == TOKEN_WILDCARD:
                 symbolic_string = re.sub(key, "{}", symbolic_string, 1)
             else:
-                symbolic_string = re.sub(key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+                symbolic_string = re.sub(
+                    key, "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1
+                )
 
         elif key is UNDERSCORE:
-            symbolic_string = re.sub(key, "\"_\"" + ": " + "{" + str(self.grammar[key][fire]) + "}", symbolic_string, 1)
+            symbolic_string = re.sub(
+                key,
+                '"_"' + ": " + "{" + str(self.grammar[key][fire]) + "}",
+                symbolic_string,
+                1,
+            )
 
         elif key in [P, T, F, EF]:
-            symbolic_string = re.sub(key, str(self.grammar[key][fire]), symbolic_string, 1)
+            symbolic_string = re.sub(
+                key, str(self.grammar[key][fire]), symbolic_string, 1
+            )
 
         elif key in [IN, NOT_IN]:
-            key_r = key.replace(SLD, '').replace(SRD, '')
-            feature = "\"" + key_r + "\"" + ":" + str(self.grammar[key][fire]).replace("\'", "\"").replace("\'", "")
+            key_r = key.replace(SLD, "").replace(SRD, "")
+            feature = (
+                '"'
+                + key_r
+                + '"'
+                + ":"
+                + str(self.grammar[key][fire]).replace("'", '"').replace("'", "")
+            )
             symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
         elif key in [GTH, LTH, GEQ, LEQ, EQQ]:
-            feature = "\"" + XPS_AS[key] + "\"" + ":" + str(self.grammar[key][fire])
+            feature = '"' + XPS_AS[key] + '"' + ":" + str(self.grammar[key][fire])
             symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
         else:
-            key_r = key.replace(SLD, '').replace(SRD, '')
+            key_r = key.replace(SLD, "").replace(SRD, "")
             fired_rule = str(self.grammar[key][fire])
             if fired_rule != XPS:
-                feature = "\"" + key_r + "\"" + ":" + "\"" + fired_rule + "\""
+                feature = '"' + key_r + '"' + ":" + '"' + fired_rule + '"'
             else:
-                feature = "\"" + key_r + "\"" + ":" + fired_rule
+                feature = '"' + key_r + '"' + ":" + fired_rule
             symbolic_string = re.sub(key, feature, symbolic_string, 1)
 
         return symbolic_string
@@ -259,14 +342,14 @@ class Individual(object):
         Returns: Binary string
 
         """
-        mutated_dna = ''
+        mutated_dna = ""
 
         for gen in dna:
             if random() < mutation_probability:
-                if gen == '1':
-                    mutated_dna += '0'
+                if gen == "1":
+                    mutated_dna += "0"
                 else:
-                    mutated_dna += '1'
+                    mutated_dna += "1"
             else:
                 mutated_dna += gen
         return mutated_dna
@@ -282,5 +365,5 @@ class Individual(object):
         if self.stats.solution_found is False:
             self.stats.sum_aes(1)
             if self.fitness_value >= self.config.success_threshold:
-                LOG.debug('Solution found for this run!')
+                LOG.debug("Solution found for this run!")
                 self.stats.solution_found = True

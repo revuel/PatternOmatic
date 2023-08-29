@@ -19,18 +19,30 @@ along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import unittest
+
 import spacy
 
+from patternomatic.ge.individual import Individual
+from patternomatic.ge.population import (
+    Population,
+    Recombination,
+    Replacement,
+    Selection,
+)
 from patternomatic.ge.stats import Stats
 from patternomatic.nlp.bnf import dynamic_generator as dgg
-from patternomatic.ge.population import Population, Selection, Recombination, Replacement
-from patternomatic.ge.individual import Individual
 from patternomatic.settings.config import Config
-from patternomatic.settings.literals import FitnessType, SelectionType, RecombinationType, ReplacementType
+from patternomatic.settings.literals import (
+    FitnessType,
+    RecombinationType,
+    ReplacementType,
+    SelectionType,
+)
 
 
 class BasePopulationTest(unittest.TestCase):
-    """ Base class to supply shard attributes and helpers """
+    """Base class to supply shard attributes and helpers"""
+
     #
     # Shared attributes
     #
@@ -38,10 +50,12 @@ class BasePopulationTest(unittest.TestCase):
 
     nlp = spacy.load("en_core_web_sm")
 
-    samples = [nlp(u'I am a raccoon!'),
-               nlp(u'You are a cat!'),
-               nlp(u'Is she a rabbit?'),
-               nlp(u'This is a test')]
+    samples = [
+        nlp("I am a raccoon!"),
+        nlp("You are a cat!"),
+        nlp("Is she a rabbit?"),
+        nlp("This is a test"),
+    ]
 
     grammar = dgg(samples)
 
@@ -51,37 +65,39 @@ class BasePopulationTest(unittest.TestCase):
     # Helpers
     #
     def setUp(self) -> None:
-        """ Fresh Config instance """
+        """Fresh Config instance"""
         self.config = Config()
 
     def tearDown(self) -> None:
-        """ Destroy Config instance """
+        """Destroy Config instance"""
         Config.clear_instance()
 
 
 class TestPopulation(BasePopulationTest):
-    """ Unit Test class for GE Population object """
+    """Unit Test class for GE Population object"""
 
     def test_initialize(self):
-        """ Tests that a population is correctly filled with Individuals """
+        """Tests that a population is correctly filled with Individuals"""
         p = Population(self.samples, self.grammar, self.stats)
 
         super().assertIsInstance(p.generation[0], Individual)
 
     def test_best_challenge(self):
-        """ Tests that the most fitted individual occupies the population's best_individual slot """
+        """Tests that the most fitted individual occupies the population's best_individual slot"""
         self.config.max_generations = 3
         self.config.fitness_function_type = FitnessType.BASIC
         p = Population(self.samples, self.grammar, self.stats)
         self.config.mutation_probability = 0.0
-        p.generation[0] = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
+        p.generation[0] = Individual(
+            self.samples, self.grammar, self.stats, "01110101100101100110010110010101"
+        )
         self.config.mutation_probability = 0.5
         p.evolve()
 
         super().assertGreaterEqual(p.best_individual.fitness_value, 0.2)
 
     def test_binary_tournament(self):
-        """ Test that binary tournament works as expected """
+        """Test that binary tournament works as expected"""
         self.config.max_generations = 3
         self.config.fitness_function_type = FitnessType.FULL_MATCH
         self.config.selection_type = SelectionType.BINARY_TOURNAMENT
@@ -91,14 +107,14 @@ class TestPopulation(BasePopulationTest):
         super().assertNotEqual(p.generation, mating_pool)
 
     def test_k_tournament(self):
-        """ Test that k tournament raises error """
+        """Test that k tournament raises error"""
         self.config.selection_type = SelectionType.K_TOURNAMENT
         p = Population(self.samples, self.grammar, self.stats)
         with super().assertRaises(NotImplementedError):
             _ = p.selection(p.generation)
 
     def test_random_one_point_crossover(self):
-        """ Test that crossover 'random one point' works as expected """
+        """Test that crossover 'random one point' works as expected"""
         self.config.max_generations = 3
         self.config.fitness_function_type = FitnessType.BASIC
         self.config.selection_type = SelectionType.BINARY_TOURNAMENT
@@ -109,7 +125,7 @@ class TestPopulation(BasePopulationTest):
         super().assertNotEqual(p.generation, p.offspring)
 
     def test_mu_plus_lambda(self):
-        """ Tests that replacement 'mu plus lambda' works as expected """
+        """Tests that replacement 'mu plus lambda' works as expected"""
         self.config.replacement_type = ReplacementType.MU_PLUS_LAMBDA
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p.selection(p.generation)
@@ -118,7 +134,7 @@ class TestPopulation(BasePopulationTest):
         super().assertListEqual(p.offspring, [])
 
     def test_mu_lambda_elite(self):
-        """ Tests that replacement 'mu lambda with elitism' works as expected """
+        """Tests that replacement 'mu lambda with elitism' works as expected"""
         self.config.replacement_type = ReplacementType.MU_LAMBDA_WITH_ELITISM
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p.selection(p.generation)
@@ -127,7 +143,7 @@ class TestPopulation(BasePopulationTest):
         super().assertListEqual(p.offspring, [])
 
     def test_mu_lambda_no_elite(self):
-        """ Tests that replacement 'mu lambda without elitism' works as expected """
+        """Tests that replacement 'mu lambda without elitism' works as expected"""
         self.config.replacement_type = ReplacementType.MU_LAMBDA_WITHOUT_ELITISM
         p = Population(self.samples, self.grammar, self.stats)
         mating_pool = p.selection(p.generation)
@@ -136,24 +152,36 @@ class TestPopulation(BasePopulationTest):
         super().assertListEqual(p.offspring, [])
 
     def test_evolve(self):
-        """ Tests that an evolution works, preserving a fitted individual """
+        """Tests that an evolution works, preserving a fitted individual"""
         self.config.max_generations = 3
         self.config.fitness_function_type = FitnessType.BASIC
         p = Population(self.samples, self.grammar, self.stats)
         self.config.mutation_probability = 0.0
-        p.generation[0] = Individual(self.samples, self.grammar, self.stats, '01110101100101100110010110010101')
+        p.generation[0] = Individual(
+            self.samples, self.grammar, self.stats, "01110101100101100110010110010101"
+        )
         self.config.mutation_probability = 0.5
         p.evolve()
         super().assertLessEqual(0.25, p.generation[0].fitness_value)
 
     def test_best_challenge_changes_best_individual(self):
-        """ Covers best challenge cases """
+        """Covers best challenge cases"""
         self.config.mutation_probability = 0.0
         self.config.fitness_function_type = FitnessType.BASIC
 
         p = Population(self.samples, self.grammar, self.stats)
-        i1 = Individual(self.samples, self.grammar, self.stats, dna='00000000000000000000000000000000')
-        i2 = Individual(self.samples, self.grammar, self.stats, dna='01110101100101100110010110010101')
+        i1 = Individual(
+            self.samples,
+            self.grammar,
+            self.stats,
+            dna="00000000000000000000000000000000",
+        )
+        i2 = Individual(
+            self.samples,
+            self.grammar,
+            self.stats,
+            dna="01110101100101100110010110010101",
+        )
 
         # When there's no best individual yet, population's best individual is updated
         p.best_individual = None
@@ -177,7 +205,7 @@ class TestPopulation(BasePopulationTest):
         super().assertEqual(i2, p.best_individual)
 
     def test_sr_update(self):
-        """ Check SR is updated if a solution is found for the run """
+        """Check SR is updated if a solution is found for the run"""
         stats = Stats()
 
         self.config.max_generations = 1
@@ -187,23 +215,27 @@ class TestPopulation(BasePopulationTest):
 
         self.config.success_threshold = 0.0
         p = Population(self.samples, self.grammar, stats)
-        p.generation[0] = Individual(self.samples, self.grammar, stats, '01110101100101100110010110010101')
+        p.generation[0] = Individual(
+            self.samples, self.grammar, stats, "01110101100101100110010110010101"
+        )
         p.evolve()
         super().assertListEqual([True], stats.success_rate_accumulator)
 
         self.config.success_threshold = 1.0
         self.config.population_size = 1
         p = Population(self.samples, self.grammar, stats)
-        p.generation[0] = Individual(self.samples, self.grammar, stats, '00000000000000000000000000000000')
+        p.generation[0] = Individual(
+            self.samples, self.grammar, stats, "00000000000000000000000000000000"
+        )
         p.evolve()
         super().assertListEqual([True, False], stats.success_rate_accumulator)
 
 
 class TestSelection(BasePopulationTest):
-    """ Unit Test class for GE Selection object """
+    """Unit Test class for GE Selection object"""
 
     def test_dispatch(self):
-        """ Dispatcher method provides the proper selection method """
+        """Dispatcher method provides the proper selection method"""
         selection = Selection(SelectionType.BINARY_TOURNAMENT)
         super().assertIs(selection._select, Selection._binary_tournament)
 
@@ -216,19 +248,21 @@ class TestSelection(BasePopulationTest):
 
 
 class TestRecombination(BasePopulationTest):
-    """ Unit Test class for GE Recombination object """
+    """Unit Test class for GE Recombination object"""
 
     def test_dispatch(self):
-        """ Dispatcher method provides the proper recombine method """
+        """Dispatcher method provides the proper recombine method"""
         recombination = Recombination(self.grammar, self.samples, self.stats)
-        super().assertEqual(recombination._recombine, recombination._random_one_point_crossover)
+        super().assertEqual(
+            recombination._recombine, recombination._random_one_point_crossover
+        )
 
 
 class TestReplacement(BasePopulationTest):
-    """ Unit Test class for GE Replacement object """
+    """Unit Test class for GE Replacement object"""
 
     def test_dispatch(self):
-        """ Dispatcher method provides the proper replacement method """
+        """Dispatcher method provides the proper replacement method"""
         replacement = Replacement(ReplacementType.MU_PLUS_LAMBDA)
         super().assertIs(replacement._replace, Replacement._mu_plus_lambda)
 
