@@ -1,19 +1,19 @@
 <img src="https://svgshare.com/i/R3P.svg" width="200" height="200" align="right"/> 
 
-# PatternOmatic 0.2.*
+# patternomatic 0.2.*
 
 **\#AI · \#EvolutionaryComputation · \#NLP**
 
 [![Built with spaCy](https://img.shields.io/badge/made%20with%20❤%20and-spaCy-09a3d5.svg)](https://spacy.io)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
-[![Build Status](https://travis-ci.org/revuel/PatternOmatic.svg?branch=master)](https://travis-ci.org/revuel/PatternOmatic) 
-[![Sonar Coverage](https://img.shields.io/sonar/coverage/revuel_PatternOmatic?server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/dashboard?id=revuel_PatternOmatic)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=revuel_PatternOmatic&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=revuel_PatternOmatic)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=revuel_PatternOmatic&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=revuel_PatternOmatic)
-[![GitHub repo size](https://img.shields.io/github/repo-size/revuel/PatternOmatic?color=teal)](#)
-[![Libraries.io SourceRank](https://img.shields.io/librariesio/sourcerank/pypi/PatternOmatic)](https://libraries.io/pypi/PatternOmatic/sourcerank)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/PatternOmatic?color=FFDF00&label=downloads)](https://pypistats.org/packages/PatternOmatic)
-[![PyPI version](https://badge.fury.io/py/PatternOmatic.svg?color=red)](https://badge.fury.io/py/PatternOmatic)
+[![Build Status](https://travis-ci.org/revuel/patternomatic.svg?branch=master)](https://travis-ci.org/revuel/patternomatic) 
+[![Sonar Coverage](https://img.shields.io/sonar/coverage/revuel_patternomatic?server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/dashboard?id=revuel_patternomatic)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=revuel_patternomatic&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=revuel_patternomatic)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=revuel_patternomatic&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=revuel_patternomatic)
+[![GitHub repo size](https://img.shields.io/github/repo-size/revuel/patternomatic?color=teal)](#)
+[![Libraries.io SourceRank](https://img.shields.io/librariesio/sourcerank/pypi/patternomatic)](https://libraries.io/pypi/patternomatic/sourcerank)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/patternomatic?color=FFDF00&label=downloads)](https://pypistats.org/packages/patternomatic)
+[![PyPI version](https://badge.fury.io/py/patternomatic.svg?color=red)](https://badge.fury.io/py/patternomatic)
 
 _Discover spaCy's linguistic patterns matching a given set of string samples_
 
@@ -24,9 +24,9 @@ _Discover spaCy's linguistic patterns matching a given set of string samples_
 ## Basic usage
 
 ### From sources
-*[Clone SCM official repository](https://github.com/revuel/PatternOmatic)*
+*[Clone SCM official repository](https://github.com/revuel/patternomatic)*
 
-`git clone git@github.com:revuel/PatternOmatic.git`
+`git clone git@github.com:revuel/patternomatic.git`
 
 *Play with Makefile*
 
@@ -34,14 +34,14 @@ _Discover spaCy's linguistic patterns matching a given set of string samples_
 - `make libs` to install dependencies
 - `make test` to run Unit Tests
 - `make coverage` to run Code Coverage
-- `make run` to run PatternOmatic's script with example parameters
+- `make run` to run patternomatic's script with example parameters
 
 <sub>* you must have one first</sub>
 
 ### From package
 *Install package*
 
-`pip install PatternOmatic`
+`pip install patternomatic`
 
 *Play with the CLI*
 
@@ -54,17 +54,17 @@ patternomatic.py -s Hello world -s Goodbye world
 
 # Usage example 2: Using a different language
 python -m spacy download es_core_news_sm
-patternomatic.py -s Me llamo Miguel -s Se llama PatternOmatic -l es_core_news_sm
+patternomatic.py -s Me llamo Miguel -s Se llama patternomatic -l es_core_news_sm
 ```
 
 *Play with the library*
 ```
 """ 
-PatternOmatic library client example.
+patternomatic library client example.
 Find linguistic patterns to be used by the spaCy Rule Based Matcher
 
 """
-from PatternOmatic.api import find_patterns, Config
+from patternomatic.api import find_patterns, Config
 
 if __name__ == '__main__':
 

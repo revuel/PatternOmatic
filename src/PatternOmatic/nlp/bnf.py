@@ -1,33 +1,33 @@
 """ Backus Naur Form Grammar Generator module
 
-This file is part of PatternOmatic.
+This file is part of patternomatic.
 
 Copyright © 2020  Miguel Revuelta Espinosa
 
-PatternOmatic is free software: you can redistribute it and/or
+patternomatic is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-PatternOmatic is distributed in the hope that it will be useful,
+patternomatic is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 from inspect import getmembers
 from spacy.tokens import Doc, Token
-from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
+from patternomatic.settings.config import Config
+from patternomatic.settings.literals import S, P, T, F, OP, NEGATION, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, LENGTH, \
     XPS, IN, NOT_IN, EQQ, GEQ, LEQ, GTH, LTH, TOKEN_WILDCARD, UNDERSCORE, EF, ORTH, TEXT, LOWER, POS, TAG, DEP, LEMMA, \
     SHAPE, ENT_TYPE, IS_ALPHA, IS_ASCII, IS_DIGIT, IS_BRACKET, IS_LOWER, IS_PUNCT, IS_QUOTE, IS_SPACE, IS_TITLE, \
     IS_OOV, IS_UPPER, IS_STOP, IS_CURRENCY, IS_LEFT_PUNCT, IS_RIGHT_PUNCT, LIKE_NUM, LIKE_EMAIL, \
     LANG, NORM, PREFIX, SENTIMENT, STRING, SUFFIX, TEXT_WITH_WS, WHITESPACE, LIKE_URL, MATCHER_SUPPORTED_ATTRIBUTES, \
     ENT_ID, ENT_IOB, ENT_KB_ID, HAS_VECTOR
-from PatternOmatic.settings.log import LOG
+from patternomatic.settings.log import LOG
 
 
 #

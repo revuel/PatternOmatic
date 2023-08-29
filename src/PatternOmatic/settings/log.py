@@ -1,21 +1,21 @@
 """ Logging module
 
-This file is part of PatternOmatic.
+This file is part of patternomatic.
 
 Copyright © 2020  Miguel Revuelta Espinosa
 
-PatternOmatic is free software: you can redistribute it and/or
+patternomatic is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-PatternOmatic is distributed in the hope that it will be useful,
+patternomatic is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import logging
@@ -68,4 +68,4 @@ def get_logger(logger_name):
     return logger
 
 
-LOG = get_logger('PatternOmatic')
+LOG = get_logger('patternomatic')

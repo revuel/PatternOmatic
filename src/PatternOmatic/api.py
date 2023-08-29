@@ -1,21 +1,21 @@
 """ Application Programming Interface module
 
-This file is part of PatternOmatic.
+This file is part of patternomatic.
 
 Copyright © 2020  Miguel Revuelta Espinosa
 
-PatternOmatic is free software: you can redistribute it and/or
+patternomatic is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-PatternOmatic is distributed in the hope that it will be useful,
+patternomatic is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import time
@@ -24,11 +24,11 @@ from typing import List, Union, Tuple, Any
 from spacy import load as spacy_load
 from spacy.cli import download as spacy_download
 
-from PatternOmatic.ge.population import Population
-from PatternOmatic.ge.stats import Stats
-from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.log import LOG
-from PatternOmatic.nlp.bnf import dynamic_generator as dgg
+from patternomatic.ge.population import Population
+from patternomatic.ge.stats import Stats
+from patternomatic.settings.config import Config
+from patternomatic.settings.log import LOG
+from patternomatic.nlp.bnf import dynamic_generator as dgg
 
 
 def find_patterns(
@@ -47,7 +47,7 @@ def find_patterns(
     """
     LOG.info(f'Loading language model {spacy_language_model_name}...')
     if 'en-core-web-sm' not in [d.project_name for d in pkg_resources.working_set]:
-        LOG.info(f'PatternOmatic\'s default spaCy\'s Language Model not installed,'
+        LOG.info(f'patternomatic\'s default spaCy\'s Language Model not installed,'
                  f' proceeding to install en_core_web_sm, please wait...')
         spacy_download('en_core_web_sm')
 
@@ -55,7 +55,7 @@ def find_patterns(
         nlp = spacy_load(spacy_language_model_name)
     except OSError:
         LOG.warning(f'Model {spacy_language_model_name} not found, '
-                    f'falling back to patternOmatic\'s default language model: en_core_web_sm')
+                    f'falling back to patternomatic\'s default language model: en_core_web_sm')
 
         nlp = spacy_load('en_core_web_sm')
 

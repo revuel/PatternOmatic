@@ -1,28 +1,28 @@
 """ Grammatical Evolution performance metrics module
 
-This file is part of PatternOmatic.
+This file is part of patternomatic.
 
 Copyright © 2020  Miguel Revuelta Espinosa
 
-PatternOmatic is free software: you can redistribute it and/or
+patternomatic is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-PatternOmatic is distributed in the hope that it will be useful,
+patternomatic is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import operator
 from time import time
 
-from PatternOmatic.settings.literals import ReportFormat
-from PatternOmatic.settings.config import Config
+from patternomatic.settings.literals import ReportFormat
+from patternomatic.settings.config import Config
 
 
 class Stats(object):

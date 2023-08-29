@@ -1,29 +1,29 @@
 """ Unit testing file for API module
 
-This file is part of PatternOmatic.
+This file is part of patternomatic.
 
 Copyright © 2020  Miguel Revuelta Espinosa
 
-PatternOmatic is free software: you can redistribute it and/or
+patternomatic is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-PatternOmatic is distributed in the hope that it will be useful,
+patternomatic is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import os
 import spacy
 from unittest import TestCase, mock
-from PatternOmatic.api import find_patterns
-from PatternOmatic.settings.config import Config
-from PatternOmatic.settings.log import LOG
+from patternomatic.api import find_patterns
+from patternomatic.settings.config import Config
+from patternomatic.settings.log import LOG
 
 
 class Test(TestCase):
@@ -55,16 +55,16 @@ class Test(TestCase):
         with super().assertLogs(LOG) as cm:
             bad_model = 'Something'
             _ = find_patterns(self.my_samples, spacy_language_model_name=bad_model)
-            super().assertEqual(f'WARNING:PatternOmatic:Model {bad_model} not found, falling back to '
-                                f'patternOmatic\'s default language model: en_core_web_sm', cm.output[1])
+            super().assertEqual(f'WARNING:patternomatic:Model {bad_model} not found, falling back to '
+                                f'patternomatic\'s default language model: en_core_web_sm', cm.output[1])
 
     def test_installs_en_core_web_sm_if_not_found(self):
         """ Due to questionable PyPI security policies, check en_core_web_sm installation is fired if not present """
         nlp = spacy.load('en_core_web_sm')
 
-        with mock.patch('PatternOmatic.api.pkg_resources.working_set') as patch_working_set:
-            with mock.patch('PatternOmatic.api.spacy_download') as patch_spacy_download:
-                with mock.patch('PatternOmatic.api.spacy_load') as patch_spacy_load:
+        with mock.patch('patternomatic.api.pkg_resources.working_set') as patch_working_set:
+            with mock.patch('patternomatic.api.spacy_download') as patch_spacy_download:
+                with mock.patch('patternomatic.api.spacy_load') as patch_spacy_load:
                     patch_working_set.return_value = []
                     patch_spacy_download.return_value = 'I\'ve been fired'
                     patch_spacy_load.return_value = nlp

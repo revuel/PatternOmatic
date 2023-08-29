@@ -1,21 +1,21 @@
 """ Unit testing file for CLI module
 
-This file is part of PatternOmatic.
+This file is part of patternomatic.
 
 Copyright © 2020  Miguel Revuelta Espinosa
 
-PatternOmatic is free software: you can redistribute it and/or
+patternomatic is free software: you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public License
 as published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-PatternOmatic is distributed in the hope that it will be useful,
+patternomatic is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with PatternOmatic. If not, see <https://www.gnu.org/licenses/>.
+along with patternomatic. If not, see <https://www.gnu.org/licenses/>.
 
 """
 import os
@@ -23,10 +23,10 @@ import scripts.patternomatic as pom
 
 from unittest import TestCase, mock
 from spacy import load as spacy_load
-from PatternOmatic.settings.log import LOG
+from patternomatic.settings.log import LOG
 
 
-class TestPatternomaticScript(TestCase):
+class TestpatternomaticScript(TestCase):
     """ Test class to verify patternomatic.py correct behaviour """
 
     nlp = spacy_load('en_core_web_sm')
@@ -44,7 +44,7 @@ class TestPatternomaticScript(TestCase):
         """ Checks that main method works """
         with super().assertLogs(LOG) as cm:
             pom.main(self.full_args)
-            super().assertIn('INFO:PatternOmatic:Best individuals for this execution:', cm.output)
+            super().assertIn('INFO:patternomatic:Best individuals for this execution:', cm.output)
 
     def test_main_errors_raised(self):
         """ Checks that main raises errors when bad arguments are supplied """
@@ -62,8 +62,8 @@ class TestPatternomaticScript(TestCase):
             args = self.full_args.copy()[:-1]
             args.append(bad_model)
             pom.main(args)
-            super().assertEqual(f'WARNING:PatternOmatic:Model {bad_model} not found, falling back to '
-                                f'patternOmatic\'s default language model: en_core_web_sm', cm.output[2])
+            super().assertEqual(f'WARNING:patternomatic:Model {bad_model} not found, falling back to '
+                                f'patternomatic\'s default language model: en_core_web_sm', cm.output[2])
 
         # Fatal error
         with mock.patch('scripts.patternomatic.ArgumentParser') as mock_arg_parser:

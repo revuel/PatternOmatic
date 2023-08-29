@@ -1,4 +1,4 @@
-# PatternOmatic non sources to ignore
+# patternomatic non sources to ignore
 .idea/
 /venv
 *pycache*
@@ -7,5 +7,5 @@
 coverage.xml
 build/
 dist/
-PatternOmatic.egg-info
+patternomatic.egg-info
 fil-result
