@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "patternomatic"
+version="0.2.3"
+description = "AI/NLP (Spacy) Rule Based Matcher pattern finder"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.7"
+license = {file = "LICENSE.txt"}
+authors = [
+    {name = "Miguel Revuelta Espinosa", email = "revuel22@hotmail.com"},
+]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "spacy==2.3.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/revuel/patternomatic"
